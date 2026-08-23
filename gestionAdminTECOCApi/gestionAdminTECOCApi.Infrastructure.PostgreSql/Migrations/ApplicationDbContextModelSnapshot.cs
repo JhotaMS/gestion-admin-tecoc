@@ -18,10 +18,37 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("gestionAdminTECOCApiMS")
-                .HasAnnotation("ProductVersion", "7.0.18")
+                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("gestionAdminTECOCApi.Domain.DocumentTypes.DocumentTypeEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("DocumentTypes", "gestionAdminTECOCApiMS");
+                });
 
             modelBuilder.Entity("gestionAdminTECOCApi.Domain.ScheduledClasses.ScheduledClass", b =>
                 {

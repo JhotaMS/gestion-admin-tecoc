@@ -8,6 +8,11 @@ export const routes: Routes = [
       import('./account/auth/signin/signin.component').then((m) => m.SigninComponent),
   },
   {
+    path: 'register',
+    loadComponent: () =>
+      import('./account/auth/register/register.component').then((m) => m.RegisterComponent),
+  },
+  {
     path: '',
     loadComponent: () => import('./layout/layout.component').then((m) => m.LayoutComponent),
     canActivate: [authGuard],
@@ -21,6 +26,10 @@ export const routes: Routes = [
       {
         path: 'usuarios',
         loadComponent: () => import('./users/users.component').then((m) => m.UsersComponent),
+      },
+      {
+        path: 'prestamos',
+        loadComponent: () => import('./loans/loans.component').then((m) => m.LoansComponent),
       },
     ],
   },
