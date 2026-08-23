@@ -19,4 +19,15 @@ public class UserService(
 
         return user.Id;
     }
+
+    public async Task<bool> ExistsByDocumentAsync(
+        DocumentType documentType,
+        string documentNumber,
+        CancellationToken cancellationToken
+    ) => await unitOfWork.Repository<User>()
+        .Exitst(
+            user => user.DocumentType == documentType
+                && user.DocumentNumber == documentNumber,
+            cancellationToken
+        );
 }

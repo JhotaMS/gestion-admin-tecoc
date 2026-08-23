@@ -4,31 +4,32 @@ namespace gestionAdminTECOCApi.Domain.Users;
 
 public class User : Entity<Guid> {
     private User(
-        string firstName,
-        string? secondName,
-        string surName,
-        string? secondSurName
-    ) {
-        FirstName = firstName;
-        SecondName = secondName;
-        SurName = surName;
-        SecondSurName = secondSurName;
+        string fullName,
+        DocumentType documentType,
+        string documentNumber,
+        string position
+    ) : base( true ) {
+        Id = Guid.NewGuid();
+        FullName = fullName;
+        DocumentType = documentType;
+        DocumentNumber = documentNumber;
+        Position = position;
     }
 
-    public string FirstName { get; private set; } = default!;
-    public string? SecondName { get; private set; }
-    public string SurName { get; private set; } = default!;
-    public string? SecondSurName { get; private set; }
+    public string FullName { get; private set; } = default!;
+    public DocumentType DocumentType { get; private set; }
+    public string DocumentNumber { get; private set; } = default!;
+    public string Position { get; private set; } = default!;
 
     public static User Create(
-        string firstName,
-        string? secondName,
-        string surName,
-        string? secondSurname
+        string fullName,
+        DocumentType documentType,
+        string documentNumber,
+        string position
     ) => new(
-        firstName,
-        secondName,
-        surName,
-        secondSurname
+        fullName,
+        documentType,
+        documentNumber,
+        position
     );
 }
