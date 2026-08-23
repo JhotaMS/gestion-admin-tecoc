@@ -12,11 +12,22 @@ public class UserService(
         User user,
         CancellationToken cancellationToken
     ) {
-        ArgumentNullException.ThrowIfNull( nameof( user ) );
+        ArgumentNullException.ThrowIfNull( user );
 
         await unitOfWork.Repository<User>()
             .AddAsync( user, cancellationToken );
 
         return user.Id;
     }
+
+    public async Task<bool> ExistsByDocumentAsync(
+        DocumentType documentType,
+        string documentNumber,
+        CancellationToken cancellationToken
+    ) => await unitOfWork.Repository<User>()
+        .Exitst(
+            user => user.DocumentType == documentType
+                && user.DocumentNumber == documentNumber,
+            cancellationToken
+        );
 }
