@@ -23,7 +23,9 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
                     FullName = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
                     DocumentType = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                     DocumentNumber = table.Column<string>(type: "character varying(15)", maxLength: 15, nullable: false),
-                    Position = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    UserName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Email = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    PasswordHash = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Enabled = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -71,6 +73,20 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
                 schema: "gestionAdminTECOCApiMS",
                 table: "Users",
                 columns: new[] { "DocumentType", "DocumentNumber" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Email",
+                schema: "gestionAdminTECOCApiMS",
+                table: "Users",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_UserName",
+                schema: "gestionAdminTECOCApiMS",
+                table: "Users",
+                column: "UserName",
                 unique: true);
         }
 

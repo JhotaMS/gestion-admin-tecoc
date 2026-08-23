@@ -27,14 +27,32 @@ internal sealed class UserConfiguration
             .IsRequired( true );
 
         builder
-            .Property( property => property.Position )
-            .HasMaxLength( 100 )
+            .Property( property => property.UserName )
+            .HasMaxLength( 50 )
+            .IsRequired( true );
+
+        builder
+            .Property( property => property.Email )
+            .HasMaxLength( 150 )
+            .IsRequired( true );
+
+        builder
+            .Property( property => property.PasswordHash )
+            .HasMaxLength( 200 )
             .IsRequired( true );
 
         builder.Property( property => property.Enabled );
 
         builder
             .HasIndex( index => new { index.DocumentType, index.DocumentNumber } )
+            .IsUnique();
+
+        builder
+            .HasIndex( index => index.UserName )
+            .IsUnique();
+
+        builder
+            .HasIndex( index => index.Email )
             .IsUnique();
     }
 }
