@@ -44,3 +44,5 @@ app.UseAuthorization();
 app.MapControllers();
 await app.RunAsync()
     .ConfigureAwait( default( bool ) );
+
+public partial class Program { }
