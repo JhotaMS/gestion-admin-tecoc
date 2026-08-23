@@ -39,7 +39,7 @@ export class SigninComponent {
   readonly remember = signal(true);
 
   readonly loginForm = this.formBuilder.group({
-    email: ['', [Validators.required, Validators.email]],
+    username: ['', [Validators.required]],
     password: ['', [Validators.required]],
   });
 
@@ -84,9 +84,9 @@ export class SigninComponent {
     }
 
     this.loading.set(true);
-    const { email, password } = this.loginForm.getRawValue();
+    const { username, password } = this.loginForm.getRawValue();
 
-    this.authService.login({ email: email ?? '', password: password ?? '' }).subscribe({
+    this.authService.login({ username: username ?? '', password: password ?? '' }).subscribe({
       next: () => {
         this.loading.set(false);
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
