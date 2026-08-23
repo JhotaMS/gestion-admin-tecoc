@@ -1,7 +1,10 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { switchMap } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
+import { UserRegistrationApi } from '../../../core/users/user-registration-api';
+import { DOCUMENT_TYPE_OPTIONS, DocumentTypeCode } from '../../../core/models/user-registration.models';
 
 interface PasswordStrength {
   percent: number;
@@ -23,6 +26,9 @@ export class RegisterComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly userRegistrationApi = inject(UserRegistrationApi);
+
+  readonly documentTypeOptions = DOCUMENT_TYPE_OPTIONS;
 
   readonly submitted = signal(false);
   readonly loading = signal(false);
@@ -35,6 +41,8 @@ export class RegisterComponent {
 
   readonly registerForm = this.formBuilder.group({
     fullName: ['', [Validators.required]],
+    documentType: ['' as DocumentTypeCode | '', [Validators.required]],
+    documentNumber: ['', [Validators.required, Validators.pattern(/^[0-9]+$/), Validators.minLength(5), Validators.maxLength(15)]],
     username: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
@@ -105,10 +113,27 @@ export class RegisterComponent {
 
     this.loading.set(true);
 
-    const { fullName, username, email, password } = this.registerForm.getRawValue();
+    const { fullName, documentType, documentNumber, username, email, password } = this.registerForm.getRawValue();
 
-    this.authService
-      .register({ fullName: fullName ?? '', username: username ?? '', email: email ?? '', password: password ?? '' })
+    this.userRegistrationApi
+      .createUser({
+        fullName: fullName ?? '',
+        documentType: (documentType || 'CC') as DocumentTypeCode,
+        documentNumber: documentNumber ?? '',
+        userName: username ?? '',
+        email: email ?? '',
+        password: password ?? '',
+      })
+      .pipe(
+        switchMap(() =>
+          this.authService.register({
+            fullName: fullName ?? '',
+            username: username ?? '',
+            email: email ?? '',
+            password: password ?? '',
+          }),
+        ),
+      )
       .subscribe({
         next: () => {
           this.loading.set(false);

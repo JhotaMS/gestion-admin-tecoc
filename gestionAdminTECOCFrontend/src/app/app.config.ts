@@ -9,6 +9,8 @@ import { DashboardApi } from './dashboard/dashboard-api';
 import { DashboardMockApi } from './mocks/dashboard/dashboard-mock.api';
 import { UsersApi } from './users/users-api';
 import { UsersMockApi } from './mocks/users/users-mock.api';
+import { UserRegistrationApi } from './core/users/user-registration-api';
+import { UserRegistrationHttpApi } from './core/users/user-registration-http.api';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -19,5 +21,7 @@ export const appConfig: ApplicationConfig = {
     { provide: AuthApi, useClass: AuthMockApi },
     { provide: DashboardApi, useClass: DashboardMockApi },
     { provide: UsersApi, useClass: UsersMockApi },
+    // Este sí habla con el backend real (no tiene mock): v1/User.
+    { provide: UserRegistrationApi, useClass: UserRegistrationHttpApi },
   ],
 };

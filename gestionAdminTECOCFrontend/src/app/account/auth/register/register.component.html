@@ -68,6 +68,47 @@
           }
         </label>
 
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex flex-col gap-2">
+            <span class="text-xs font-semibold uppercase tracking-[1.4px] text-tecoc-ink">Tipo de documento</span>
+            <select
+              formControlName="documentType"
+              class="tecoc-input"
+              [class.tecoc-input--error]="submitted() && f.documentType.errors"
+            >
+              <option value="" disabled>Selecciona</option>
+              @for (option of documentTypeOptions; track option.code) {
+                <option [value]="option.code">{{ option.label }}</option>
+              }
+            </select>
+            @if (submitted() && f.documentType.errors?.['required']) {
+              <span class="text-xs text-red-500">Selecciona un tipo de documento</span>
+            }
+          </label>
+
+          <label class="flex flex-col gap-2">
+            <span class="text-xs font-semibold uppercase tracking-[1.4px] text-tecoc-ink">Número de documento</span>
+            <input
+              type="text"
+              inputmode="numeric"
+              formControlName="documentNumber"
+              placeholder="Ej: 1020304050"
+              autocomplete="off"
+              class="tecoc-input"
+              [class.tecoc-input--error]="submitted() && f.documentNumber.errors"
+            />
+            @if (submitted() && f.documentNumber.errors?.['required']) {
+              <span class="text-xs text-red-500">El número de documento es obligatorio</span>
+            }
+            @if (submitted() && f.documentNumber.errors?.['pattern']) {
+              <span class="text-xs text-red-500">Solo puede contener dígitos</span>
+            }
+            @if (submitted() && (f.documentNumber.errors?.['minlength'] || f.documentNumber.errors?.['maxlength'])) {
+              <span class="text-xs text-red-500">Debe tener entre 5 y 15 dígitos</span>
+            }
+          </label>
+        </div>
+
         <label class="flex flex-col gap-2">
           <span class="text-xs font-semibold uppercase tracking-[1.4px] text-tecoc-ink">Nombre de usuario</span>
           <input
