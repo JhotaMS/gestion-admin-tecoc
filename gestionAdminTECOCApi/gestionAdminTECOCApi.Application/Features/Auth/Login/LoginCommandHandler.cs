@@ -7,7 +7,6 @@ namespace gestionAdminTECOCApi.Application.Features.Auth.Login;
 
 internal sealed class LoginCommandHandler(
     IUnitOfWork unitOfWork,
-    IPasswordHasher passwordHasher,
     IJwtService jwtService
 ) : ICommandHandler<LoginCommand, LoginResponse> {
 
@@ -21,10 +20,9 @@ internal sealed class LoginCommandHandler(
         if (user.IsLocked) {
             return Result.Failure<LoginResponse>( new Error( "Auth.AccountLocked", $"Cuenta bloqueada hasta {user.LockedUntil:O}. Intente más tarde." ) );
         }
-        if (!passwordHasher.Verify( user.PasswordHash, request.Password )) {
+        if (!PasswordHasher.Verify( user.PasswordHash, request.Password )) {
             user.RecordFailedLogin();
             await unitOfWork.SaveChangesAsync();
-            // TODO: Outbox mail to user when locked (TDDSIVI-109)
             return Result.Failure<LoginResponse>( new Error( "Auth.InvalidCredentials", "Usuario o contraseña inválidos" ) );
         }
         user.ResetFailedLogins();

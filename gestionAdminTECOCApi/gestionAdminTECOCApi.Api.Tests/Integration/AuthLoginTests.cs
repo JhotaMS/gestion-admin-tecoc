@@ -34,10 +34,9 @@ public class AuthLoginTests : IClassFixture<WebApplicationFactory<Program>> {
         db.Database.EnsureDeleted();
         db.Database.EnsureCreated();
         if (!db.Set<User>().Any()) {
-            var hasher = new Argon2PasswordHasher();
             var user = User.Create(
                 "Docente Prueba", DocumentType.CedulaCiudadania, "1018329848", "docente1",
-                "docente@tecoc.edu.co", hasher.Hash( "Test123*" )
+                "docente@tecoc.edu.co", PasswordHasher.Hash( "Test123*" )
             );
             db.Set<User>().Add( user );
             db.SaveChanges();
