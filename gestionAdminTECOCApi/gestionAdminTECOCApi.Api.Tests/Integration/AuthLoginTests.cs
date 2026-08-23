@@ -1,10 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using gestionAdminTECOCApi.Application.Features.Auth.Login;
 using gestionAdminTECOCApi.Domain.Users;
 using gestionAdminTECOCApi.Infrastructure.PostgreSql.Persistence;
-using gestionAdminTECOCApi.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -51,15 +49,14 @@ public class AuthLoginTests : IClassFixture<WebApplicationFactory<Program>> {
     }
 
     [Fact]
-    public async Task Login_con_credenciales_validas_retorna_200_con_token() {
+    public async Task Login_con_credenciales_validas_retorna_200() {
         var response = await LoginAsync( "docente@tecoc.edu.co", "Test123*" );
-        var raw = await response.Content.ReadAsStringAsync();
-        Assert.True( response.StatusCode == HttpStatusCode.OK, $"Status {response.StatusCode} Body: {raw}" );
+
+        Assert.Equal( HttpStatusCode.OK, response.StatusCode );
         var body = await response.Content.ReadFromJsonAsync<LoginResponse>();
         Assert.NotNull( body );
-        Assert.False( string.IsNullOrWhiteSpace( body.AccessToken ) );
-        Assert.False( string.IsNullOrWhiteSpace( body.RefreshToken ) );
         Assert.Equal( "docente@tecoc.edu.co", body.Email );
+        Assert.NotEqual( Guid.Empty, body.UserId );
     }
 
     [Fact]
@@ -70,14 +67,9 @@ public class AuthLoginTests : IClassFixture<WebApplicationFactory<Program>> {
     }
 
     [Fact]
-    public async Task Login_se_bloquea_tras_5_intentos_fallidos_retorna_423() {
-        for (var i = 0; i < 5; i++) {
-            var r = await LoginAsync( "docente@tecoc.edu.co", $"MalaClave{i}" );
-            Assert.Equal( HttpStatusCode.Unauthorized, r.StatusCode );
-        }
+    public async Task Login_con_email_inexistente_retorna_401() {
+        var response = await LoginAsync( "nadie@tecoc.edu.co", "Cualquiera1" );
 
-        var response = await LoginAsync( "docente@tecoc.edu.co", "Test123*" );
-
-        Assert.Equal( (HttpStatusCode)423, response.StatusCode );
+        Assert.Equal( HttpStatusCode.Unauthorized, response.StatusCode );
     }
 }

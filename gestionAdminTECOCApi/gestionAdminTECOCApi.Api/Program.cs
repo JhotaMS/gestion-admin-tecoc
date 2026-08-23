@@ -1,7 +1,6 @@
 using gestionAdminTECOCApi.Api.Middlewares;
 using gestionAdminTECOCApi.Application.Extensions;
 using gestionAdminTECOCApi.Application.Messaging;
-using gestionAdminTECOCApi.Infrastructure.Extensions;
 using gestionAdminTECOCApi.Infrastructure.PostgreSql.Extensions;
 
 WebApplicationBuilder builder = WebApplication
@@ -15,7 +14,6 @@ builder.Configuration
 builder.Services
     .AddApplication( builder.Configuration )
     .AddDomainService()
-    .AddInfrastructure()
     .AddInfrastructurePostgreSql( builder.Configuration );
 
 builder.Services.AddTransient<IDispatch, Dispatch>();

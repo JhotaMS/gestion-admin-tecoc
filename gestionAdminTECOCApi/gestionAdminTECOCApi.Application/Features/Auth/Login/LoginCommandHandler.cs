@@ -6,8 +6,7 @@ using gestionAdminTECOCApi.Domain.Users;
 namespace gestionAdminTECOCApi.Application.Features.Auth.Login;
 
 internal sealed class LoginCommandHandler(
-    IUnitOfWork unitOfWork,
-    IJwtService jwtService
+    IUnitOfWork unitOfWork
 ) : ICommandHandler<LoginCommand, LoginResponse> {
 
     public async Task<Result<LoginResponse>> Handle( LoginCommand request, CancellationToken cancellationToken ) {
@@ -17,21 +16,10 @@ internal sealed class LoginCommandHandler(
         if (user is null) {
             return Result.Failure<LoginResponse>( new Error( "Auth.InvalidCredentials", "Usuario o contraseña inválidos" ) );
         }
-        if (user.IsLocked) {
-            return Result.Failure<LoginResponse>( new Error( "Auth.AccountLocked", $"Cuenta bloqueada hasta {user.LockedUntil:O}. Intente más tarde." ) );
-        }
         if (!PasswordHasher.Verify( user.PasswordHash, request.Password )) {
-            user.RecordFailedLogin();
-            await unitOfWork.SaveChangesAsync();
             return Result.Failure<LoginResponse>( new Error( "Auth.InvalidCredentials", "Usuario o contraseña inválidos" ) );
         }
-        user.ResetFailedLogins();
-        await unitOfWork.SaveChangesAsync();
 
-        var accessToken = jwtService.GenerateAccessToken( user.Id, user.Email, Array.Empty<string>() );
-        var refreshToken = jwtService.GenerateRefreshToken();
-        var expiresAt = DateTime.UtcNow.AddMinutes( 15 );
-
-        return Result.Success( new LoginResponse( accessToken, refreshToken, expiresAt, user.Id, user.Email ) );
+        return Result.Success( new LoginResponse( user.Id, user.Email ) );
     }
 }

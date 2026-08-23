@@ -26,8 +26,6 @@ public class User : Entity<Guid> {
     public string UserName { get; private set; } = default!;
     public string Email { get; private set; } = default!;
     public string PasswordHash { get; private set; } = default!;
-    public int FailedLoginAttempts { get; private set; }
-    public DateTime? LockedUntil { get; private set; }
 
     public static User Create(
         string fullName,
@@ -44,23 +42,4 @@ public class User : Entity<Guid> {
         email,
         passwordHash
     );
-
-    public void RecordFailedLogin() {
-        FailedLoginAttempts++;
-        if (FailedLoginAttempts >= 5) {
-            LockedUntil = DateTime.UtcNow.AddMinutes( 15 );
-        }
-    }
-
-    public void ResetFailedLogins() {
-        FailedLoginAttempts = 0;
-        LockedUntil = null;
-    }
-
-    public void Unlock() {
-        FailedLoginAttempts = 0;
-        LockedUntil = null;
-    }
-
-    public bool IsLocked => LockedUntil.HasValue && LockedUntil.Value > DateTime.UtcNow;
 }

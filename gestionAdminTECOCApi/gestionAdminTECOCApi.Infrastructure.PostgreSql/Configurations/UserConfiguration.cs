@@ -42,8 +42,6 @@ internal sealed class UserConfiguration
             .IsRequired( true );
 
         builder.Property( property => property.Enabled );
-        builder.Property( property => property.FailedLoginAttempts ).IsRequired( true );
-        builder.Property( property => property.LockedUntil ).IsRequired( false );
 
         builder
             .HasIndex( index => new { index.DocumentType, index.DocumentNumber } )
