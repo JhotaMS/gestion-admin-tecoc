@@ -24,6 +24,7 @@ internal sealed class LoginCommandHandler(
         );
 
         var user = users.FirstOrDefault();
+
         if (user is null) {
             return Result.Failure<LoginResponse>( new Error( "Auth.InvalidCredentials", "Usuario o contraseña inválidos" ) );
         }
