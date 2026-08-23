@@ -1,4 +1,5 @@
-﻿using gestionAdminTECOCApi.Domain.Users;
+﻿using gestionAdminTECOCApi.Domain.ScheduledClasses;
+using gestionAdminTECOCApi.Domain.Users;
 using gestionAdminTECOCApi.Domain.WeatherForecasts;
 using gestionAdminTECOCApi.Domain.WeatherForecastsHistories;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ public partial class ApplicationDbContext : DbContext {
         _config = config;
     }
 
+    public virtual DbSet<ScheduledClass> ScheduledClasses { get; set; }
     public virtual DbSet<User> Users { get; set; }
     public virtual DbSet<WeatherForecast> WeatherForecasts { get; set; }
     public virtual DbSet<WeatherForecastsHistory> WeatherForecastsHistories { get; set; }
