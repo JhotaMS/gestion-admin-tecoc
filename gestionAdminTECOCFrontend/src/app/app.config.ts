@@ -11,6 +11,8 @@ import { UsersApi } from './users/users-api';
 import { UsersMockApi } from './mocks/users/users-mock.api';
 import { UserRegistrationApi } from './core/users/user-registration-api';
 import { UserRegistrationHttpApi } from './core/users/user-registration-http.api';
+import { DocumentTypeApi } from './core/document-types/document-type-api';
+import { DocumentTypeHttpApi } from './core/document-types/document-type-http.api';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -21,7 +23,8 @@ export const appConfig: ApplicationConfig = {
     { provide: AuthApi, useClass: AuthMockApi },
     { provide: DashboardApi, useClass: DashboardMockApi },
     { provide: UsersApi, useClass: UsersMockApi },
-    // Este sí habla con el backend real (no tiene mock): v1/User.
+    // Estos sí hablan con el backend real (no tienen mock): v1/User, v1/DocumentType.
     { provide: UserRegistrationApi, useClass: UserRegistrationHttpApi },
+    { provide: DocumentTypeApi, useClass: DocumentTypeHttpApi },
   ],
 };

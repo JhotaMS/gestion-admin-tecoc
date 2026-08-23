@@ -21,6 +21,13 @@ export class UserRegistrationHttpApi extends UserRegistrationApi {
   }
 
   private extractMessage(error: HttpErrorResponse): string {
+    // status 0 = la petición nunca llegó a recibir respuesta del servidor
+    // (backend caído, proxy sin poder conectar, CORS). Se distingue del caso
+    // en que el backend sí respondió pero con un error de negocio/validación.
+    if (error.status === 0) {
+      return 'No se pudo conectar con el servidor de registro. Verifica que el backend esté corriendo (localhost:5189) e inténtalo de nuevo.';
+    }
+
     const body = error.error as ApiErrorBody | undefined;
 
     if (body?.errors) {

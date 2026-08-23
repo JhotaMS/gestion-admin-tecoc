@@ -4,7 +4,8 @@ import { Router, RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { UserRegistrationApi } from '../../../core/users/user-registration-api';
-import { DOCUMENT_TYPE_OPTIONS, DocumentTypeCode } from '../../../core/models/user-registration.models';
+import { DocumentTypeApi } from '../../../core/document-types/document-type-api';
+import { DocumentTypeDto } from '../../../core/models/document-type.models';
 
 interface PasswordStrength {
   percent: number;
@@ -27,8 +28,11 @@ export class RegisterComponent {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly userRegistrationApi = inject(UserRegistrationApi);
+  private readonly documentTypeApi = inject(DocumentTypeApi);
 
-  readonly documentTypeOptions = DOCUMENT_TYPE_OPTIONS;
+  readonly documentTypeOptions = signal<DocumentTypeDto[]>([]);
+  readonly documentTypesLoading = signal(true);
+  readonly documentTypesError = signal<string | null>(null);
 
   readonly submitted = signal(false);
   readonly loading = signal(false);
@@ -37,11 +41,31 @@ export class RegisterComponent {
   readonly showConfirmPassword = signal(false);
   readonly acceptTerms = signal(false);
 
+  constructor() {
+    this.loadDocumentTypes();
+  }
+
+  loadDocumentTypes(): void {
+    this.documentTypesLoading.set(true);
+    this.documentTypesError.set(null);
+
+    this.documentTypeApi.getAll().subscribe({
+      next: (documentTypes) => {
+        this.documentTypeOptions.set(documentTypes);
+        this.documentTypesLoading.set(false);
+      },
+      error: () => {
+        this.documentTypesLoading.set(false);
+        this.documentTypesError.set('No se pudieron cargar los tipos de documento.');
+      },
+    });
+  }
+
   readonly providers = ['Microsoft', 'Google', 'SSO'];
 
   readonly registerForm = this.formBuilder.group({
     fullName: ['', [Validators.required]],
-    documentType: ['' as DocumentTypeCode | '', [Validators.required]],
+    documentType: ['', [Validators.required]],
     documentNumber: ['', [Validators.required, Validators.pattern(/^[0-9]+$/), Validators.minLength(5), Validators.maxLength(15)]],
     username: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
@@ -118,7 +142,7 @@ export class RegisterComponent {
     this.userRegistrationApi
       .createUser({
         fullName: fullName ?? '',
-        documentType: (documentType || 'CC') as DocumentTypeCode,
+        documentType: documentType ?? '',
         documentNumber: documentNumber ?? '',
         userName: username ?? '',
         email: email ?? '',

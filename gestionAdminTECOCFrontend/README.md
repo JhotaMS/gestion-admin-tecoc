@@ -12,6 +12,21 @@ ng serve
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
+### Backend requerido para el registro (`/register`)
+
+El formulario de "Crear cuenta" llama al endpoint real `POST /v1/User` del backend
+(`gestionAdminTECOCApi`), reenviado por `ng serve` vía `proxy.conf.json`
+(`/api` → `http://localhost:5189`). Para probar el registro en local necesitas
+tener el backend corriendo en paralelo:
+
+```bash
+cd ../gestionAdminTECOCApi/gestionAdminTECOCApi.Api
+dotnet run --urls http://localhost:5189
+```
+
+Si el backend no está arriba, el formulario mostrará "No se pudo conectar con
+el servidor de registro" — no es un bug del frontend, es que falta levantar la API.
+
 ## Code scaffolding
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:

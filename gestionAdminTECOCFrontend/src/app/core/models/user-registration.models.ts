@@ -1,21 +1,8 @@
-export type DocumentTypeCode = 'CC' | 'CE' | 'TI' | 'NIT';
-
-export interface DocumentTypeOption {
-  code: DocumentTypeCode;
-  label: string;
-}
-
-// Debe coincidir con gestionAdminTECOCApi.Domain.Users.DocumentTypeCodes (backend).
-export const DOCUMENT_TYPE_OPTIONS: DocumentTypeOption[] = [
-  { code: 'CC', label: 'Cédula de ciudadanía' },
-  { code: 'CE', label: 'Cédula de extranjería' },
-  { code: 'TI', label: 'Tarjeta de identidad' },
-  { code: 'NIT', label: 'NIT' },
-];
-
+// El tipo de documento ahora se obtiene en vivo desde v1/DocumentType (ver
+// core/document-types/), así que aquí ya no es una unión fija de literales.
 export interface CreateUserRequest {
   fullName: string;
-  documentType: DocumentTypeCode;
+  documentType: string;
   documentNumber: string;
   userName: string;
   email: string;
@@ -25,7 +12,7 @@ export interface CreateUserRequest {
 export interface CreateUserResponse {
   id: string;
   fullName: string;
-  documentType: DocumentTypeCode;
+  documentType: string;
   documentNumber: string;
   userName: string;
   email: string;

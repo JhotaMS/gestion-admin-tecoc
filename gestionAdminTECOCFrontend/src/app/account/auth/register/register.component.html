@@ -75,14 +75,21 @@
               formControlName="documentType"
               class="tecoc-input"
               [class.tecoc-input--error]="submitted() && f.documentType.errors"
+              [disabled]="documentTypesLoading()"
             >
-              <option value="" disabled>Selecciona</option>
-              @for (option of documentTypeOptions; track option.code) {
-                <option [value]="option.code">{{ option.label }}</option>
+              <option value="" disabled>{{ documentTypesLoading() ? 'Cargando…' : 'Selecciona' }}</option>
+              @for (option of documentTypeOptions(); track option.documentTypeId) {
+                <option [value]="option.code">{{ option.description }}</option>
               }
             </select>
             @if (submitted() && f.documentType.errors?.['required']) {
               <span class="text-xs text-red-500">Selecciona un tipo de documento</span>
+            }
+            @if (documentTypesError()) {
+              <span class="text-xs text-red-500">
+                {{ documentTypesError() }}
+                <button type="button" class="font-semibold text-tecoc-blue hover:underline" (click)="loadDocumentTypes()">Reintentar</button>
+              </span>
             }
           </label>
 
