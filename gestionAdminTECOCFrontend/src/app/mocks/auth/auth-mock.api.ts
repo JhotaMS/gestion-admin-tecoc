@@ -55,7 +55,7 @@ export class AuthMockApi extends AuthApi {
 
   login(request: LoginRequest): Observable<LoginResponse> {
     const account = this.accounts.find(
-      (a) => a.username === request.username && a.password === request.password
+      (a) => a.user.email === request.email && a.password === request.password
     );
 
     if (!account) {

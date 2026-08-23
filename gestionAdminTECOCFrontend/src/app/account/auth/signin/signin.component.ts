@@ -35,7 +35,7 @@ export class SigninComponent {
   readonly providers = ['Microsoft', 'Google', 'SSO'];
 
   readonly loginForm = this.formBuilder.group({
-    username: ['', [Validators.required]],
+    email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
   });
 
@@ -80,9 +80,9 @@ export class SigninComponent {
     }
 
     this.loading.set(true);
-    const { username, password } = this.loginForm.getRawValue();
+    const { email, password } = this.loginForm.getRawValue();
 
-    this.authService.login({ username: username ?? '', password: password ?? '' }).subscribe({
+    this.authService.login({ email: email ?? '', password: password ?? '' }).subscribe({
       next: () => {
         this.loading.set(false);
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';

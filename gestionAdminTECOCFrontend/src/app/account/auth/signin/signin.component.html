@@ -56,17 +56,20 @@
 
       <form class="flex flex-col gap-[18px]" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <label class="flex flex-col gap-2">
-          <span class="text-xs font-semibold uppercase tracking-[1.4px] text-tecoc-ink">Usuario</span>
+          <span class="text-xs font-semibold uppercase tracking-[1.4px] text-tecoc-ink">Correo Electrónico</span>
           <input
-            type="text"
-            formControlName="username"
-            placeholder="nombre.apellido"
-            autocomplete="username"
+            type="email"
+            formControlName="email"
+            placeholder="usuario@tecoc.edu.co"
+            autocomplete="email"
             class="tecoc-input"
-            [class.tecoc-input--error]="submitted() && f.username.errors"
+            [class.tecoc-input--error]="submitted() && f.email.errors"
           />
-          @if (submitted() && f.username.errors?.['required']) {
-            <span class="text-xs text-red-500">El usuario es obligatorio</span>
+          @if (submitted() && f.email.errors?.['required']) {
+            <span class="text-xs text-red-500">El correo es obligatorio</span>
+          }
+          @if (submitted() && f.email.errors?.['email']) {
+            <span class="text-xs text-red-500">El correo debe ser válido</span>
           }
         </label>
 
@@ -166,7 +169,7 @@
       </p>
 
       <p class="m-0 text-center text-xs text-tecoc-line">
-        Demo: usuario <span class="font-medium text-tecoc-ink">admin</span> / contraseña
+        Demo: usuario <span class="font-medium text-tecoc-ink">admin@tecoc.local</span> / contraseña
         <span class="font-medium text-tecoc-ink">admin123</span>
       </p>
     </div>
