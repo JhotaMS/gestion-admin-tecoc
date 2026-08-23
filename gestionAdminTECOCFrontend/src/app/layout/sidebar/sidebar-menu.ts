@@ -11,7 +11,7 @@ export const SIDEBAR_MENU: MenuItem[] = [
     icon: 'folder-kanban',
     children: [
       { label: 'Solicitudes', icon: 'file-text', link: '/dashboard' },
-      { label: 'Usuarios', icon: 'users', link: '/dashboard' },
+      { label: 'Usuarios', icon: 'users', link: '/usuarios' },
     ],
   },
   { label: 'Configuración', icon: 'settings', link: '/dashboard' },
