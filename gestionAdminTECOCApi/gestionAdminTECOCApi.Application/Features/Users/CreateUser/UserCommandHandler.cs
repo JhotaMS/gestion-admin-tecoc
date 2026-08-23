@@ -39,7 +39,9 @@ internal sealed class UserCommandHandler(
             request.FullName.Trim()
             , documentType
             , documentNumber
-            , request.Position.Trim()
+            , request.UserName.Trim()
+            , request.Email.Trim()
+            , PasswordHasher.Hash( request.Password )
         );
 
         Guid id = await userService
@@ -50,7 +52,8 @@ internal sealed class UserCommandHandler(
             , user.FullName
             , DocumentTypeCodes.ToCode( user.DocumentType )
             , user.DocumentNumber
-            , user.Position
+            , user.UserName
+            , user.Email
         );
     }
 }
