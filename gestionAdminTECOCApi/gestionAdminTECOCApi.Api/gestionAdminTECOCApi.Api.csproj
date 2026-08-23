@@ -18,6 +18,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\gestionAdminTECOCApi.Application\gestionAdminTECOCApi.Application.csproj" />
 		<ProjectReference Include="..\gestionAdminTECOCApi.Infrastructure.PostgreSql\gestionAdminTECOCApi.Infrastructure.PostgreSql.csproj" />
+		<ProjectReference Include="..\gestionAdminTECOCApi.Infrastructure\gestionAdminTECOCApi.Infrastructure.csproj" />
 	</ItemGroup>
 
 </Project>
