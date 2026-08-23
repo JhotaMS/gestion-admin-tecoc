@@ -4,8 +4,8 @@ using System.ComponentModel.DataAnnotations;
 namespace gestionAdminTECOCApi.Application.Features.Users.CreateUser;
 
 public record UserCommand(
-    [Required] string FirstName
-    , string? SecondName
-    , [Required] string SurName
-    , string? SecondSurName
+    [Required] string FullName
+    , [Required] string DocumentType
+    , [Required] string DocumentNumber
+    , [Required] string Position
     ) : ICommand<UserCommandResponse>;

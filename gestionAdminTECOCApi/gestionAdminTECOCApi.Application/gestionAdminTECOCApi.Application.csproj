@@ -16,6 +16,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<InternalsVisibleTo Include="gestionAdminTECOCApi.Api.Tests" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\gestionAdminTECOCApi.Domain\gestionAdminTECOCApi.Domain.csproj" />
 		<ProjectReference Include="..\gestionAdminTECOCApi.Infrastructure\gestionAdminTECOCApi.Infrastructure.csproj" />
 	</ItemGroup>
