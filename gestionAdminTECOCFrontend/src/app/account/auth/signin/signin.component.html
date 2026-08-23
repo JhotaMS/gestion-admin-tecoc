@@ -1,83 +1,174 @@
-<div class="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
-  <div class="grid w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-lg lg:grid-cols-2">
-    <div class="hidden flex-col justify-between bg-emerald-600 p-10 text-white lg:flex">
-      <span class="text-xl font-semibold">TECOC Admin</span>
-      <div>
-        <p class="text-3xl font-light leading-snug">
-          "Gestión administrativa clara, rápida y en tiempo real."
+<div
+  class="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-10"
+  style="background: radial-gradient(1200px 700px at 15% 10%, #0073cb 0%, #003892 45%, #00215e 100%);"
+>
+  <div class="tecoc-float pointer-events-none absolute left-[6%] top-[8%] h-80 w-80 rounded-full border border-white/10"></div>
+  <div class="tecoc-float-slow pointer-events-none absolute bottom-[6%] right-[10%] h-44 w-44 rounded-full border border-white/10"></div>
+
+  <div class="grid w-full max-w-[1080px] overflow-hidden rounded-md bg-white shadow-[0_40px_80px_-30px_rgba(0,33,94,0.55)] lg:grid-cols-[1.05fr_1fr]">
+    <!-- Brand panel -->
+    <div class="relative hidden min-h-[620px] flex-col justify-between overflow-hidden bg-tecoc-deep p-11 lg:flex">
+      <div
+        class="pointer-events-none absolute inset-0"
+        style="background: repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 14px);"
+      ></div>
+      <div
+        class="pointer-events-none absolute inset-0"
+        style="background: linear-gradient(160deg, rgba(0,115,203,0.55) 0%, rgba(0,33,94,0.92) 70%);"
+      ></div>
+      <div class="pointer-events-none absolute -right-20 -top-16 h-[300px] w-[300px] rotate-[20deg] bg-tecoc-blue opacity-35"></div>
+
+      <div class="relative flex items-center gap-3.5">
+        <div class="flex flex-col gap-1.5">
+          <span class="font-narrow text-[40px] font-bold uppercase leading-none tracking-[-0.5px] text-white">Gestión TECOC</span>
+          <span class="text-[11px] uppercase tracking-[3px] text-white/70">Corporación Tecnológica Católica de Occidente</span>
+        </div>
+      </div>
+
+      <div class="relative my-10 flex h-[260px] items-center justify-center">
+        <div class="flex h-60 w-60 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_24px_48px_-20px_rgba(0,0,0,0.7)]">
+          <img
+            src="tecoc-logo.png"
+            alt="Logo TECOC"
+            class="h-full w-full object-contain"
+            style="transform: scale(1.62) translateY(-3px);"
+          />
+        </div>
+      </div>
+
+      <div class="relative">
+        <div class="mb-5 h-[3px] w-11 bg-tecoc-blue"></div>
+        <p class="m-0 text-2xl font-semibold leading-[1.45] tracking-[0.4px] text-white">
+          FORMACIÓN, VALORES Y CONOCIMIENTO PARA UN FUTURO MEJOR
+        </p>
+        <p class="mt-4 text-center text-[13px] tracking-[1.4px] text-white/70">
+          CALLE 20 #5-07, SANTA FÉ DE ANTIOQUIA, ANTIOQUIA
         </p>
       </div>
     </div>
 
-    <div class="p-8 sm:p-10">
-      <h1 class="text-2xl font-semibold text-slate-800">Bienvenido de nuevo</h1>
-      <p class="mt-1 text-sm text-slate-500">Inicia sesión para continuar a TECOC Admin.</p>
+    <!-- Form panel -->
+    <div class="flex flex-col justify-center gap-6 px-8 py-12 sm:px-14 sm:py-14">
+      <div>
+        <h1 class="m-0 mb-2 text-[30px] font-bold tracking-[-0.6px] text-tecoc-deep">Bienvenido de nuevo</h1>
+        <p class="m-0 text-sm text-tecoc-ink">Accede con tu cuenta institucional TECOC.</p>
+      </div>
 
-      <form class="mt-6 space-y-4" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        <div>
-          <label for="username" class="mb-1 block text-sm font-medium text-slate-700">Usuario</label>
+      <form class="flex flex-col gap-[18px]" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <label class="flex flex-col gap-2">
+          <span class="text-xs font-semibold uppercase tracking-[1.4px] text-tecoc-ink">Usuario</span>
           <input
-            id="username"
             type="text"
             formControlName="username"
-            placeholder="Ingresa tu usuario"
-            class="w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            [class.border-red-400]="submitted() && f.username.errors"
-            [class.border-slate-300]="!(submitted() && f.username.errors)"
+            placeholder="nombre.apellido"
+            autocomplete="username"
+            class="tecoc-input"
+            [class.tecoc-input--error]="submitted() && f.username.errors"
           />
           @if (submitted() && f.username.errors?.['required']) {
-            <p class="mt-1 text-xs text-red-500">El usuario es obligatorio</p>
+            <span class="text-xs text-red-500">El usuario es obligatorio</span>
           }
-        </div>
+        </label>
 
-        <div>
-          <div class="mb-1 flex items-center justify-between">
-            <label for="password" class="block text-sm font-medium text-slate-700">Contraseña</label>
+        <div class="flex flex-col gap-2">
+          <div class="flex items-baseline justify-between">
+            <span class="text-xs font-semibold uppercase tracking-[1.4px] text-tecoc-ink">Contraseña</span>
+            <a href="#" class="text-xs text-tecoc-blue hover:text-tecoc-navy hover:underline">¿Olvidaste tu contraseña?</a>
           </div>
           <div class="relative">
             <input
-              id="password"
               [type]="showPassword() ? 'text' : 'password'"
               formControlName="password"
-              placeholder="Ingresa tu contraseña"
-              class="w-full rounded-md border px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              [class.border-red-400]="submitted() && f.password.errors"
-              [class.border-slate-300]="!(submitted() && f.password.errors)"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              class="tecoc-input pr-[52px]"
+              [class.tecoc-input--error]="submitted() && f.password.errors"
+              (keydown.enter)="onSubmit()"
             />
             <button
               type="button"
-              class="absolute inset-y-0 right-2 flex items-center text-slate-400"
+              class="tecoc-eye-btn"
               (click)="toggleShowPassword()"
-              aria-label="Mostrar u ocultar contraseña"
+              [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
             >
               @if (showPassword()) {
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
               } @else {
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19M1 1l22 22"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path
+                    d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19M1 1l22 22"
+                  />
+                </svg>
               }
             </button>
           </div>
+          <div class="h-1 overflow-hidden rounded-full bg-[#eceef1]">
+            <div
+              class="h-full transition-all duration-300"
+              [style.width.%]="passwordStrength().percent"
+              [style.background]="passwordStrength().color"
+            ></div>
+          </div>
+          <span class="min-h-[14px] text-[11px] tracking-[0.3px] text-tecoc-ink">{{ passwordStrength().label }}</span>
           @if (submitted() && f.password.errors?.['required']) {
-            <p class="mt-1 text-xs text-red-500">La contraseña es obligatoria</p>
+            <span class="text-xs text-red-500">La contraseña es obligatoria</span>
           }
         </div>
 
-        @if (errorMessage()) {
-          <p class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{{ errorMessage() }}</p>
-        }
+        <label class="flex cursor-pointer items-center gap-2.5 select-none">
+          <button
+            type="button"
+            class="tecoc-check"
+            [class.tecoc-check--on]="remember()"
+            (click)="toggleRemember()"
+            aria-label="Mantener la sesión iniciada"
+          >
+            @if (remember()) {
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+            }
+          </button>
+          <span class="text-sm text-tecoc-ink">Mantener la sesión iniciada</span>
+        </label>
 
-        <button
-          type="submit"
-          class="w-full rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
-          [disabled]="loading()"
-        >
-          {{ loading() ? 'Ingresando...' : 'Ingresar' }}
+        <button type="submit" class="tecoc-submit" [disabled]="loading()">
+          @if (loading()) {
+            <span class="tecoc-spinner"></span>
+          }
+          <span>{{ loading() ? 'Verificando…' : 'Iniciar sesión' }}</span>
         </button>
 
-        <p class="text-center text-xs text-slate-400">
-          Demo: usuario <span class="font-medium">admin</span> / contraseña <span class="font-medium">admin123</span>
-        </p>
+        @if (errorMessage()) {
+          <div class="border-l-[3px] border-tecoc-blue bg-tecoc-tint px-3.5 py-2.5 text-[13px] text-tecoc-deep">
+            {{ errorMessage() }}
+          </div>
+        }
       </form>
+
+      <div class="flex items-center gap-3.5">
+        <div class="h-px flex-1 bg-tecoc-border"></div>
+        <span class="text-[11px] uppercase tracking-[1.6px] text-tecoc-line">o continúa con</span>
+        <div class="h-px flex-1 bg-tecoc-border"></div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-3">
+        @for (provider of providers; track provider) {
+          <button type="button" class="tecoc-provider-btn" disabled title="Próximamente disponible">{{ provider }}</button>
+        }
+      </div>
+
+      <p class="m-0 text-sm text-tecoc-ink">
+        ¿No tienes cuenta? <a href="#" class="font-semibold text-tecoc-blue hover:text-tecoc-navy hover:underline">Solicita acceso</a>
+      </p>
+
+      <p class="m-0 text-center text-xs text-tecoc-line">
+        Demo: usuario <span class="font-medium text-tecoc-ink">admin</span> / contraseña
+        <span class="font-medium text-tecoc-ink">admin123</span>
+      </p>
     </div>
   </div>
 </div>
