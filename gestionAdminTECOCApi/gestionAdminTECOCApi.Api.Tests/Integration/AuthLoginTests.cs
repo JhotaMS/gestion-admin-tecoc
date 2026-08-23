@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using gestionAdminTECOCApi.Application.Features.Auth.Login;
 using gestionAdminTECOCApi.Domain.Users;
@@ -55,8 +55,8 @@ public class AuthLoginTests : IClassFixture<WebApplicationFactory<Program>> {
         Assert.Equal( HttpStatusCode.OK, response.StatusCode );
         var body = await response.Content.ReadFromJsonAsync<LoginResponse>();
         Assert.NotNull( body );
-        Assert.Equal( "docente@tecoc.edu.co", body.User.Email );
-        Assert.NotEqual( Guid.Empty, body.User.Id );
+        Assert.Equal( "docente@tecoc.edu.co", body.Email );
+        Assert.NotEqual( Guid.Empty, body.UserId );
     }
 
     [Fact]
