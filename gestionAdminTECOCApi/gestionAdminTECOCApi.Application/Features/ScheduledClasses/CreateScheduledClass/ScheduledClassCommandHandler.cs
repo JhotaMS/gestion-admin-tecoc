@@ -11,17 +11,16 @@ internal sealed class ScheduledClassCommandHandler(
     public async Task<Result<ScheduledClassCommandResponse>> Handle( ScheduledClassCommand request
         , CancellationToken cancellationToken
     ) {
-        if (!ClassScheduleFormats.TryParseDate( request.ScheduledDate, out DateOnly scheduledDate )) {
+        IReadOnlyList<string> validationMessages = ScheduledClassCommandRules.Validate( request );
+
+        if (validationMessages.Count != 0) {
             return Result.Failure<ScheduledClassCommandResponse>(
-                ScheduledClassErrors.DateFormatNotAllowed( request.ScheduledDate )
+                ScheduledClassErrors.ValidationFailed( validationMessages )
             );
         }
 
-        if (!ClassScheduleFormats.TryParseTime( request.ScheduledTime, out TimeOnly scheduledTime )) {
-            return Result.Failure<ScheduledClassCommandResponse>(
-                ScheduledClassErrors.TimeFormatNotAllowed( request.ScheduledTime )
-            );
-        }
+        ClassScheduleFormats.TryParseDate( request.ScheduledDate, out DateOnly scheduledDate );
+        ClassScheduleFormats.TryParseTime( request.ScheduledTime, out TimeOnly scheduledTime );
 
         bool scheduleAlreadyTaken = await scheduledClassService
             .ExistsByScheduleAsync(

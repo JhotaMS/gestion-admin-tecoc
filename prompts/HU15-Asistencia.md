@@ -66,11 +66,13 @@ Respuestas de error:
 
 | Código | Situación | `code` |
 |---|---|---|
-| `400` | Campo obligatorio faltante o vacío | validación de FluentValidation |
-| `400` | Formato de fecha inválido | `ScheduledClass.DateFormatNotAllowed` |
-| `400` | Formato de hora inválido | `ScheduledClass.TimeFormatNotAllowed` |
-| `400` | Fecha anterior al día actual | validación de FluentValidation |
+| `400` | Campo obligatorio faltante o vacío | `ScheduledClass.ValidationFailed` |
+| `400` | Formato de fecha u hora inválido | `ScheduledClass.ValidationFailed` |
+| `400` | Fecha anterior al día actual | `ScheduledClass.ValidationFailed` |
 | `409` | Ya hay una clase en esa fecha y hora | `ScheduledClass.ScheduleAlreadyTaken` |
+
+Los `400` acumulan en un solo mensaje todos los campos que fallaron, separados por
+punto y espacio.
 
 ## Prompt inicial
 
@@ -138,6 +140,14 @@ REGLAS ESTRICTAS sobre el manejo del repositorio y los commits:
 - **El cruce de horario se valida sobre (fecha, hora)** con un índice único en
   base de datos, bajo el supuesto de un único docente. Cuando el sistema modele
   docente y curso, la restricción debe moverse a (docente, fecha, hora).
-- **La regla de "no programar en el pasado" vive en el Validator** y usa la zona
-  horaria de Colombia (`SA Pacific Standard Time`), la misma que ya usa
-  `ConvertTimeHelpers` en el resto del proyecto.
+- **La regla de "no programar en el pasado"** usa la zona horaria de Colombia
+  (`SA Pacific Standard Time`), la misma que ya usa `ConvertTimeHelpers` en el
+  resto del proyecto.
+- **Las validaciones NO usan FluentValidation**, a diferencia del endpoint de
+  usuarios. `ValidationBehavior` lanza `ValidationApplicationException` cuando un
+  validador falla, y esa excepción se lanza *después* de que
+  `UnitOfWorkBehevior` ya abrió un `TransactionScope`, así que cada petición
+  inválida abría una transacción contra la base solo para abortarla. Las reglas
+  viven en `ScheduledClassCommandRules` y el handler devuelve `Result.Failure`,
+  que es lo que pide la propia guía del proyecto para casos de negocio
+  esperados. El endpoint de usuarios se dejó como estaba.

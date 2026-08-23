@@ -3,6 +3,11 @@
 namespace gestionAdminTECOCApi.Domain.ScheduledClasses;
 
 public static class ScheduledClassErrors {
+    public static Error ValidationFailed( IEnumerable<string> messages ) => new(
+        "ScheduledClass.ValidationFailed",
+        string.Join( " ", messages )
+    );
+
     public static Error DateFormatNotAllowed( string? scheduledDate ) => new(
         "ScheduledClass.DateFormatNotAllowed",
         $"La fecha '{scheduledDate}' no corresponde al formato configurado en el sistema ({ClassScheduleFormats.DateFormat})"

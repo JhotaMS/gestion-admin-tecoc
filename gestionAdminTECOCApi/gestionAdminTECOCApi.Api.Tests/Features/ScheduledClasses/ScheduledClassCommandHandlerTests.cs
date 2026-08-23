@@ -1,5 +1,6 @@
-﻿using gestionAdminTECOCApi.Application.Features.ScheduledClasses.CreateScheduledClass;
+using gestionAdminTECOCApi.Application.Features.ScheduledClasses.CreateScheduledClass;
 using gestionAdminTECOCApi.Domain.Abstractions;
+using gestionAdminTECOCApi.Domain.Helpers;
 using gestionAdminTECOCApi.Domain.Ports;
 using gestionAdminTECOCApi.Domain.ScheduledClasses;
 using NSubstitute;
@@ -17,8 +18,14 @@ public class ScheduledClassCommandHandlerTests {
         _handler = new ScheduledClassCommandHandler( new ScheduledClassService( _unitOfWork ) );
     }
 
+    private static DateOnly FechaFutura()
+        => DateOnly.FromDateTime( DateTime.Now.ZoneByIdPacificStandardTime() ).AddDays( 30 );
+
+    private static string FechaFuturaTexto()
+        => FechaFutura().ToString( "yyyy-MM-dd" );
+
     private static ScheduledClassCommand ValidCommand() => new(
-        "2026-09-01"
+        FechaFuturaTexto()
         , "14:30"
         , "Ecuaciones diferenciales de primer orden"
         , "Unidad 3"
@@ -32,10 +39,9 @@ public class ScheduledClassCommandHandlerTests {
         );
 
         Assert.True( result.IsFailure );
-        Assert.Equal( "ScheduledClass.DateFormatNotAllowed", result.Error.Code );
-        await _repository
-            .DidNotReceive()
-            .AddAsync( Arg.Any<ScheduledClass>(), Arg.Any<CancellationToken>() );
+        Assert.Equal( "ScheduledClass.ValidationFailed", result.Error.Code );
+        Assert.Contains( "yyyy-MM-dd", result.Error.Name, StringComparison.Ordinal );
+        await NoSeGuardoNada();
     }
 
     [Fact]
@@ -46,10 +52,42 @@ public class ScheduledClassCommandHandlerTests {
         );
 
         Assert.True( result.IsFailure );
-        Assert.Equal( "ScheduledClass.TimeFormatNotAllowed", result.Error.Code );
-        await _repository
-            .DidNotReceive()
-            .AddAsync( Arg.Any<ScheduledClass>(), Arg.Any<CancellationToken>() );
+        Assert.Equal( "ScheduledClass.ValidationFailed", result.Error.Code );
+        Assert.Contains( "HH:mm", result.Error.Name, StringComparison.Ordinal );
+        await NoSeGuardoNada();
+    }
+
+    [Fact]
+    public async Task Handle_CamposObligatoriosVacios_RetornaFailureConTodosLosMensajes() {
+        Result<ScheduledClassCommandResponse> result = await _handler.Handle(
+            new ScheduledClassCommand( string.Empty, string.Empty, string.Empty, string.Empty )
+            , CancellationToken.None
+        );
+
+        Assert.True( result.IsFailure );
+        Assert.Equal( "ScheduledClass.ValidationFailed", result.Error.Code );
+        Assert.Contains( "La fecha de la clase es obligatoria", result.Error.Name, StringComparison.Ordinal );
+        Assert.Contains( "La hora de la clase es obligatoria", result.Error.Name, StringComparison.Ordinal );
+        Assert.Contains( "El tema de la clase es obligatorio", result.Error.Name, StringComparison.Ordinal );
+        Assert.Contains( "El nivel o unidad del curso es obligatorio", result.Error.Name, StringComparison.Ordinal );
+        await NoSeGuardoNada();
+    }
+
+    [Fact]
+    public async Task Handle_FechaAnteriorAHoy_RetornaFailureSinGuardar() {
+        string fechaPasada = DateOnly
+            .FromDateTime( DateTime.Now.ZoneByIdPacificStandardTime() )
+            .AddDays( -1 )
+            .ToString( "yyyy-MM-dd" );
+
+        Result<ScheduledClassCommandResponse> result = await _handler.Handle(
+            ValidCommand() with { ScheduledDate = fechaPasada }
+            , CancellationToken.None
+        );
+
+        Assert.True( result.IsFailure );
+        Assert.Contains( "no puede ser anterior a la fecha actual", result.Error.Name, StringComparison.Ordinal );
+        await NoSeGuardoNada();
     }
 
     [Fact]
@@ -63,9 +101,7 @@ public class ScheduledClassCommandHandlerTests {
 
         Assert.True( result.IsFailure );
         Assert.Equal( "ScheduledClass.ScheduleAlreadyTaken", result.Error.Code );
-        await _repository
-            .DidNotReceive()
-            .AddAsync( Arg.Any<ScheduledClass>(), Arg.Any<CancellationToken>() );
+        await NoSeGuardoNada();
     }
 
     [Fact]
@@ -89,7 +125,7 @@ public class ScheduledClassCommandHandlerTests {
             .Received( 1 )
             .AddAsync(
                 Arg.Is<ScheduledClass>( scheduledClass =>
-                    scheduledClass.ScheduledDate == new DateOnly( 2026, 9, 1 )
+                    scheduledClass.ScheduledDate == FechaFutura()
                     && scheduledClass.ScheduledTime == new TimeOnly( 14, 30 )
                     && scheduledClass.Topic == command.Topic
                     && scheduledClass.CourseLevel == command.CourseLevel
@@ -133,7 +169,7 @@ public class ScheduledClassCommandHandlerTests {
 
         Result<ScheduledClassCommandResponse> result = await _handler.Handle(
             new ScheduledClassCommand(
-                "  2026-09-01  "
+                "  " + FechaFuturaTexto() + "  "
                 , "  14:30  "
                 , "  Ecuaciones diferenciales de primer orden  "
                 , "  Unidad 3  "
@@ -142,11 +178,16 @@ public class ScheduledClassCommandHandlerTests {
         );
 
         Assert.True( result.IsSuccess );
-        Assert.Equal( "2026-09-01", result.Value.ScheduledDate );
+        Assert.Equal( FechaFuturaTexto(), result.Value.ScheduledDate );
         Assert.Equal( "14:30", result.Value.ScheduledTime );
         Assert.Equal( "Ecuaciones diferenciales de primer orden", result.Value.Topic );
         Assert.Equal( "Unidad 3", result.Value.CourseLevel );
     }
+
+    private async Task NoSeGuardoNada()
+        => await _repository
+        .DidNotReceive()
+        .AddAsync( Arg.Any<ScheduledClass>(), Arg.Any<CancellationToken>() );
 
     private void ExisteProgramacion( bool existe )
         => _repository
