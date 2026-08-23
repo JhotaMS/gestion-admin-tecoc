@@ -4,5 +4,6 @@ namespace gestionAdminTECOCApi.Application.Features.Auth.Login;
 
 public record LoginCommand(
     string UserName,
-    string Password
+    string Password,
+    string? Email = null
 ) : ICommand<LoginResponse>;
