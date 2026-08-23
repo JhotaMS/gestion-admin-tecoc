@@ -5,9 +5,12 @@ namespace gestionAdminTECOCApi.Application.Features.Users.CreateUser;
 
 public sealed class UserCommandValidator : AbstractValidator<UserCommand> {
     private const int MaximumFullNameLength = 150;
-    private const int MaximumPositionLength = 100;
     private const int MinimumDocumentNumberLength = 5;
     private const int MaximumDocumentNumberLength = 15;
+    private const int MaximumUserNameLength = 50;
+    private const int MaximumEmailLength = 150;
+    private const int MinimumPasswordLength = 8;
+    private const int MaximumPasswordLength = 100;
 
     public UserCommandValidator() {
         RuleFor( command => command.FullName )
@@ -33,11 +36,27 @@ public sealed class UserCommandValidator : AbstractValidator<UserCommand> {
             .Length( MinimumDocumentNumberLength, MaximumDocumentNumberLength )
             .WithMessage( $"El número de documento debe tener entre {MinimumDocumentNumberLength} y {MaximumDocumentNumberLength} dígitos" );
 
-        RuleFor( command => command.Position )
+        RuleFor( command => command.UserName )
             .Cascade( CascadeMode.Stop )
             .NotEmpty()
-            .WithMessage( "El cargo es obligatorio" )
-            .MaximumLength( MaximumPositionLength )
-            .WithMessage( $"El cargo no puede superar los {MaximumPositionLength} caracteres" );
+            .WithMessage( "El nombre de usuario es obligatorio" )
+            .MaximumLength( MaximumUserNameLength )
+            .WithMessage( $"El nombre de usuario no puede superar los {MaximumUserNameLength} caracteres" );
+
+        RuleFor( command => command.Email )
+            .Cascade( CascadeMode.Stop )
+            .NotEmpty()
+            .WithMessage( "El correo electrónico es obligatorio" )
+            .MaximumLength( MaximumEmailLength )
+            .WithMessage( $"El correo electrónico no puede superar los {MaximumEmailLength} caracteres" )
+            .EmailAddress()
+            .WithMessage( "El correo electrónico no tiene un formato válido" );
+
+        RuleFor( command => command.Password )
+            .Cascade( CascadeMode.Stop )
+            .NotEmpty()
+            .WithMessage( "La contraseña es obligatoria" )
+            .Length( MinimumPasswordLength, MaximumPasswordLength )
+            .WithMessage( $"La contraseña debe tener entre {MinimumPasswordLength} y {MaximumPasswordLength} caracteres" );
     }
 }

@@ -23,7 +23,9 @@ public class UserServiceTests {
         "Juan Camilo Tamayo"
         , DocumentType.CedulaCiudadania
         , "1094567890"
-        , "Analista de desarrollo"
+        , "jctamayo"
+        , "juan.tamayo@example.com"
+        , "hashed-password"
     );
 
     [TestMethod]
@@ -111,7 +113,7 @@ public class UserServiceTests {
         Assert.IsNotNull( predicate );
         Func<User, bool> filtro = predicate.Compile();
         Assert.IsTrue( filtro( NewUser() ) );
-        Assert.IsFalse( filtro( User.Create( "Otra persona", DocumentType.CedulaExtranjeria, "1094567890", "Analista" ) ) );
-        Assert.IsFalse( filtro( User.Create( "Otra persona", DocumentType.CedulaCiudadania, "1000000000", "Analista" ) ) );
+        Assert.IsFalse( filtro( User.Create( "Otra persona", DocumentType.CedulaExtranjeria, "1094567890", "otrapersona", "otra.persona@example.com", "hashed-password" ) ) );
+        Assert.IsFalse( filtro( User.Create( "Otra persona", DocumentType.CedulaCiudadania, "1000000000", "otrapersona", "otra.persona@example.com", "hashed-password" ) ) );
     }
 }

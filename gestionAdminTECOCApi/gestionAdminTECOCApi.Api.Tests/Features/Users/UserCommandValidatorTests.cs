@@ -10,7 +10,9 @@ public class UserCommandValidatorTests {
         "Juan Camilo Tamayo"
         , "CC"
         , "1094567890"
-        , "Analista de desarrollo"
+        , "jctamayo"
+        , "juan.tamayo@example.com"
+        , "Passw0rd!"
     );
 
     [Fact]
@@ -60,25 +62,72 @@ public class UserCommandValidatorTests {
     [InlineData( null )]
     [InlineData( "" )]
     [InlineData( "   " )]
-    public void Validate_CargoSinValor_RetornaErrorDelCampo( string? position ) {
+    public void Validate_NombreUsuarioSinValor_RetornaErrorDelCampo( string? userName ) {
         ValidationResult result = _validator.Validate(
-            ValidCommand() with { Position = position! }
+            ValidCommand() with { UserName = userName! }
         );
 
-        AssertErrorEnPropiedad( result, nameof( UserCommand.Position ) );
+        AssertErrorEnPropiedad( result, nameof( UserCommand.UserName ) );
+    }
+
+    [Theory]
+    [InlineData( null )]
+    [InlineData( "" )]
+    [InlineData( "   " )]
+    public void Validate_EmailSinValor_RetornaErrorDelCampo( string? email ) {
+        ValidationResult result = _validator.Validate(
+            ValidCommand() with { Email = email! }
+        );
+
+        AssertErrorEnPropiedad( result, nameof( UserCommand.Email ) );
+    }
+
+    [Theory]
+    [InlineData( "correo-invalido" )]
+    [InlineData( "correo@" )]
+    [InlineData( "@example.com" )]
+    public void Validate_EmailFormatoInvalido_RetornaErrorDelCampo( string email ) {
+        ValidationResult result = _validator.Validate(
+            ValidCommand() with { Email = email }
+        );
+
+        AssertErrorEnPropiedad( result, nameof( UserCommand.Email ) );
+    }
+
+    [Theory]
+    [InlineData( null )]
+    [InlineData( "" )]
+    [InlineData( "   " )]
+    public void Validate_ContrasenaSinValor_RetornaErrorDelCampo( string? password ) {
+        ValidationResult result = _validator.Validate(
+            ValidCommand() with { Password = password! }
+        );
+
+        AssertErrorEnPropiedad( result, nameof( UserCommand.Password ) );
+    }
+
+    [Fact]
+    public void Validate_ContrasenaMuyCorta_RetornaErrorDelCampo() {
+        ValidationResult result = _validator.Validate(
+            ValidCommand() with { Password = "1234567" }
+        );
+
+        AssertErrorEnPropiedad( result, nameof( UserCommand.Password ) );
     }
 
     [Fact]
     public void Validate_TodosLosCamposVacios_RetornaUnErrorPorCadaCampo() {
         ValidationResult result = _validator.Validate(
-            new UserCommand( string.Empty, string.Empty, string.Empty, string.Empty )
+            new UserCommand( string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty )
         );
 
-        Assert.Equal( 4, result.Errors.Count );
+        Assert.Equal( 6, result.Errors.Count );
         AssertErrorEnPropiedad( result, nameof( UserCommand.FullName ) );
         AssertErrorEnPropiedad( result, nameof( UserCommand.DocumentType ) );
         AssertErrorEnPropiedad( result, nameof( UserCommand.DocumentNumber ) );
-        AssertErrorEnPropiedad( result, nameof( UserCommand.Position ) );
+        AssertErrorEnPropiedad( result, nameof( UserCommand.UserName ) );
+        AssertErrorEnPropiedad( result, nameof( UserCommand.Email ) );
+        AssertErrorEnPropiedad( result, nameof( UserCommand.Password ) );
     }
 
     [Theory]
@@ -152,12 +201,12 @@ public class UserCommandValidatorTests {
     }
 
     [Fact]
-    public void Validate_CargoExcedeLongitudMaxima_RetornaErrorDelCampo() {
+    public void Validate_NombreUsuarioExcedeLongitudMaxima_RetornaErrorDelCampo() {
         ValidationResult result = _validator.Validate(
-            ValidCommand() with { Position = new string( 'a', 101 ) }
+            ValidCommand() with { UserName = new string( 'a', 51 ) }
         );
 
-        AssertErrorEnPropiedad( result, nameof( UserCommand.Position ) );
+        AssertErrorEnPropiedad( result, nameof( UserCommand.UserName ) );
     }
 
     private static void AssertErrorEnPropiedad( ValidationResult result, string propertyName ) {

@@ -21,7 +21,9 @@ public class UserCommandHandlerTests {
         "Juan Camilo Tamayo"
         , "CC"
         , "1094567890"
-        , "Analista de desarrollo"
+        , "jctamayo"
+        , "juan.tamayo@example.com"
+        , "Passw0rd!"
     );
 
     [Fact]
@@ -69,7 +71,8 @@ public class UserCommandHandlerTests {
         Assert.Equal( command.FullName, result.Value.FullName );
         Assert.Equal( command.DocumentType, result.Value.DocumentType );
         Assert.Equal( command.DocumentNumber, result.Value.DocumentNumber );
-        Assert.Equal( command.Position, result.Value.Position );
+        Assert.Equal( command.UserName, result.Value.UserName );
+        Assert.Equal( command.Email, result.Value.Email );
 
         await _repository
             .Received( 1 )
@@ -78,7 +81,9 @@ public class UserCommandHandlerTests {
                     user.FullName == command.FullName
                     && user.DocumentType == DocumentType.CedulaCiudadania
                     && user.DocumentNumber == command.DocumentNumber
-                    && user.Position == command.Position
+                    && user.UserName == command.UserName
+                    && user.Email == command.Email
+                    && user.PasswordHash != command.Password
                 )
                 , Arg.Any<CancellationToken>()
             );
@@ -122,7 +127,9 @@ public class UserCommandHandlerTests {
                 "  Juan Camilo Tamayo  "
                 , "CC"
                 , "  1094567890  "
-                , "  Analista de desarrollo  "
+                , "  jctamayo  "
+                , "  juan.tamayo@example.com  "
+                , "Passw0rd!"
             )
             , CancellationToken.None
         );
@@ -130,7 +137,8 @@ public class UserCommandHandlerTests {
         Assert.True( result.IsSuccess );
         Assert.Equal( "Juan Camilo Tamayo", result.Value.FullName );
         Assert.Equal( "1094567890", result.Value.DocumentNumber );
-        Assert.Equal( "Analista de desarrollo", result.Value.Position );
+        Assert.Equal( "jctamayo", result.Value.UserName );
+        Assert.Equal( "juan.tamayo@example.com", result.Value.Email );
     }
 
     private void ExisteDocumento( bool existe )

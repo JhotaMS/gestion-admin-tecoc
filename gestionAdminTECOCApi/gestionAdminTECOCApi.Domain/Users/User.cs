@@ -1,4 +1,4 @@
-﻿using gestionAdminTECOCApi.Domain.Abstractions;
+using gestionAdminTECOCApi.Domain.Abstractions;
 
 namespace gestionAdminTECOCApi.Domain.Users;
 
@@ -7,29 +7,39 @@ public class User : Entity<Guid> {
         string fullName,
         DocumentType documentType,
         string documentNumber,
-        string position
+        string userName,
+        string email,
+        string passwordHash
     ) : base( true ) {
         Id = Guid.NewGuid();
         FullName = fullName;
         DocumentType = documentType;
         DocumentNumber = documentNumber;
-        Position = position;
+        UserName = userName;
+        Email = email;
+        PasswordHash = passwordHash;
     }
 
     public string FullName { get; private set; } = default!;
     public DocumentType DocumentType { get; private set; }
     public string DocumentNumber { get; private set; } = default!;
-    public string Position { get; private set; } = default!;
+    public string UserName { get; private set; } = default!;
+    public string Email { get; private set; } = default!;
+    public string PasswordHash { get; private set; } = default!;
 
     public static User Create(
         string fullName,
         DocumentType documentType,
         string documentNumber,
-        string position
+        string userName,
+        string email,
+        string passwordHash
     ) => new(
         fullName,
         documentType,
         documentNumber,
-        position
+        userName,
+        email,
+        passwordHash
     );
 }

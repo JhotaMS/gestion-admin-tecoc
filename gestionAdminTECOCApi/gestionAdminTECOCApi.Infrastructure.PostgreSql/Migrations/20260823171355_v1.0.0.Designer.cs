@@ -12,7 +12,7 @@ using gestionAdminTECOCApi.Infrastructure.PostgreSql.Persistence;
 namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260823163929_v1.0.0")]
+    [Migration("20260823171355_v1.0.0")]
     partial class v100
     {
         /// <inheritdoc />
@@ -42,6 +42,11 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
                     b.Property<bool>("Enabled")
                         .HasColumnType("boolean");
 
@@ -50,12 +55,23 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
-                    b.Property<string>("Position")
+                    b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("UserName")
+                        .IsUnique();
 
                     b.HasIndex("DocumentType", "DocumentNumber")
                         .IsUnique();
