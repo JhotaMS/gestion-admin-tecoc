@@ -27,6 +27,10 @@ export const routes: Routes = [
         path: 'usuarios',
         loadComponent: () => import('./users/users.component').then((m) => m.UsersComponent),
       },
+      {
+        path: 'prestamos',
+        loadComponent: () => import('./loans/loans.component').then((m) => m.LoansComponent),
+      },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },

@@ -1,3 +1,119 @@
-<div class="space-y-6">
-  <h1>Hola Mundo</h1>
+<div class="flex flex-col gap-6">
+  <header class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <p class="m-0 mb-1.5 text-[11px] uppercase tracking-[2.6px] text-tecoc-ink">Salpicadero</p>
+      <h1 class="dash-title m-0 text-tecoc-deep">Panel general</h1>
+    </div>
+    <div class="dash-live-pill">
+      <span class="tecoc-live-dot h-2 w-2 rounded-full bg-tecoc-blue"></span>
+      <span>En vivo · {{ clock() }}</span>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="kpi-grid">
+      @for (i of [0, 1, 2, 3]; track i) {
+        <div class="dash-skeleton" style="height: 112px"></div>
+      }
+    </div>
+  } @else {
+    <div class="kpi-grid">
+      @for (stat of stats(); track stat.label) {
+        <div class="kpi-card">
+          <div class="kpi-card__top">
+            <span class="kpi-value">{{ stat.value }}</span>
+            <span class="kpi-badge" [class.kpi-badge--accent]="stat.changePercent >= 0" [class.kpi-badge--neutral]="stat.changePercent < 0">
+              {{ stat.changePercent >= 0 ? '▲' : '▼' }} {{ (stat.changePercent >= 0 ? '+' : '') + stat.changePercent }}%
+            </span>
+          </div>
+          <p class="kpi-label">{{ stat.label }}</p>
+          <div class="kpi-bar-track">
+            <div class="kpi-bar-fill" [style.width.%]="stat.barPercent"></div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="dash-columns">
+    <section class="glass-card">
+      <div class="glass-card__head">
+        <div>
+          <h2>Actividad reciente</h2>
+          <p>Últimos movimientos registrados en el sistema.</p>
+        </div>
+        <a href="#">Ver todo</a>
+      </div>
+
+      @if (loading()) {
+        <div class="dash-skeleton" style="height: 220px"></div>
+      } @else {
+        <div class="activity-list">
+          @for (item of recentActivity(); track item.id) {
+            <div class="activity-row">
+              <div class="activity-tag">{{ item.tag }}</div>
+              <div class="activity-body">
+                <div class="activity-title">{{ item.title }}</div>
+                <div class="activity-time">{{ item.timestampIso | date: 'dd MMM, HH:mm' }}</div>
+              </div>
+              <span
+                class="activity-chip"
+                [class.activity-chip--accent]="item.tone === 'accent'"
+                [class.activity-chip--neutral]="item.tone === 'neutral'"
+              >
+                {{ item.state }}
+              </span>
+            </div>
+          } @empty {
+            <div class="activity-row">
+              <div class="activity-body">
+                <div class="activity-title">Sin actividad reciente.</div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="chart-block">
+        <div class="chart-head">
+          <h3>Solicitudes por semana</h3>
+          <span>Últimas 12 semanas</span>
+        </div>
+        <div class="chart-bars">
+          @for (bar of weeklyRequests; track $index) {
+            <div class="chart-bar" [style.height.%]="bar.heightPercent" [attr.title]="bar.value"></div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="glass-card notif-card">
+      <div class="glass-card__head">
+        <div>
+          <h2>Notificaciones</h2>
+          <p>Canal en tiempo real.</p>
+        </div>
+        <span class="notif-live">
+          <span class="tecoc-live-dot h-1.5 w-1.5 rounded-full bg-tecoc-blue"></span>
+          En vivo
+        </span>
+      </div>
+
+      <div class="notif-list">
+        @for (notification of liveNotifications(); track notification.id) {
+          <div class="notif-item">
+            <div class="notif-title">{{ notification.title }}</div>
+            <div class="notif-body">{{ notification.body }}</div>
+            <div class="notif-time">{{ notification.createdAtIso | date: 'HH:mm:ss' }}</div>
+          </div>
+        } @empty {
+          <div class="notif-empty">Esperando la primera notificación…</div>
+        }
+      </div>
+
+      <button type="button" class="notif-cta" [disabled]="liveNotifications().length === 0" (click)="clearNotifications()">
+        Marcar todo como leído
+      </button>
+    </section>
+  </div>
 </div>
