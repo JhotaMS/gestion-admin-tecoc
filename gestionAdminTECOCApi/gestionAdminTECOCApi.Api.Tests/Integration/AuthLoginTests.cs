@@ -41,34 +41,34 @@ public class AuthLoginTests : IClassFixture<WebApplicationFactory<Program>> {
         }
     }
 
-    private async Task<HttpResponseMessage> LoginAsync( string email, string password ) {
+    private async Task<HttpResponseMessage> LoginAsync( string userName, string password ) {
         var client = _factory.CreateClient();
         return await client.PostAsJsonAsync(
             "/api/v1/auth/login",
-            new LoginCommand( email, password ) );
+            new LoginCommand( userName, password ) );
     }
 
     [Fact]
-    public async Task Login_con_credenciales_validas_retorna_200() {
-        var response = await LoginAsync( "docente@tecoc.edu.co", "Test123*" );
+    public async Task Login_con_usuario_y_contrasena_validos_retorna_200() {
+        var response = await LoginAsync( "docente1", "Test123*" );
 
         Assert.Equal( HttpStatusCode.OK, response.StatusCode );
         var body = await response.Content.ReadFromJsonAsync<LoginResponse>();
         Assert.NotNull( body );
-        Assert.Equal( "docente@tecoc.edu.co", body.Email );
+        Assert.Equal( "docente1", body.UserName );
         Assert.NotEqual( Guid.Empty, body.UserId );
     }
 
     [Fact]
-    public async Task Login_con_password_invalida_retorna_401() {
-        var response = await LoginAsync( "docente@tecoc.edu.co", "MalaClave1" );
+    public async Task Login_con_contrasena_invalida_retorna_401() {
+        var response = await LoginAsync( "docente1", "MalaClave1" );
 
         Assert.Equal( HttpStatusCode.Unauthorized, response.StatusCode );
     }
 
     [Fact]
-    public async Task Login_con_email_inexistente_retorna_401() {
-        var response = await LoginAsync( "nadie@tecoc.edu.co", "Cualquiera1" );
+    public async Task Login_con_usuario_inexistente_retorna_401() {
+        var response = await LoginAsync( "nadie1", "Cualquiera1" );
 
         Assert.Equal( HttpStatusCode.Unauthorized, response.StatusCode );
     }

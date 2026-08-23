@@ -11,7 +11,7 @@ internal sealed class LoginCommandHandler(
 
     public async Task<Result<LoginResponse>> Handle( LoginCommand request, CancellationToken cancellationToken ) {
         var repo = unitOfWork.Repository<User>();
-        var users = await repo.GetAsync( u => u.Email == request.Email, cancellationToken: cancellationToken );
+        var users = await repo.GetAsync( u => u.UserName == request.UserName, cancellationToken: cancellationToken );
         var user = users.FirstOrDefault();
         if (user is null) {
             return Result.Failure<LoginResponse>( new Error( "Auth.InvalidCredentials", "Usuario o contraseña inválidos" ) );
@@ -20,6 +20,6 @@ internal sealed class LoginCommandHandler(
             return Result.Failure<LoginResponse>( new Error( "Auth.InvalidCredentials", "Usuario o contraseña inválidos" ) );
         }
 
-        return Result.Success( new LoginResponse( user.Id, user.Email ) );
+        return Result.Success( new LoginResponse( user.Id, user.UserName, user.Email ) );
     }
 }
