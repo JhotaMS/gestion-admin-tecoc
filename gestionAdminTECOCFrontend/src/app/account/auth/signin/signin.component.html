@@ -163,16 +163,7 @@
               }
             </button>
           </div>
-          <div class="h-1 overflow-hidden rounded-full bg-[#eceef1]">
-            <div
-              class="h-full transition-all duration-300"
-              [style.width.%]="passwordStrength().percent"
-              [style.background]="passwordStrength().color"
-            ></div>
-          </div>
-          <span class="min-h-[14px] text-[11px] tracking-[0.3px] text-tecoc-ink">{{
-            passwordStrength().label
-          }}</span>
+
           @if (submitted() && f.password.errors?.['required']) {
             <span class="text-xs text-red-500">La contraseña es obligatoria</span>
           }
@@ -218,20 +209,6 @@
         }
       </form>
 
-      <div class="flex items-center gap-3.5">
-        <div class="h-px flex-1 bg-tecoc-border"></div>
-        <span class="text-[11px] uppercase tracking-[1.6px] text-tecoc-line">o continúa con</span>
-        <div class="h-px flex-1 bg-tecoc-border"></div>
-      </div>
-
-      <div class="grid grid-cols-3 gap-3">
-        @for (provider of providers; track provider) {
-          <button type="button" class="tecoc-provider-btn" disabled title="Próximamente disponible">
-            {{ provider }}
-          </button>
-        }
-      </div>
-
       <p class="m-0 text-sm text-tecoc-ink">
         ¿No tienes cuenta?
         <a
@@ -241,10 +218,6 @@
         >
       </p>
 
-      <p class="m-0 text-center text-xs text-tecoc-line">
-        Demo: usuario <span class="font-medium text-tecoc-ink">admin@tecoc.local</span> / contraseña
-        <span class="font-medium text-tecoc-ink">admin123</span>
-      </p>
     </div>
   </div>
 </div>

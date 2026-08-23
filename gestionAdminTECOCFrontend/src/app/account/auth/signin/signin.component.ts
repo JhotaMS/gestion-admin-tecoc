@@ -38,8 +38,6 @@ export class SigninComponent {
   readonly showPassword = signal(false);
   readonly remember = signal(true);
 
-  readonly providers = ['Microsoft', 'Google', 'SSO'];
-
   readonly loginForm = this.formBuilder.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
