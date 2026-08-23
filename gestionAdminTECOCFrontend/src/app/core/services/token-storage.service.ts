@@ -12,7 +12,18 @@ export class TokenStorageService {
 
   getUser(): AuthUser | null {
     const raw = localStorage.getItem(USER_KEY);
-    return raw ? (JSON.parse(raw) as AuthUser) : null;
+    if (!raw) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(raw) as AuthUser;
+    } catch {
+      // Sesión corrupta (ej. de una versión anterior del mock): se descarta
+      // en vez de tumbar el arranque de la app.
+      localStorage.removeItem(USER_KEY);
+      return null;
+    }
   }
 
   setSession(token: string, user: AuthUser): void {
