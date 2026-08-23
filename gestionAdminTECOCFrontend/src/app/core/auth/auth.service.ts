@@ -2,7 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { AuthApi } from './auth-api';
-import { AuthUser, LoginRequest, LoginResponse } from '../models/auth.models';
+import { AuthUser, LoginRequest, LoginResponse, RegisterRequest } from '../models/auth.models';
 import { TokenStorageService } from '../services/token-storage.service';
 
 @Injectable({ providedIn: 'root' })
@@ -23,6 +23,10 @@ export class AuthService {
         this.currentUserSignal.set(response.user);
       })
     );
+  }
+
+  register(request: RegisterRequest): Observable<AuthUser> {
+    return this.api.register(request);
   }
 
   logout(): void {
