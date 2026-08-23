@@ -17,7 +17,7 @@
 
 | Campo | Contrato | Regla |
 |---|---|---|
-| Fecha | `scheduledDate` | Formato `yyyy-MM-dd`, no puede ser anterior al día actual |
+| Fecha | `scheduledDate` | Formato `yyyy-MM-dd` |
 | Hora | `scheduledTime` | Formato `HH:mm` (24 horas); se acepta `HH:mm:ss` y se normaliza a `HH:mm` |
 | Tema | `topic` | Texto libre, máximo 200 caracteres |
 | Nivel o unidad del curso | `courseLevel` | Texto libre, máximo 100 caracteres |
@@ -29,12 +29,11 @@
    solicitud e indicar cuál campo tiene el error.
 3. Si la fecha o la hora no cumplen el formato configurado en el sistema, debe
    rechazar la solicitud e indicarlo.
-4. No debe permitir programar una clase en una fecha anterior al día actual.
-5. Si ya existe una clase programada para la misma fecha y hora, NO debe crear un
+4. Si ya existe una clase programada para la misma fecha y hora, NO debe crear un
    duplicado; debe responder indicando el cruce de horario (patrón
    `Result.Failure`, no una excepción).
-6. Si todos los datos son válidos, debe crear y almacenar la clase programada.
-7. Al crear exitosamente, debe devolver la información de la clase programada y
+5. Si todos los datos son válidos, debe crear y almacenar la clase programada.
+6. Al crear exitosamente, debe devolver la información de la clase programada y
    su identificador.
 
 ## Contrato del endpoint
@@ -68,7 +67,6 @@ Respuestas de error:
 |---|---|---|
 | `400` | Campo obligatorio faltante o vacío | `ScheduledClass.ValidationFailed` |
 | `400` | Formato de fecha u hora inválido | `ScheduledClass.ValidationFailed` |
-| `400` | Fecha anterior al día actual | `ScheduledClass.ValidationFailed` |
 | `409` | Ya hay una clase en esa fecha y hora | `ScheduledClass.ScheduleAlreadyTaken` |
 
 Los `400` acumulan en un solo mensaje todos los campos que fallaron, separados por
@@ -140,9 +138,8 @@ REGLAS ESTRICTAS sobre el manejo del repositorio y los commits:
 - **El cruce de horario se valida sobre (fecha, hora)** con un índice único en
   base de datos, bajo el supuesto de un único docente. Cuando el sistema modele
   docente y curso, la restricción debe moverse a (docente, fecha, hora).
-- **La regla de "no programar en el pasado"** usa la zona horaria de Colombia
-  (`SA Pacific Standard Time`), la misma que ya usa `ConvertTimeHelpers` en el
-  resto del proyecto.
+- **Se permiten fechas pasadas.** Se evaluó rechazarlas, pero no está en la
+  historia y bloquea registrar clases ya dictadas.
 - **Las validaciones NO usan FluentValidation**, a diferencia del endpoint de
   usuarios. `ValidationBehavior` lanza `ValidationApplicationException` cuando un
   validador falla, y esa excepción se lanza *después* de que

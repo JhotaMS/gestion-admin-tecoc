@@ -1,6 +1,5 @@
-using gestionAdminTECOCApi.Application.Features.ScheduledClasses.CreateScheduledClass;
+﻿using gestionAdminTECOCApi.Application.Features.ScheduledClasses.CreateScheduledClass;
 using gestionAdminTECOCApi.Domain.Abstractions;
-using gestionAdminTECOCApi.Domain.Helpers;
 using gestionAdminTECOCApi.Domain.Ports;
 using gestionAdminTECOCApi.Domain.ScheduledClasses;
 using NSubstitute;
@@ -18,14 +17,13 @@ public class ScheduledClassCommandHandlerTests {
         _handler = new ScheduledClassCommandHandler( new ScheduledClassService( _unitOfWork ) );
     }
 
-    private static DateOnly FechaFutura()
-        => DateOnly.FromDateTime( DateTime.Now.ZoneByIdPacificStandardTime() ).AddDays( 30 );
+    private static readonly DateOnly _fecha = new( 2026, 9, 15 );
 
-    private static string FechaFuturaTexto()
-        => FechaFutura().ToString( "yyyy-MM-dd" );
+    private static string FechaTexto()
+        => _fecha.ToString( "yyyy-MM-dd" );
 
     private static ScheduledClassCommand ValidCommand() => new(
-        FechaFuturaTexto()
+        FechaTexto()
         , "14:30"
         , "Ecuaciones diferenciales de primer orden"
         , "Unidad 3"
@@ -74,20 +72,16 @@ public class ScheduledClassCommandHandlerTests {
     }
 
     [Fact]
-    public async Task Handle_FechaAnteriorAHoy_RetornaFailureSinGuardar() {
-        string fechaPasada = DateOnly
-            .FromDateTime( DateTime.Now.ZoneByIdPacificStandardTime() )
-            .AddDays( -1 )
-            .ToString( "yyyy-MM-dd" );
+    public async Task Handle_FechaAnteriorAHoy_LaAceptaYGuardaElRegistro() {
+        ExisteProgramacion( false );
 
         Result<ScheduledClassCommandResponse> result = await _handler.Handle(
-            ValidCommand() with { ScheduledDate = fechaPasada }
+            ValidCommand() with { ScheduledDate = "2020-03-15" }
             , CancellationToken.None
         );
 
-        Assert.True( result.IsFailure );
-        Assert.Contains( "no puede ser anterior a la fecha actual", result.Error.Name, StringComparison.Ordinal );
-        await NoSeGuardoNada();
+        Assert.True( result.IsSuccess );
+        Assert.Equal( "2020-03-15", result.Value.ScheduledDate );
     }
 
     [Fact]
@@ -125,7 +119,7 @@ public class ScheduledClassCommandHandlerTests {
             .Received( 1 )
             .AddAsync(
                 Arg.Is<ScheduledClass>( scheduledClass =>
-                    scheduledClass.ScheduledDate == FechaFutura()
+                    scheduledClass.ScheduledDate == _fecha
                     && scheduledClass.ScheduledTime == new TimeOnly( 14, 30 )
                     && scheduledClass.Topic == command.Topic
                     && scheduledClass.CourseLevel == command.CourseLevel
@@ -169,7 +163,7 @@ public class ScheduledClassCommandHandlerTests {
 
         Result<ScheduledClassCommandResponse> result = await _handler.Handle(
             new ScheduledClassCommand(
-                "  " + FechaFuturaTexto() + "  "
+                "  " + FechaTexto() + "  "
                 , "  14:30  "
                 , "  Ecuaciones diferenciales de primer orden  "
                 , "  Unidad 3  "
@@ -178,7 +172,7 @@ public class ScheduledClassCommandHandlerTests {
         );
 
         Assert.True( result.IsSuccess );
-        Assert.Equal( FechaFuturaTexto(), result.Value.ScheduledDate );
+        Assert.Equal( FechaTexto(), result.Value.ScheduledDate );
         Assert.Equal( "14:30", result.Value.ScheduledTime );
         Assert.Equal( "Ecuaciones diferenciales de primer orden", result.Value.Topic );
         Assert.Equal( "Unidad 3", result.Value.CourseLevel );

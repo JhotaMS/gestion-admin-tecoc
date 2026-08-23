@@ -95,19 +95,14 @@ public class ScheduledClassCommandRulesTests {
         Assert.Contains( messages, message => message.Contains( "yyyy-MM-dd", StringComparison.Ordinal ) );
     }
 
-    [Fact]
-    public void Validate_FechaAnteriorAHoy_RetornaMensajeDeFechaPasada() {
+    [Theory]
+    [InlineData( -365 )]
+    [InlineData( -1 )]
+    [InlineData( 0 )]
+    [InlineData( 365 )]
+    public void Validate_CualquierFechaConFormatoValido_NoRetornaMensajes( int dias ) {
         IReadOnlyList<string> messages = ScheduledClassCommandRules.Validate(
-            ValidCommand() with { ScheduledDate = FechaEnDias( -1 ) }
-        );
-
-        Assert.Contains( "La fecha de la clase no puede ser anterior a la fecha actual", messages );
-    }
-
-    [Fact]
-    public void Validate_FechaDeHoy_NoRetornaMensajes() {
-        IReadOnlyList<string> messages = ScheduledClassCommandRules.Validate(
-            ValidCommand() with { ScheduledDate = FechaEnDias( 0 ) }
+            ValidCommand() with { ScheduledDate = FechaEnDias( dias ) }
         );
 
         Assert.Empty( messages );

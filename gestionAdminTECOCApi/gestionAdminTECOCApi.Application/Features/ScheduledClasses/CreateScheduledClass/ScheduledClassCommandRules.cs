@@ -1,5 +1,4 @@
-﻿using gestionAdminTECOCApi.Domain.Helpers;
-using gestionAdminTECOCApi.Domain.ScheduledClasses;
+﻿using gestionAdminTECOCApi.Domain.ScheduledClasses;
 
 namespace gestionAdminTECOCApi.Application.Features.ScheduledClasses.CreateScheduledClass;
 
@@ -40,13 +39,8 @@ public static class ScheduledClassCommandRules {
             return;
         }
 
-        if (!ClassScheduleFormats.TryParseDate( scheduledDate, out DateOnly date )) {
+        if (!ClassScheduleFormats.TryParseDate( scheduledDate, out _ )) {
             messages.Add( ScheduledClassErrors.DateFormatNotAllowed( scheduledDate ).Name );
-            return;
-        }
-
-        if (date < DateOnly.FromDateTime( DateTime.Now.ZoneByIdPacificStandardTime() )) {
-            messages.Add( "La fecha de la clase no puede ser anterior a la fecha actual" );
         }
     }
 
