@@ -1,37 +1,70 @@
 <div
   class="relative flex min-h-screen items-center justify-center overflow-hidden px-6 py-10"
-  style="background: radial-gradient(1200px 700px at 15% 10%, #0073cb 0%, #003892 45%, #00215e 100%);"
+  style="
+    background: radial-gradient(1200px 700px at 15% 10%, #0073cb 0%, #003892 45%, #00215e 100%);
+  "
 >
-  <div class="tecoc-float pointer-events-none absolute left-[6%] top-[8%] h-80 w-80 rounded-full border border-white/10"></div>
-  <div class="tecoc-float-slow pointer-events-none absolute bottom-[6%] right-[10%] h-44 w-44 rounded-full border border-white/10"></div>
+  <div
+    class="tecoc-float pointer-events-none absolute left-[6%] top-[8%] h-80 w-80 rounded-full border border-white/10"
+  ></div>
+  <div
+    class="tecoc-float-slow pointer-events-none absolute bottom-[6%] right-[10%] h-44 w-44 rounded-full border border-white/10"
+  ></div>
 
-  <div class="grid w-full max-w-[1080px] overflow-hidden rounded-md bg-white shadow-[0_40px_80px_-30px_rgba(0,33,94,0.55)] lg:grid-cols-[1.05fr_1fr]">
+  <div
+    class="grid w-full max-w-[1080px] overflow-hidden rounded-md bg-white shadow-[0_40px_80px_-30px_rgba(0,33,94,0.55)] lg:grid-cols-[1.05fr_1fr]"
+  >
     <!-- Brand panel -->
-    <div class="relative hidden min-h-[620px] flex-col justify-between overflow-hidden bg-tecoc-deep p-11 lg:flex">
+    <div
+      class="relative hidden min-h-[620px] flex-col justify-between overflow-hidden bg-tecoc-deep p-11 lg:flex"
+    >
       <div
         class="pointer-events-none absolute inset-0"
-        style="background: repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 14px);"
+        style="
+          background: repeating-linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.05) 0px,
+            rgba(255, 255, 255, 0.05) 2px,
+            transparent 2px,
+            transparent 14px
+          );
+        "
       ></div>
       <div
         class="pointer-events-none absolute inset-0"
-        style="background: linear-gradient(160deg, rgba(0,115,203,0.55) 0%, rgba(0,33,94,0.92) 70%);"
+        style="
+          background: linear-gradient(
+            160deg,
+            rgba(0, 115, 203, 0.55) 0%,
+            rgba(0, 33, 94, 0.92) 70%
+          );
+        "
       ></div>
-      <div class="pointer-events-none absolute -right-20 -top-16 h-[300px] w-[300px] rotate-[20deg] bg-tecoc-blue opacity-35"></div>
+      <div
+        class="pointer-events-none absolute -right-20 -top-16 h-[300px] w-[300px] rotate-[20deg] bg-tecoc-blue opacity-35"
+      ></div>
 
       <div class="relative flex items-center gap-3.5">
         <div class="flex flex-col gap-1.5">
-          <span class="font-narrow text-[40px] font-bold uppercase leading-none tracking-[-0.5px] text-white">Gestión TECOC</span>
-          <span class="text-[11px] uppercase tracking-[3px] text-white/70">Corporación Tecnológica Católica de Occidente</span>
+          <span
+            class="font-narrow text-[40px] font-bold uppercase leading-none tracking-[-0.5px] text-white"
+            >Gestión TECOC</span
+          >
+          <span class="text-[11px] uppercase tracking-[3px] text-white/70"
+            >Corporación Tecnológica Católica de Occidente</span
+          >
         </div>
       </div>
 
       <div class="relative my-10 flex h-[260px] items-center justify-center">
-        <div class="flex h-60 w-60 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_24px_48px_-20px_rgba(0,0,0,0.7)]">
+        <div
+          class="flex h-60 w-60 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_24px_48px_-20px_rgba(0,0,0,0.7)]"
+        >
           <img
             src="tecoc-logo.png"
             alt="Logo TECOC"
             class="h-full w-full object-contain"
-            style="transform: scale(1.62) translateY(-3px);"
+            style="transform: scale(1.62) translateY(-3px)"
           />
         </div>
       </div>
@@ -50,13 +83,17 @@
     <!-- Form panel -->
     <div class="flex flex-col justify-center gap-6 px-8 py-12 sm:px-14 sm:py-14">
       <div>
-        <h1 class="m-0 mb-2 text-[30px] font-bold tracking-[-0.6px] text-tecoc-deep">Bienvenido de nuevo</h1>
+        <h1 class="m-0 mb-2 text-[30px] font-bold tracking-[-0.6px] text-tecoc-deep">
+          Bienvenido de nuevo
+        </h1>
         <p class="m-0 text-sm text-tecoc-ink">Accede con tu cuenta institucional TECOC.</p>
       </div>
 
       <form class="flex flex-col gap-[18px]" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <label class="flex flex-col gap-2">
-          <span class="text-xs font-semibold uppercase tracking-[1.4px] text-tecoc-ink">Correo Electrónico</span>
+          <span class="text-xs font-semibold uppercase tracking-[1.4px] text-tecoc-ink"
+            >Correo Electrónico</span
+          >
           <input
             type="email"
             formControlName="email"
@@ -75,8 +112,12 @@
 
         <div class="flex flex-col gap-2">
           <div class="flex items-baseline justify-between">
-            <span class="text-xs font-semibold uppercase tracking-[1.4px] text-tecoc-ink">Contraseña</span>
-            <a href="#" class="text-xs text-tecoc-blue hover:text-tecoc-navy hover:underline">¿Olvidaste tu contraseña?</a>
+            <span class="text-xs font-semibold uppercase tracking-[1.4px] text-tecoc-ink"
+              >Contraseña</span
+            >
+            <a href="#" class="text-xs text-tecoc-blue hover:text-tecoc-navy hover:underline"
+              >¿Olvidaste tu contraseña?</a
+            >
           </div>
           <div class="relative">
             <input
@@ -95,12 +136,26 @@
               [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
             >
               @if (showPassword()) {
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
                   <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
                   <circle cx="12" cy="12" r="3" />
                 </svg>
               } @else {
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
                   <path
                     d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 4.22-5.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19M1 1l22 22"
                   />
@@ -115,7 +170,9 @@
               [style.background]="passwordStrength().color"
             ></div>
           </div>
-          <span class="min-h-[14px] text-[11px] tracking-[0.3px] text-tecoc-ink">{{ passwordStrength().label }}</span>
+          <span class="min-h-[14px] text-[11px] tracking-[0.3px] text-tecoc-ink">{{
+            passwordStrength().label
+          }}</span>
           @if (submitted() && f.password.errors?.['required']) {
             <span class="text-xs text-red-500">La contraseña es obligatoria</span>
           }
@@ -130,7 +187,14 @@
             aria-label="Mantener la sesión iniciada"
           >
             @if (remember()) {
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+              >
                 <path d="M20 6L9 17l-5-5" />
               </svg>
             }
@@ -146,7 +210,9 @@
         </button>
 
         @if (errorMessage()) {
-          <div class="border-l-[3px] border-tecoc-blue bg-tecoc-tint px-3.5 py-2.5 text-[13px] text-tecoc-deep">
+          <div
+            class="border-l-[3px] border-tecoc-blue bg-tecoc-tint px-3.5 py-2.5 text-[13px] text-tecoc-deep"
+          >
             {{ errorMessage() }}
           </div>
         }
@@ -160,12 +226,19 @@
 
       <div class="grid grid-cols-3 gap-3">
         @for (provider of providers; track provider) {
-          <button type="button" class="tecoc-provider-btn" disabled title="Próximamente disponible">{{ provider }}</button>
+          <button type="button" class="tecoc-provider-btn" disabled title="Próximamente disponible">
+            {{ provider }}
+          </button>
         }
       </div>
 
       <p class="m-0 text-sm text-tecoc-ink">
-        ¿No tienes cuenta? <a routerLink="/register" class="font-semibold text-tecoc-blue hover:text-tecoc-navy hover:underline">Crea tu cuenta</a>
+        ¿No tienes cuenta?
+        <a
+          routerLink="/register"
+          class="font-semibold text-tecoc-blue hover:text-tecoc-navy hover:underline"
+          >Crea tu cuenta</a
+        >
       </p>
 
       <p class="m-0 text-center text-xs text-tecoc-line">
