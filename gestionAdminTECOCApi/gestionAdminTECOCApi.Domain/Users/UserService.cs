@@ -12,7 +12,7 @@ public class UserService(
         User user,
         CancellationToken cancellationToken
     ) {
-        ArgumentNullException.ThrowIfNull( nameof( user ) );
+        ArgumentNullException.ThrowIfNull( user );
 
         await unitOfWork.Repository<User>()
             .AddAsync( user, cancellationToken );

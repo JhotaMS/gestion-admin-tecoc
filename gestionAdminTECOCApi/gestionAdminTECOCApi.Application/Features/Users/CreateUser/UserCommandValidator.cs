@@ -22,7 +22,7 @@ public sealed class UserCommandValidator : AbstractValidator<UserCommand> {
             .NotEmpty()
             .WithMessage( "El tipo de documento es obligatorio" )
             .Must( documentType => DocumentTypeCodes.IsAllowed( documentType ) )
-            .WithMessage( command => $"El tipo de documento '{command.DocumentType}' no es un valor válido configurado en el sistema. Los valores permitidos son: {string.Join( ", ", DocumentTypeCodes.AllowedCodes )}" );
+            .WithMessage( command => UserErrors.DocumentTypeNotAllowed( command.DocumentType ).Name );
 
         RuleFor( command => command.DocumentNumber )
             .Cascade( CascadeMode.Stop )
