@@ -1,7 +1,7 @@
 using gestionAdminTECOCApi.Api.Errors;
 using gestionAdminTECOCApi.Application.Features.Users.CreateUser;
-using gestionAdminTECOCApi.Application.Features.Users.UpdateUser;
 using gestionAdminTECOCApi.Application.Features.Users.GetAllUsers;
+using gestionAdminTECOCApi.Application.Features.Users.UpdateUser;
 using gestionAdminTECOCApi.Application.Messaging;
 using gestionAdminTECOCApi.Domain.Abstractions;
 using gestionAdminTECOCApi.Domain.Helpers;
