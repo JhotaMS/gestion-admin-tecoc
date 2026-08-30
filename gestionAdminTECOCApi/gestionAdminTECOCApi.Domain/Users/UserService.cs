@@ -45,4 +45,35 @@ public class UserService( IUnitOfWork unitOfWork ) {
                 && user.DocumentNumber == documentNumber,
             cancellationToken
         );
+
+    public async Task<bool> ExistsByDocumentExcludingUserAsync(
+        Guid userId,
+        DocumentType documentType,
+        string documentNumber,
+        CancellationToken cancellationToken
+    ) => await unitOfWork.Repository<User>()
+        .Exitst(
+            user => user.Id != userId
+                && user.DocumentType == documentType
+                && user.DocumentNumber == documentNumber,
+            cancellationToken
+        );
+
+    public async Task<User> GetByIdAsync(
+        Guid userId,
+        CancellationToken cancellationToken
+    ) => await unitOfWork.Repository<User>()
+        .GetByAsync( user => user.Id == userId, disableTracking: false, cancellationToken );
+
+    public Task UpdateUserAsync(
+        User user,
+        CancellationToken cancellationToken
+    ) {
+        ArgumentNullException.ThrowIfNull( user );
+
+        // El UnitOfWorkBehevior del pipeline hace el SaveChangesAsync tras el Handle.
+        unitOfWork.Repository<User>().Update( user );
+
+        return Task.CompletedTask;
+    }
 }

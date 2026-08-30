@@ -56,5 +56,11 @@ internal sealed class UserConfiguration
         builder
             .HasIndex( index => index.Email )
             .IsUnique();
+
+        builder
+            .HasOne( user => user.Group )
+            .WithMany()
+            .HasForeignKey( user => user.GroupId )
+            .OnDelete( DeleteBehavior.SetNull );
     }
 }

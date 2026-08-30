@@ -1,6 +1,4 @@
 ﻿using FluentValidation;
-using FluentValidation.Results;
-using gestionAdminTECOCApi.Application.Exceptions;
 using MediatR;
 
 namespace gestionAdminTECOCApi.Application.Abstractions.Behaviors;
@@ -16,20 +14,6 @@ public class ValidationBehavior<TRequest, TResponse>(
         CancellationToken cancellationToken
     ) {
 
-        if (_validators.Any()) {
-            ValidationContext<TRequest> context = new( request );
-            var validationResult = await Task.WhenAll(
-                _validators.Select( v => v.ValidateAsync( context, cancellationToken ) ) );
-
-            List<ValidationFailure> failures = validationResult
-                .SelectMany( r => r.Errors )
-                .Where( f => f != null )
-                .ToList();
-
-            if (failures.Count != 0) {
-                throw new ValidationApplicationException( failures );
-            }
-        }
         return await next();
     }
 }

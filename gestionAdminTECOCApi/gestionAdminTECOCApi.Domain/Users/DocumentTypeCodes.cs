@@ -9,6 +9,13 @@ public static class DocumentTypeCodes {
             ["NIT"] = DocumentType.NumeroIdentificacionTributaria
         };
 
+    private static readonly Dictionary<DocumentType, string> _descriptions = new() {
+        [DocumentType.CedulaCiudadania] = "Cédula de ciudadanía",
+        [DocumentType.CedulaExtranjeria] = "Cédula de extranjería",
+        [DocumentType.TarjetaIdentidad] = "Tarjeta de identidad",
+        [DocumentType.NumeroIdentificacionTributaria] = "Número de identificación tributaria"
+    };
+
     public static IReadOnlyCollection<string> AllowedCodes => _documentTypes.Keys;
 
     public static bool IsAllowed( string? code )
@@ -26,4 +33,7 @@ public static class DocumentTypeCodes {
         => _documentTypes
         .First( documentTypeCode => documentTypeCode.Value == documentType )
         .Key;
+
+    public static string ToDescription( DocumentType documentType )
+        => _descriptions[documentType];
 }

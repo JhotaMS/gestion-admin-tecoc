@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
   useMockApi: false,
-  apiBaseUrl: '/api',
+  apiBaseUrl: 'https://localhost:7092',
   signalRHubUrl: '/hubs/notifications',
 };

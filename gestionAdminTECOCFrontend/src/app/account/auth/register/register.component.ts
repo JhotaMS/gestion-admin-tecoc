@@ -1,8 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { switchMap } from 'rxjs';
-import { AuthService } from '../../../core/auth/auth.service';
 import { UserRegistrationApi } from '../../../core/users/user-registration-api';
 import { DOCUMENT_TYPE_OPTIONS, DocumentTypeCode } from '../../../core/models/user-registration.models';
 
@@ -25,7 +23,6 @@ const STRENGTH_LABELS = ['', 'Contraseña débil', 'Contraseña aceptable', 'Con
 export class RegisterComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
-  private readonly authService = inject(AuthService);
   private readonly userRegistrationApi = inject(UserRegistrationApi);
 
   readonly documentTypeOptions = DOCUMENT_TYPE_OPTIONS;
@@ -124,16 +121,6 @@ export class RegisterComponent {
         email: email ?? '',
         password: password ?? '',
       })
-      .pipe(
-        switchMap(() =>
-          this.authService.register({
-            fullName: fullName ?? '',
-            username: username ?? '',
-            email: email ?? '',
-            password: password ?? '',
-          }),
-        ),
-      )
       .subscribe({
         next: () => {
           this.loading.set(false);
