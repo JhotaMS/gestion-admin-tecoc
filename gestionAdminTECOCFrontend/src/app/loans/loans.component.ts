@@ -93,6 +93,11 @@ export class LoansComponent implements OnInit {
     { key: 'regular', label: 'Regular' },
     { key: 'bueno', label: 'Bueno' },
   ];
+  readonly roleOptions: RequesterRole[] = ['Estudiante', 'Docente'];
+  readonly editStatusOptions = STATUS_FILTERS.filter((option) => option.key !== 'todos') as {
+    key: LoanStatus;
+    label: string;
+  }[];
   readonly minPickupDate = todayIso();
 
   readonly loading = signal(true);
@@ -127,6 +132,21 @@ export class LoansComponent implements OnInit {
   readonly newLoanSubmitted = signal(false);
   readonly newLoanSubmitting = signal(false);
   readonly newLoanMessage = signal<string | null>(null);
+
+  // Modal "Eliminar por ID"
+  readonly deleteModalOpen = signal(false);
+  readonly deleteIdInput = signal('');
+  readonly deleteSubmitting = signal(false);
+
+  // Modal "Editar solicitud"
+  readonly editingLoan = signal<LoanRequest | null>(null);
+  readonly editSaving = signal(false);
+
+  readonly deleteMatch = computed<LoanRequest | null>(() => {
+    const id = this.deleteIdInput().trim();
+    if (!id) return null;
+    return this.loans().find((loan) => loan.id === id) ?? null;
+  });
 
   readonly filteredLoans = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
@@ -214,6 +234,68 @@ export class LoansComponent implements OnInit {
       return BLUE;
     }
     return SUCCESS;
+  }
+
+  openDeleteModal(): void {
+    this.deleteIdInput.set('');
+    this.deleteModalOpen.set(true);
+  }
+
+  closeDeleteModal(): void {
+    this.deleteModalOpen.set(false);
+  }
+
+  setDeleteIdInput(value: string): void {
+    this.deleteIdInput.set(value.replace(/[^0-9]/g, ''));
+  }
+
+  confirmDeleteById(): void {
+    const match = this.deleteMatch();
+    if (!match) return;
+
+    this.deleteSubmitting.set(true);
+    this.loansApi.deleteLoan(match.id).subscribe({
+      next: () => {
+        this.loans.update((list) => list.filter((loan) => loan.id !== match.id));
+        if (this.selectedLoanId() === match.id) {
+          this.selectedLoanId.set(this.loans()[0]?.id ?? null);
+        }
+        this.deleteSubmitting.set(false);
+        this.deleteModalOpen.set(false);
+      },
+      error: () => {
+        this.deleteSubmitting.set(false);
+      },
+    });
+  }
+
+  openEditLoan(loan: LoanRequest): void {
+    this.editingLoan.set({ ...loan });
+  }
+
+  closeEditLoan(): void {
+    this.editingLoan.set(null);
+  }
+
+  updateEditingLoanField<K extends keyof LoanRequest>(field: K, value: LoanRequest[K]): void {
+    this.editingLoan.update((loan) => (loan ? { ...loan, [field]: value } : loan));
+  }
+
+  saveEditLoan(): void {
+    const loan = this.editingLoan();
+    if (!loan || !loan.itemName.trim() || !loan.requesterName.trim()) return;
+
+    this.editSaving.set(true);
+    this.loansApi.updateLoan(loan).subscribe({
+      next: (updated) => {
+        this.loans.update((list) => list.map((current) => (current.id === updated.id ? updated : current)));
+        this.editSaving.set(false);
+        this.editingLoan.set(null);
+      },
+      error: () => {
+        this.editSaving.set(false);
+      },
+    });
   }
 
   initials(name: string): string {

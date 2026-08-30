@@ -62,3 +62,13 @@ export interface NewLoanRequest {
   pickupTime: string;
   note?: string;
 }
+
+export interface UpdateLoanRequest {
+  id: string;
+  itemName: string;
+  itemCode: string;
+  requesterName: string;
+  requesterRole: string;
+  status: LoanStatus;
+  condition: ItemCondition;
+}
