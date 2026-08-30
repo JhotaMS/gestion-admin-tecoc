@@ -39,6 +39,16 @@ export class AttendanceComponent implements OnInit {
 
   readonly durationOptions = [4, 8];
 
+  // Selección visual de contexto académico (Programa/Semestre/Materia). No filtra datos:
+  // el backend real de asistencias todavía no expone estos catálogos.
+  readonly programOptions = ['Ingeniería de Sistemas', 'Administración de Empresas', 'Contaduría Pública'];
+  readonly semesterOptions = ['1° semestre', '2° semestre', '3° semestre', '4° semestre', '5° semestre', '6° semestre', '7° semestre', '8° semestre'];
+  readonly subjectOptions = ['Matemáticas', 'Programación I', 'Bases de Datos', 'Física'];
+
+  readonly selectedProgram = signal(this.programOptions[0]);
+  readonly selectedSemester = signal('8° semestre');
+  readonly selectedSubject = signal(this.subjectOptions[0]);
+
   readonly loading = signal(true);
   readonly groupName = signal('');
   readonly subjectName = signal('');
@@ -54,6 +64,13 @@ export class AttendanceComponent implements OnInit {
   readonly editDuration = signal(4);
   readonly editSubmitting = signal(false);
   readonly editSubmitted = signal(false);
+
+  readonly newSessionModalOpen = signal(false);
+  readonly newSessionLabel = signal('');
+  readonly newSessionDay = signal('');
+  readonly newSessionDuration = signal(4);
+  readonly newSessionSubmitting = signal(false);
+  readonly newSessionSubmitted = signal(false);
 
   readonly confirmingDelete = signal(false);
   readonly deleting = signal(false);
@@ -105,6 +122,10 @@ export class AttendanceComponent implements OnInit {
     return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase();
   }
 
+  sessionOptionLabel(session: ClassSession): string {
+    return `${session.label} · ${session.day} · ${session.duration}h`;
+  }
+
   selectSession(sessionId: string): void {
     this.selectedSessionId.set(sessionId);
     this.saveNote.set(null);
@@ -143,24 +164,45 @@ export class AttendanceComponent implements OnInit {
     this.saveNote.set(null);
   }
 
-  markComplete(index: number): void {
-    const session = this.selectedSession();
-    if (session) this.setHours(index, String(session.duration));
+  openAddSessionModal(): void {
+    this.newSessionLabel.set('');
+    this.newSessionDay.set('');
+    this.newSessionDuration.set(4);
+    this.newSessionSubmitted.set(false);
+    this.newSessionModalOpen.set(true);
   }
 
-  markAbsent(index: number): void {
-    this.setHours(index, '0');
+  closeAddSessionModal(): void {
+    this.newSessionModalOpen.set(false);
   }
 
-  addSession(): void {
-    const nextNumber = this.sessions().length + 1;
+  setNewSessionDuration(duration: number): void {
+    this.newSessionDuration.set(duration);
+  }
+
+  submitNewSession(): void {
+    this.newSessionSubmitted.set(true);
+
+    const label = this.newSessionLabel().trim();
+    const day = this.newSessionDay().trim();
+    if (!label || !day) return;
+
+    this.newSessionSubmitting.set(true);
     this.attendanceApi
-      .addSession({ label: 'Nueva', day: `Fecha ${nextNumber}`, duration: 4 })
-      .subscribe((created) => {
-        this.sessions.update((sessions) => [...sessions, created]);
-        this.lastSaved = cloneSessions(this.sessions());
-        this.selectedSessionId.set(created.id);
-        this.saveNote.set('Nueva fecha creada con jornada de 4 horas.');
+      .addSession({ label, day, duration: this.newSessionDuration() })
+      .subscribe({
+        next: (created) => {
+          this.sessions.update((sessions) => [...sessions, created]);
+          this.lastSaved = cloneSessions(this.sessions());
+          this.selectedSessionId.set(created.id);
+          this.newSessionSubmitting.set(false);
+          this.newSessionModalOpen.set(false);
+          this.saveNote.set(`Fecha "${label} ${day}" creada correctamente.`);
+        },
+        error: () => {
+          this.newSessionSubmitting.set(false);
+          this.saveNote.set('No fue posible crear la fecha. Intenta nuevamente.');
+        },
       });
   }
 

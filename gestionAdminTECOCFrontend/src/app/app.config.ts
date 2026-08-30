@@ -28,7 +28,6 @@ export const appConfig: ApplicationConfig = {
     // Swap these for real HttpClient-backed implementations once the backend is ready.
     { provide: AuthApi, useClass: AuthHttpApi },
     { provide: DashboardApi, useClass: DashboardMockApi },
-    // Estos sí hablan con el backend real (no tienen mock): v1/User.
     { provide: UsersApi, useClass: UsersHttpApi },
     { provide: UserRegistrationApi, useClass: UserRegistrationHttpApi },
     { provide: ImplementosApi, useClass: ImplementosHttpApi },
