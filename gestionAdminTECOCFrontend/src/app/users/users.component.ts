@@ -4,6 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { UsersApi } from './users-api';
 import { UserAccount } from './users.models';
 
+const DOCUMENT_TYPE_LABELS: Record<string, string> = {
+  CC: 'Cédula de ciudadanía',
+  CE: 'Cédula de extranjería',
+  TI: 'Tarjeta de identidad',
+  NIT: 'Número de identificación tributaria',
+};
+
 @Component({
   selector: 'app-users',
   standalone: true,
@@ -16,6 +23,10 @@ export class UsersComponent implements OnInit {
   readonly loading = signal(true);
   readonly users = signal<UserAccount[]>([]);
   readonly searchTerm = signal('');
+
+  // Modal "Detalle de usuario"
+  readonly detailsModalOpen = signal(false);
+  readonly selectedUser = signal<UserAccount | null>(null);
 
   readonly filteredUsers = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
@@ -65,5 +76,18 @@ export class UsersComponent implements OnInit {
 
   onSearchInput(value: string): void {
     this.searchTerm.set(value);
+  }
+
+  documentTypeLabel(code: string): string {
+    return DOCUMENT_TYPE_LABELS[code] ?? code;
+  }
+
+  openUserDetails(user: UserAccount): void {
+    this.selectedUser.set(user);
+    this.detailsModalOpen.set(true);
+  }
+
+  closeUserDetails(): void {
+    this.detailsModalOpen.set(false);
   }
 }
