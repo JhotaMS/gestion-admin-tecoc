@@ -8,347 +8,200 @@ using gestionAdminTECOCApi.Infrastructure.PostgreSql.Persistence;
 
 #nullable disable
 
-namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
-{
-    [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
-    {
-        protected override void BuildModel(ModelBuilder modelBuilder)
-        {
+namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations {
+    [DbContext( typeof( ApplicationDbContext ) )]
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot {
+        protected override void BuildModel( ModelBuilder modelBuilder ) {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("gestionAdminTECOCApiMS")
-                .HasAnnotation("ProductVersion", "8.0.10")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasDefaultSchema( "gestionAdminTECOCApiMS" )
+                .HasAnnotation( "ProductVersion", "8.0.10" )
+                .HasAnnotation( "Relational:MaxIdentifierLength", 63 );
 
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns( modelBuilder );
+
+            modelBuilder.Entity( "gestionAdminTECOCApi.Domain.DocumentTypes.DocumentTypeEntity", b =>
+            {
+                b.Property<Guid>( "Id" )
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType( "uuid" );
 
-            modelBuilder.Entity("gestionAdminTECOCApi.Domain.DocumentTypes.DocumentTypeEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                b.Property<string>( "Code" )
+                    .IsRequired()
+                    .HasMaxLength( 20 )
+                    .HasColumnType( "character varying(20)" );
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                b.Property<string>( "Description" )
+                    .IsRequired()
+                    .HasMaxLength( 100 )
+                    .HasColumnType( "character varying(100)" );
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                b.Property<bool>( "Enabled" )
+                    .HasColumnType( "boolean" );
 
-                    b.Property<bool>("Enabled")
-                        .HasColumnType("boolean");
+                b.HasKey( "Id" );
 
-                    b.HasKey("Id");
+                b.HasIndex( "Code" )
+                    .IsUnique();
 
-                    b.HasIndex("Code")
-                        .IsUnique();
+                b.ToTable( "DocumentTypes", "gestionAdminTECOCApiMS" );
+            } );
 
-                    b.ToTable("DocumentTypes", "gestionAdminTECOCApiMS");
-                });
+            modelBuilder.Entity( "gestionAdminTECOCApi.Domain.ScheduledClasses.ScheduledClass", b =>
+            {
+                b.Property<Guid>( "Id" )
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType( "uuid" );
 
-            modelBuilder.Entity("gestionAdminTECOCApi.Domain.Groups.Group", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                b.Property<string>( "CourseLevel" )
+                    .IsRequired()
+                    .HasMaxLength( 100 )
+                    .HasColumnType( "character varying(100)" );
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
+                b.Property<bool>( "Enabled" )
+                    .HasColumnType( "boolean" );
 
-                    b.Property<bool>("Enabled")
-                        .HasColumnType("boolean");
+                b.Property<DateOnly>( "ScheduledDate" )
+                    .HasColumnType( "date" );
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                b.Property<TimeOnly>( "ScheduledTime" )
+                    .HasColumnType( "time without time zone" );
 
-                    b.HasKey("Id");
+                b.Property<string>( "Topic" )
+                    .IsRequired()
+                    .HasMaxLength( 200 )
+                    .HasColumnType( "character varying(200)" );
 
-                    b.HasIndex("Code")
-                        .IsUnique();
+                b.HasKey( "Id" );
 
-                    b.ToTable("Groups", "gestionAdminTECOCApiMS");
-                });
+                b.HasIndex( "ScheduledDate", "ScheduledTime" )
+                    .IsUnique();
 
-            modelBuilder.Entity("gestionAdminTECOCApi.Domain.Loans.Implemento", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                b.ToTable( "ScheduledClasses", "gestionAdminTECOCApiMS" );
+            } );
 
-                    b.Property<string>("Codigo")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
+            modelBuilder.Entity( "gestionAdminTECOCApi.Domain.Users.User", b =>
+            {
+                b.Property<Guid>( "Id" )
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType( "uuid" );
 
-                    b.Property<string>("Descripcion")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                b.Property<string>( "DocumentNumber" )
+                    .IsRequired()
+                    .HasMaxLength( 15 )
+                    .HasColumnType( "character varying(15)" );
 
-                    b.Property<bool>("Enabled")
-                        .HasColumnType("boolean");
+                b.Property<string>( "DocumentType" )
+                    .IsRequired()
+                    .HasMaxLength( 40 )
+                    .HasColumnType( "character varying(40)" );
 
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
+                b.Property<string>( "Email" )
+                    .IsRequired()
+                    .HasMaxLength( 150 )
+                    .HasColumnType( "character varying(150)" );
 
-                    b.HasKey("Id");
+                b.Property<bool>( "Enabled" )
+                    .HasColumnType( "boolean" );
 
-                    b.HasIndex("Codigo")
-                        .IsUnique();
+                b.Property<string>( "FullName" )
+                    .IsRequired()
+                    .HasMaxLength( 150 )
+                    .HasColumnType( "character varying(150)" );
 
-                    b.ToTable("Implementos", "gestionAdminTECOCApiMS");
-                });
+                b.Property<Guid?>( "GroupId" )
+                    .HasColumnType( "uuid" );
 
-            modelBuilder.Entity("gestionAdminTECOCApi.Domain.Loans.ImplementoPrestado", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                b.Property<string>( "PasswordHash" )
+                    .IsRequired()
+                    .HasMaxLength( 200 )
+                    .HasColumnType( "character varying(200)" );
 
-                    b.Property<bool>("Enabled")
-                        .HasColumnType("boolean");
+                b.Property<string>( "UserName" )
+                    .IsRequired()
+                    .HasMaxLength( 50 )
+                    .HasColumnType( "character varying(50)" );
 
-                    b.Property<string>("EstadoTipo")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                b.HasKey( "Id" );
 
-                    b.Property<DateTime>("FechaFin")
-                        .HasColumnType("timestamp with time zone");
+                b.HasIndex( "Email" )
+                    .IsUnique();
 
-                    b.Property<DateTime>("FechaInicio")
-                        .HasColumnType("timestamp with time zone");
+                b.HasIndex( "GroupId" );
 
-                    b.Property<Guid>("ImplementoId")
-                        .HasColumnType("uuid");
+                b.HasIndex( "UserName" )
+                    .IsUnique();
 
-                    b.Property<string>("Observacion")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                b.HasIndex( "DocumentType", "DocumentNumber" )
+                    .IsUnique();
 
-                    b.Property<int>("TipoRevisionId")
-                        .HasColumnType("integer");
+                b.ToTable( "Users", "gestionAdminTECOCApiMS" );
+            } );
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+            modelBuilder.Entity( "gestionAdminTECOCApi.Domain.WeatherForecasts.WeatherForecast", b =>
+            {
+                b.Property<Guid>( "Id" )
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType( "uuid" );
 
-                    b.HasKey("Id");
+                b.Property<DateOnly>( "Date" )
+                    .HasColumnType( "date" );
 
-                    b.HasIndex("FechaInicio");
+                b.Property<bool>( "Enabled" )
+                    .HasColumnType( "boolean" );
 
-                    b.HasIndex("ImplementoId");
+                b.Property<string>( "Summary" )
+                    .HasColumnType( "text" );
 
-                    b.HasIndex("UserId");
+                b.Property<int>( "Temperature" )
+                    .HasColumnType( "integer" );
 
-                    b.ToTable("ImplementosPrestados", "gestionAdminTECOCApiMS");
-                });
+                b.Property<int>( "TemperatureC" )
+                    .HasColumnType( "integer" );
 
-            modelBuilder.Entity("gestionAdminTECOCApi.Domain.Loans.TipoRevision", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
+                b.HasKey( "Id" );
 
-                    b.Property<string>("Descripcion")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                b.ToTable( "WeatherForecasts", "gestionAdminTECOCApiMS" );
+            } );
 
-                    b.Property<bool>("Enabled")
-                        .HasColumnType("boolean");
+            modelBuilder.Entity( "gestionAdminTECOCApi.Domain.WeatherForecastsHistories.WeatherForecastsHistory", b =>
+            {
+                b.Property<Guid>( "Id" )
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType( "uuid" );
 
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                b.Property<string>( "CreatedByUser" )
+                    .HasColumnType( "text" );
 
-                    b.HasKey("Id");
+                b.Property<DateOnly?>( "CreatedDate" )
+                    .HasColumnType( "date" );
 
-                    b.ToTable("TiposRevision", "gestionAdminTECOCApiMS");
+                b.Property<bool>( "Enabled" )
+                    .HasColumnType( "boolean" );
 
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Descripcion = "Revisión al inicio del préstamo del implemento",
-                            Enabled = true,
-                            Nombre = "Inicio Préstamo"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Descripcion = "Revisión al finalizar el préstamo del implemento",
-                            Enabled = true,
-                            Nombre = "Fin Préstamo"
-                        });
-                });
+                b.Property<string>( "LastModifiedByUser" )
+                    .HasColumnType( "text" );
 
-            modelBuilder.Entity("gestionAdminTECOCApi.Domain.Prestamos.Prestamo", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                b.Property<DateOnly?>( "LastModifiedDate" )
+                    .HasColumnType( "date" );
 
-                    b.Property<bool>("Enabled")
-                        .HasColumnType("boolean");
+                b.Property<string>( "Proccess" )
+                    .HasColumnType( "text" );
 
-                    b.Property<string>("EstadoTipo")
-                        .IsRequired()
-                        .HasColumnType("text");
+                b.HasKey( "Id" );
 
-                    b.Property<DateTime>("Fin")
-                        .HasColumnType("timestamp with time zone");
+                b.ToTable( "WeatherForecastsHistories", "gestionAdminTECOCApiMS" );
+            } );
 
-                    b.Property<Guid>("ImplementoId")
-                        .HasColumnType("uuid");
+            modelBuilder.Entity( "gestionAdminTECOCApi.Domain.Users.User", b =>
+            {
+                b.HasOne( "gestionAdminTECOCApi.Domain.Groups.Group", "Group" )
+                    .WithMany()
+                    .HasForeignKey( "GroupId" )
+                    .OnDelete( DeleteBehavior.SetNull );
 
-                    b.Property<DateTime>("Inicio")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Observacion")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("TipoRevisionId")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("UuserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Prestamos", "gestionAdminTECOCApiMS");
-                });
-
-            modelBuilder.Entity("gestionAdminTECOCApi.Domain.Users.User", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("DocumentNumber")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("character varying(15)");
-
-                    b.Property<string>("DocumentType")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("character varying(40)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
-
-                    b.Property<bool>("Enabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
-
-                    b.Property<Guid?>("GroupId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("GroupId");
-
-                    b.HasIndex("UserName")
-                        .IsUnique();
-
-                    b.HasIndex("DocumentType", "DocumentNumber")
-                        .IsUnique();
-
-                    b.ToTable("Users", "gestionAdminTECOCApiMS");
-                });
-
-            modelBuilder.Entity("gestionAdminTECOCApi.Domain.WeatherForecasts.WeatherForecast", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
-                    b.Property<bool>("Enabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Summary")
-                        .HasColumnType("text");
-
-                    b.Property<int>("Temperature")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TemperatureC")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("WeatherForecasts", "gestionAdminTECOCApiMS");
-                });
-
-            modelBuilder.Entity("gestionAdminTECOCApi.Domain.WeatherForecastsHistories.WeatherForecastsHistory", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("CreatedByUser")
-                        .HasColumnType("text");
-
-                    b.Property<DateOnly?>("CreatedDate")
-                        .HasColumnType("date");
-
-                    b.Property<bool>("Enabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("LastModifiedByUser")
-                        .HasColumnType("text");
-
-                    b.Property<DateOnly?>("LastModifiedDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Proccess")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("WeatherForecastsHistories", "gestionAdminTECOCApiMS");
-                });
-
-            modelBuilder.Entity("gestionAdminTECOCApi.Domain.Users.User", b =>
-                {
-                    b.HasOne("gestionAdminTECOCApi.Domain.Groups.Group", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Group");
-                });
+                b.Navigation( "Group" );
+            } );
 #pragma warning restore 612, 618
         }
     }

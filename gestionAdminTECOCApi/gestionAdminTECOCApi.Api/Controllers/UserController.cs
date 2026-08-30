@@ -85,7 +85,7 @@ public class UserController(
             );
         }
 
-        return StatusCode( (int)HttpStatusCode.OK, result.Value );
+        return Ok( result.Value );
     }
 
     [HttpGet()]

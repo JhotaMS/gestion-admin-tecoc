@@ -19,5 +19,4 @@ export interface UpdateUserAccountRequest {
   id: string;
   name: string;
   email: string;
-  enabled: boolean;
 }

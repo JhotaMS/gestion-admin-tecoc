@@ -1,4 +1,5 @@
-﻿using gestionAdminTECOCApi.Domain.DomainService;
+﻿using gestionAdminTECOCApi.Domain.Abstractions;
+using gestionAdminTECOCApi.Domain.DomainService;
 using gestionAdminTECOCApi.Domain.Ports;
 
 namespace gestionAdminTECOCApi.Domain.Users;
@@ -7,6 +8,31 @@ namespace gestionAdminTECOCApi.Domain.Users;
 public class UserService(
     IUnitOfWork unitOfWork
 ) {
+
+    public async Task<Result> DeleteUserAsync(
+            Guid id,
+            CancellationToken cancellationToken
+        ) {
+        User user = await unitOfWork.Repository<User>().GetByAsync(
+            u => u.Id == id,
+            disableTracking: false,
+            cancellationToken
+        );
+
+        if (user is null) {
+            return Result.Failure( UserErrors.NotFound( id ) );
+        }
+
+        if (!user.Enabled) {
+            return Result.Failure( UserErrors.NotFound( id ) );
+        }
+
+        user.Disable();
+
+        await unitOfWork.Repository<User>().UpdateAsync( user );
+
+        return Result.Success();
+    }
 
     public async Task<Guid> CreateUserAsync(
         User user,

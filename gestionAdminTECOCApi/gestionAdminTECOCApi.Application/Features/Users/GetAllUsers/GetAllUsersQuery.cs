@@ -16,7 +16,7 @@ public record UserSummaryDto(
     string FullName,
     string UserName,
     string Email,
-    DocumentType DocumentType,
+    string DocumentType,
     string DocumentNumber,
     bool Enabled,
     GroupDto? Group
@@ -51,7 +51,7 @@ internal sealed class GetAllUsersQueryHandler(
                 u.FullName,
                 u.UserName,
                 u.Email,
-                u.DocumentType,
+                DocumentTypeCodes.ToDescription( u.DocumentType ),
                 u.DocumentNumber,
                 u.Enabled,
                 u.Group is null
