@@ -1,11 +1,12 @@
-using System.Net;
-using System.Net.Http.Json;
 using gestionAdminTECOCApi.Application.Features.Users.CreateUser;
 using gestionAdminTECOCApi.Application.Features.Users.GetAllUsers;
+using gestionAdminTECOCApi.Domain.Users;
 using gestionAdminTECOCApi.Infrastructure.PostgreSql.Persistence;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net;
+using System.Net.Http.Json;
 
 namespace gestionAdminTECOCApi.Api.Tests.Integration;
 
@@ -17,7 +18,8 @@ public class GetAllUsersTests : IClassFixture<WebApplicationFactory<Program>> {
             builder.ConfigureServices( services => {
                 var descriptor = services.SingleOrDefault(
                     d => d.ServiceType == typeof( DbContextOptions<ApplicationDbContext> ) );
-                if (descriptor is not null) services.Remove( descriptor );
+                if (descriptor is not null)
+                    services.Remove( descriptor );
                 services.AddDbContext<ApplicationDbContext>( options =>
                     options.UseInMemoryDatabase( "tecoc-getallusers-tests" ) );
             } );
@@ -50,7 +52,7 @@ public class GetAllUsersTests : IClassFixture<WebApplicationFactory<Program>> {
         Assert.Contains( body!.Users, u =>
             u.FullName == "Camila Restrepo"
             && u.UserName == "crestrepo"
-            && u.DocumentType == "CC"
+            && u.DocumentType == DocumentType.CedulaCiudadania
             && u.DocumentNumber == "1094567890"
             && u.Email == "camila.restrepo@example.com" );
     }

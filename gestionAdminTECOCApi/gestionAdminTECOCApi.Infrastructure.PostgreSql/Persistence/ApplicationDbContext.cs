@@ -1,4 +1,5 @@
 ﻿using gestionAdminTECOCApi.Domain.DocumentTypes;
+using gestionAdminTECOCApi.Domain.Loans;
 using gestionAdminTECOCApi.Domain.Prestamos;
 using gestionAdminTECOCApi.Domain.Users;
 using gestionAdminTECOCApi.Domain.WeatherForecasts;
