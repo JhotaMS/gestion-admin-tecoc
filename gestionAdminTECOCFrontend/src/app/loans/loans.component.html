@@ -243,33 +243,41 @@
 
         <label class="mb-3.5 block">
           <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
-            >Usuario</span
+            >Préstamo</span
           >
           <select
             class="w-full rounded-md border border-tecoc-line bg-white px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
-            [ngModel]="selectedTeacherId()"
-            (ngModelChange)="selectedTeacherId.set($event)"
+            [ngModel]="selectedLoanId()"
+            (ngModelChange)="selectLoan($event)"
           >
-            @for (teacher of teachers(); track teacher.id) {
-              <option [value]="teacher.name">{{ teacher.name }}</option>
+            <option value="" disabled>Selecciona un préstamo…</option>
+            @for (loan of loans(); track loan.id) {
+              <option [value]="loan.id">
+                {{ loan.requesterName }} · {{ loan.itemName }} ({{ loan.itemCode }})
+              </option>
+            } @empty {
+              <option value="" disabled>No hay préstamos registrados</option>
             }
           </select>
         </label>
 
-        <label class="mb-3.5 block">
-          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
-            >Implemento</span
+        @if (selectedLoan(); as loan) {
+          <div
+            class="mb-3.5 flex items-center justify-between rounded-md bg-slate-50 px-3 py-2 text-[11px]"
           >
-          <select
-            class="w-full rounded-md border border-tecoc-line bg-white px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
-            [ngModel]="selectedItemCode()"
-            (ngModelChange)="selectedItemCode.set($event)"
-          >
-            @for (item of catalog(); track item.code) {
-              <option [value]="item.code">{{ item.name }} · {{ item.code }}</option>
-            }
-          </select>
-        </label>
+            <span class="font-bold uppercase tracking-wider text-tecoc-ink">Estado actual</span>
+            <span
+              class="inline-flex items-center gap-1.5 font-semibold"
+              [style.color]="statusColor(loan.status)"
+            >
+              <span
+                class="h-1.5 w-1.5 rounded-full"
+                [style.background]="statusColor(loan.status)"
+              ></span>
+              {{ statusLabel(loan.status) }}
+            </span>
+          </div>
+        }
 
         <label class="mb-3.5 block">
           <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
@@ -350,7 +358,7 @@
         <button
           type="button"
           class="mt-3 w-full rounded-md bg-tecoc-deep px-3 py-2.5 text-[12.5px] font-bold tracking-wide text-white transition hover:brightness-125 disabled:opacity-60"
-          [disabled]="submitting()"
+          [disabled]="submitting() || !selectedLoan()"
           (click)="submitReview()"
         >
           {{ submitting() ? 'Registrando…' : 'Registrar' }}
@@ -534,12 +542,12 @@
           <div
             class="mx-6 mb-4 rounded-md px-3.5 py-2.5 text-[12.5px] font-semibold"
             [class]="
-              message.startsWith('No fue posible')
+              message.tone === 'error'
                 ? 'bg-tecoc-danger-tint text-tecoc-danger'
                 : 'bg-tecoc-success-tint text-tecoc-success'
             "
           >
-            {{ message }}
+            {{ message.text }}
           </div>
         }
 
