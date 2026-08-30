@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  useMockApi: true,
+  useMockApi: false,
   apiBaseUrl: '/api',
   signalRHubUrl: '/hubs/notifications',
 };
