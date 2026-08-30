@@ -9,6 +9,7 @@ import {
   RequesterRole,
   ReviewMoment,
   StockItem,
+  TeacherItem,
 } from './loans.models';
 
 interface StatusFilterOption {
@@ -47,6 +48,7 @@ const STATUS_COLORS: Record<LoanStatus, string> = {
 const CONDITION_LABELS: Record<ItemCondition, string> = {
   bueno: 'Bueno',
   regular: 'Regular',
+  malo: 'Malo',
   danado: 'Dañado',
   pend: 'Pendiente de revisión',
 };
@@ -54,6 +56,7 @@ const CONDITION_LABELS: Record<ItemCondition, string> = {
 const CONDITION_COLORS: Record<ItemCondition, string> = {
   bueno: SUCCESS,
   regular: WARNING,
+  malo: DANGER,
   danado: DANGER,
   pend: '#bbbbbb',
 };
@@ -75,9 +78,9 @@ export class LoansComponent implements OnInit {
 
   readonly statusFilters = STATUS_FILTERS;
   readonly conditionOptions: { key: ItemCondition; label: string }[] = [
-    { key: 'bueno', label: 'Bueno' },
+    { key: 'malo', label: 'MALO' },
     { key: 'regular', label: 'Regular' },
-    { key: 'danado', label: 'Dañado' },
+    { key: 'bueno', label: 'Bueno' },
   ];
   readonly roleOptions: RequesterRole[] = ['Estudiante', 'Docente'];
   readonly minPickupDate = todayIso();
@@ -86,13 +89,18 @@ export class LoansComponent implements OnInit {
   readonly loans = signal<LoanRequest[]>([]);
   readonly stock = signal<StockItem[]>([]);
   readonly catalog = signal<CatalogItem[]>([]);
+  readonly teachers = signal<TeacherItem[]>([]);
   readonly searchTerm = signal('');
   readonly statusFilter = signal<'todos' | LoanStatus>('todos');
 
-  readonly selectedLoanId = signal<string | null>(null);
-  readonly reviewMoment = signal<ReviewMoment>('entrega');
-  readonly reviewCondition = signal<ItemCondition | null>(null);
-  readonly reviewNote = signal('');
+  // Formulario lateral de revisión / estado de préstamo
+  readonly selectedTeacherId = signal<string>('');
+  readonly selectedItemCode = signal<string>('');
+  readonly reviewMoment = signal<ReviewMoment>('inicio');
+  readonly reviewCondition = signal<ItemCondition | null>('bueno');
+  readonly reviewStartDate = signal<string>(todayIso());
+  readonly reviewEndDate = signal<string>(todayIso());
+  readonly reviewNote = signal<string>('');
   readonly reviewMessage = signal<{ text: string; tone: 'success' | 'error' } | null>(null);
   readonly submitting = signal(false);
 
@@ -144,7 +152,14 @@ export class LoansComponent implements OnInit {
       this.loans.set(snapshot.loans);
       this.stock.set(snapshot.stock);
       this.catalog.set(snapshot.catalog);
-      this.selectedLoanId.set(snapshot.loans[0]?.id ?? null);
+      this.teachers.set(snapshot.teachers || []);
+
+      if (snapshot.teachers && snapshot.teachers.length > 0) {
+        this.selectedTeacherId.set(snapshot.teachers[0].name);
+      }
+      if (snapshot.catalog && snapshot.catalog.length > 0) {
+        this.selectedItemCode.set(snapshot.catalog[0].code);
+      }
       this.loading.set(false);
     });
   }
@@ -192,27 +207,52 @@ export class LoansComponent implements OnInit {
   }
 
   submitReview(): void {
-    const loanId = this.selectedLoanId();
+    const teacher = this.selectedTeacherId();
+    const itemCode = this.selectedItemCode();
     const condition = this.reviewCondition();
 
-    if (!loanId || !condition) {
+    if (!teacher || !itemCode || !condition) {
       this.reviewMessage.set({
-        text: 'Selecciona el estado del implemento antes de registrar.',
+        text: 'Por favor selecciona el docente, implemento y estado.',
         tone: 'error',
       });
       return;
     }
 
+    if (this.reviewEndDate() < this.reviewStartDate()) {
+      this.reviewMessage.set({
+        text: 'La fecha de fin debe ser igual o posterior a la fecha de inicio.',
+        tone: 'error',
+      });
+      return;
+    }
+
+    const item = this.catalog().find((candidate) => candidate.code === itemCode);
+
     this.submitting.set(true);
     this.loansApi
-      .reviewLoan({ loanId, moment: this.reviewMoment(), condition, note: this.reviewNote().trim() || undefined })
+      .reviewLoan({
+        teacherName: teacher,
+        itemCode: itemCode,
+        itemName: item?.name,
+        moment: this.reviewMoment(),
+        condition,
+        startDate: this.reviewStartDate(),
+        endDate: this.reviewEndDate(),
+        note: this.reviewNote().trim() || undefined,
+      })
       .subscribe({
         next: (updated) => {
-          this.loans.update((list) => list.map((loan) => (loan.id === updated.id ? updated : loan)));
-          this.reviewMessage.set({ text: 'Revisión registrada correctamente.', tone: 'success' });
+          this.loans.update((list) => {
+            const exists = list.some((loan) => loan.id === updated.id);
+            return exists
+              ? list.map((loan) => (loan.id === updated.id ? updated : loan))
+              : [updated, ...list];
+          });
+          this.reviewMessage.set({ text: 'Revisión y préstamo registrado correctamente.', tone: 'success' });
           this.reviewNote.set('');
           this.submitting.set(false);
-          setTimeout(() => this.reviewMessage.set(null), 3000);
+          setTimeout(() => this.reviewMessage.set(null), 3500);
         },
         error: () => {
           this.reviewMessage.set({
@@ -275,7 +315,6 @@ export class LoansComponent implements OnInit {
       .subscribe({
         next: (created) => {
           this.loans.update((list) => [created, ...list]);
-          this.selectedLoanId.set(created.id);
           this.newLoanSubmitting.set(false);
           this.newLoanMessage.set('Solicitud creada correctamente.');
           setTimeout(() => this.closeNewLoanModal(), 900);
