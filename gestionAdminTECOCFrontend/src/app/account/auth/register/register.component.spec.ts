@@ -1,5 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
 import { RegisterComponent } from './register.component';
+import { AuthApi } from '../../../core/auth/auth-api';
+import { UserRegistrationApi } from '../../../core/users/user-registration-api';
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
@@ -8,6 +12,11 @@ describe('RegisterComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RegisterComponent],
+      providers: [
+        provideRouter([]),
+        { provide: AuthApi, useValue: { login: () => of(null), register: () => of(null), getCurrentUser: () => of(null) } },
+        { provide: UserRegistrationApi, useValue: { createUser: () => of(null) } },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(RegisterComponent);
