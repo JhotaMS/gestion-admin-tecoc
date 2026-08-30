@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace gestionAdminTECOCApi.Api.Controllers;
 
-[Route( "v1/[controller]" )]
+[Route( "api/v1/[controller]" )]
 public class DocumentTypeController(
     IDispatch dispatch
 ) : ControllerBase {
@@ -18,7 +18,8 @@ public class DocumentTypeController(
         CancellationToken cancellationToken
     ) {
         var result = await dispatch.Send( request, cancellationToken );
-        if (result.IsFailure) return BadRequest( result.Error );
+        if (result.IsFailure)
+            return BadRequest( result.Error );
         return Ok( result.Value );
     }
 
@@ -32,7 +33,8 @@ public class DocumentTypeController(
             return BadRequest( new { message = "El DocumentTypeId de la ruta no coincide con el cuerpo" } );
         }
         var result = await dispatch.Send( request, cancellationToken );
-        if (result.IsFailure) return BadRequest( result.Error );
+        if (result.IsFailure)
+            return BadRequest( result.Error );
         return Ok();
     }
 
@@ -42,7 +44,8 @@ public class DocumentTypeController(
         CancellationToken cancellationToken
     ) {
         var result = await dispatch.Send( new DeleteDocumentTypeCommand( documentTypeId ), cancellationToken );
-        if (result.IsFailure) return BadRequest( result.Error );
+        if (result.IsFailure)
+            return BadRequest( result.Error );
         return Ok();
     }
 
@@ -51,7 +54,8 @@ public class DocumentTypeController(
         CancellationToken cancellationToken
     ) {
         var result = await dispatch.Send( new GetAllDocumentTypesQuery(), cancellationToken );
-        if (result.IsFailure) return BadRequest( result.Error );
+        if (result.IsFailure)
+            return BadRequest( result.Error );
         return Ok( result.Value );
     }
 }
