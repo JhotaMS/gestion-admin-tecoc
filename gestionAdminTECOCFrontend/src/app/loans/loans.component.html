@@ -407,7 +407,7 @@
             >
               <option value="">Selecciona un implemento…</option>
               @for (item of implementoOptions(); track item.id) {
-                <option [value]="item.id">{{ item.nombre }} · {{ item.codigo }}</option>
+                <option [value]="item.id">{{ item.nombre }}</option>
               }
             </select>
             @if (newLoanSubmitted() && !newImplementoId()) {
@@ -431,7 +431,7 @@
             >
               <option value="">Selecciona un solicitante…</option>
               @for (user of requesterOptions(); track user.id) {
-                <option [value]="user.id">{{ user.name }} · {{ user.email }}</option>
+                <option [value]="user.id">{{ user.name }}</option>
               }
             </select>
             @if (newLoanSubmitted() && !newUserId()) {

@@ -68,7 +68,7 @@
                   </div>
                 </td>
                 <td class="px-5 py-3.5 text-sm text-slate-700">{{ user.userName }}</td>
-                <td class="px-5 py-3.5 text-sm text-slate-700">{{ user.documentType }} {{ user.documentNumber }}</td>
+                <td class="px-5 py-3.5 text-sm text-slate-700">{{ user.documentType }} · {{ user.documentNumber }}</td>
               </tr>
             } @empty {
               <tr>
@@ -134,7 +134,7 @@
                 <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">
                   Tipo de documento
                 </span>
-                <span class="text-sm text-slate-700">{{ documentTypeLabel(user.documentType) }} ({{ user.documentType }})</span>
+                <span class="text-sm text-slate-700">{{ user.documentType }}</span>
               </div>
 
               <div>

@@ -5,18 +5,10 @@ import { environment } from '../../../environments/environment';
 import { UsersApi } from '../../users/users-api';
 import { UserAccount } from '../../users/users.models';
 
-// Coincide con el enum DocumentType del backend (gestionAdminTECOCApi.Domain.Users.DocumentType).
-const DOCUMENT_TYPE_CODES: Record<number, string> = {
-  1: 'CC',
-  2: 'CE',
-  3: 'TI',
-  4: 'NIT',
-};
-
 interface UserDto {
   id: string;
   fullName: string;
-  documentType: number;
+  documentType: string;
   documentNumber: string;
   userName: string;
   email: string;
@@ -42,7 +34,7 @@ function toUserAccount(dto: UserDto): UserAccount {
     id: dto.id,
     name: dto.fullName,
     userName: dto.userName,
-    documentType: DOCUMENT_TYPE_CODES[dto.documentType] ?? String(dto.documentType),
+    documentType: dto.documentType,
     documentNumber: dto.documentNumber,
     email: dto.email,
   };
