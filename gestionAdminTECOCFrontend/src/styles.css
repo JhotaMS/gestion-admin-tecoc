@@ -1,0 +1,76 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Archivo', Helvetica, Arial, sans-serif;
+  --font-narrow: 'Archivo Narrow', 'Archivo', sans-serif;
+
+  --color-tecoc-deep: #00215e;
+  --color-tecoc-navy: #003892;
+  --color-tecoc-blue: #0073cb;
+  --color-tecoc-ink: #53565a;
+  --color-tecoc-line: #bbbbbb;
+  --color-tecoc-border: #e3e5e9;
+  --color-tecoc-tint: #f0f3f8;
+
+  --color-tecoc-success: #1c8a4b;
+  --color-tecoc-success-tint: #e8f5ee;
+  --color-tecoc-warning: #b8790a;
+  --color-tecoc-warning-tint: #fbf1e2;
+  --color-tecoc-danger: #c0392b;
+  --color-tecoc-danger-tint: #fbeae8;
+
+  /* Acento claro usado en el sidebar oscuro (partículas, indicadores "en vivo"). */
+  --color-tecoc-glow: #4ea8f5;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+/* Fondo azul TECOC del sidebar autenticado: liso, sin textura. */
+.tecoc-shell-bg {
+  background: radial-gradient(1400px 900px at 15% -10%, #4ea8f5 0%, #0073cb 55%, #003892 100%);
+}
+
+@keyframes tecoc-rise {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-360px) scale(1.25);
+    opacity: 0;
+  }
+}
+
+@keyframes tecoc-pulse-dot {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+}
+
+.tecoc-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--color-tecoc-glow);
+  box-shadow: 0 0 12px rgba(78, 168, 245, 0.9);
+  animation: tecoc-rise linear infinite;
+}
+
+.tecoc-live-dot {
+  animation: tecoc-pulse-dot 1.8s ease-in-out infinite;
+}

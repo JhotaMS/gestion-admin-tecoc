@@ -1,0 +1,97 @@
+<aside
+  class="tecoc-shell-bg relative flex h-screen flex-col overflow-hidden border-r border-white/10 text-white transition-all duration-200"
+  [class.w-64]="!collapsed()"
+  [class.w-16]="collapsed()"
+>
+  <div class="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+    @for (particle of particles; track $index) {
+      <span
+        class="tecoc-particle"
+        [style.left.%]="particle.left"
+        [style.top.%]="particle.top"
+        [style.width.px]="particle.size"
+        [style.height.px]="particle.size"
+        [style.opacity]="particle.opacity"
+        [style.animation-duration.s]="particle.duration"
+        [style.animation-delay.s]="particle.delay"
+      ></span>
+    }
+  </div>
+
+  <div class="relative z-10 flex h-full flex-col">
+    <div class="flex h-16 items-center justify-between border-b border-white/10 px-4">
+      @if (!collapsed()) {
+        <div class="flex min-w-0 items-center gap-2.5">
+          <div class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white shadow-[0_10px_22px_-10px_rgba(0,0,0,0.8)]">
+            <img src="tecoc-logo.png" alt="Logo TECOC" class="h-full w-full scale-[1.5] object-contain" />
+          </div>
+          <span class="truncate text-lg font-semibold text-white">TECOC Admin</span>
+        </div>
+      }
+      <button
+        type="button"
+        class="rounded-md p-1.5 text-white/60 transition hover:bg-white/10 hover:text-white"
+        (click)="toggleCollapsed()"
+        aria-label="Alternar sidebar"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12h18M3 6h18M3 18h18" stroke-linecap="round" />
+        </svg>
+      </button>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto px-2 py-3">
+      <ul class="space-y-1">
+        @for (item of menu; track item.label) {
+          <li>
+            @if (item.children) {
+              <button
+                type="button"
+                class="flex w-full items-center gap-3 rounded-md border border-transparent px-3 py-2 text-sm font-medium text-white/72 transition hover:bg-white/6 hover:text-white"
+                (click)="toggleGroup(item)"
+              >
+                <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-white/35"></span>
+                @if (!collapsed()) {
+                  <span class="flex-1 text-left truncate">{{ item.label }}</span>
+                  <svg
+                    width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    class="shrink-0 transition-transform"
+                    [class.rotate-90]="isExpanded(item)"
+                  >
+                    <path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                }
+              </button>
+              @if (isExpanded(item) && !collapsed()) {
+                <ul class="mt-1 space-y-1 pl-7">
+                  @for (child of item.children; track child.label) {
+                    <li>
+                      <a
+                        [routerLink]="child.link"
+                        routerLinkActive="border-[rgba(78,168,245,0.45)] bg-[rgba(0,115,203,0.28)] text-white"
+                        class="block rounded-md border border-transparent px-3 py-1.5 text-sm text-white/60 transition hover:bg-white/6 hover:text-white"
+                      >
+                        {{ child.label }}
+                      </a>
+                    </li>
+                  }
+                </ul>
+              }
+            } @else {
+              <a
+                [routerLink]="item.link"
+                routerLinkActive="border-[rgba(78,168,245,0.45)] bg-[rgba(0,115,203,0.28)] text-white"
+                class="flex items-center gap-3 rounded-md border border-transparent px-3 py-2 text-sm font-medium text-white/72 transition hover:bg-white/6 hover:text-white"
+              >
+                <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-white/35"></span>
+                @if (!collapsed()) {
+                  <span class="truncate">{{ item.label }}</span>
+                }
+              </a>
+            }
+          </li>
+        }
+      </ul>
+    </nav>
+  </div>
+</aside>
