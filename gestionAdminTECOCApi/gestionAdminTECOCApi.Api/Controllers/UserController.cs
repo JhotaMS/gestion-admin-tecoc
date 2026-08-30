@@ -1,7 +1,7 @@
 using gestionAdminTECOCApi.Api.Errors;
 using gestionAdminTECOCApi.Application.Features.Users.CreateUser;
-using gestionAdminTECOCApi.Application.Features.Users.UpdateUser;
 using gestionAdminTECOCApi.Application.Features.Users.GetAllUsers;
+using gestionAdminTECOCApi.Application.Features.Users.UpdateUser;
 using gestionAdminTECOCApi.Application.Messaging;
 using gestionAdminTECOCApi.Domain.Abstractions;
 using gestionAdminTECOCApi.Domain.Helpers;
@@ -85,7 +85,7 @@ public class UserController(
             );
         }
 
-        return Ok( result.Value );
+        return StatusCode( (int)HttpStatusCode.OK, result.Value );
     }
 
     [HttpGet()]
