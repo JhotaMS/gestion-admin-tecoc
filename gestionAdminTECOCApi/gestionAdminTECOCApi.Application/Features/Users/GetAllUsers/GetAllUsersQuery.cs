@@ -16,6 +16,7 @@ public record UserSummaryDto(
     string FullName,
     string UserName,
     string Email,
+    DocumentType DocumentType,
     string DocumentNumber
 );
 
@@ -36,6 +37,7 @@ internal sealed class GetAllUsersQueryHandler(
                 u.FullName,
                 u.UserName,
                 u.Email,
+                u.DocumentType,
                 u.DocumentNumber
             ) )
             .ToList();
