@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using gestionAdminTECOCApi.Infrastructure.PostgreSql.Persistence;
@@ -11,44 +12,19 @@ using gestionAdminTECOCApi.Infrastructure.PostgreSql.Persistence;
 namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260823175511_v1-0-1")]
+    partial class v101
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("gestionAdminTECOCApiMS")
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "7.0.18")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("gestionAdminTECOCApi.Domain.DocumentTypes.DocumentTypeEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<bool>("Enabled")
-                        .HasColumnType("boolean");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.ToTable("DocumentTypes", "gestionAdminTECOCApiMS");
-                });
 
             modelBuilder.Entity("gestionAdminTECOCApi.Domain.ScheduledClasses.ScheduledClass", b =>
                 {
@@ -61,55 +37,11 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.ToTable("Groups", "gestionAdminTECOCApiMS");
-                });
-
-            modelBuilder.Entity("gestionAdminTECOCApi.Domain.Loans.Implemento", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("CantidadDisponible")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("CantidadTotal")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Codigo")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
-
-                    b.Property<string>("Descripcion")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
                     b.Property<bool>("Enabled")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Estado")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Codigo")
-                        .IsUnique();
-
-                    b.ToTable("Implementos", "gestionAdminTECOCApiMS");
-                });
+                    b.Property<DateOnly>("ScheduledDate")
+                        .HasColumnType("date");
 
                     b.Property<TimeOnly>("ScheduledTime")
                         .HasColumnType("time without time zone");
@@ -156,9 +88,6 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
-                    b.Property<Guid?>("GroupId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -173,8 +102,6 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique();
-
-                    b.HasIndex("GroupId");
 
                     b.HasIndex("UserName")
                         .IsUnique();
@@ -238,16 +165,6 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("WeatherForecastsHistories", "gestionAdminTECOCApiMS");
-                });
-
-            modelBuilder.Entity("gestionAdminTECOCApi.Domain.Users.User", b =>
-                {
-                    b.HasOne("gestionAdminTECOCApi.Domain.Groups.Group", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Group");
                 });
 #pragma warning restore 612, 618
         }

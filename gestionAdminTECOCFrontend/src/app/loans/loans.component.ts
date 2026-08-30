@@ -6,11 +6,19 @@ import {
   ItemCondition,
   LoanRequest,
   LoanStatus,
-  RequesterRole,
   ReviewMoment,
   StockItem,
   TeacherItem,
 } from './loans.models';
+import { UsersApi } from '../users/users-api';
+import { UserAccount } from '../users/users.models';
+import { ImplementosApi } from '../core/loans/implementos-api';
+import { ImplementoPrestadoApi } from '../core/loans/implemento-prestado-api';
+import {
+  ESTADO_TIPO_BUENO,
+  ImplementoOption,
+  TIPO_REVISION_INICIO,
+} from '../core/models/implemento-prestado.models';
 
 interface StatusFilterOption {
   key: 'todos' | LoanStatus;
@@ -75,6 +83,9 @@ function todayIso(): string {
 })
 export class LoansComponent implements OnInit {
   private readonly loansApi = inject(LoansApi);
+  private readonly usersApi = inject(UsersApi);
+  private readonly implementosApi = inject(ImplementosApi);
+  private readonly implementoPrestadoApi = inject(ImplementoPrestadoApi);
 
   readonly statusFilters = STATUS_FILTERS;
   readonly conditionOptions: { key: ItemCondition; label: string }[] = [
@@ -82,7 +93,6 @@ export class LoansComponent implements OnInit {
     { key: 'regular', label: 'Regular' },
     { key: 'bueno', label: 'Bueno' },
   ];
-  readonly roleOptions: RequesterRole[] = ['Estudiante', 'Docente'];
   readonly minPickupDate = todayIso();
 
   readonly loading = signal(true);
@@ -104,13 +114,15 @@ export class LoansComponent implements OnInit {
   readonly reviewMessage = signal<{ text: string; tone: 'success' | 'error' } | null>(null);
   readonly submitting = signal(false);
 
-  // Modal "Nueva solicitud"
+  // Modal "Nueva solicitud" — registra el préstamo contra el backend real (ImplementosPrestados)
   readonly newLoanModalOpen = signal(false);
-  readonly newItemCode = signal('');
-  readonly newRequesterName = signal('');
-  readonly newRequesterRole = signal<RequesterRole | null>(null);
-  readonly newPickupDate = signal('');
-  readonly newPickupTime = signal('09:00');
+  readonly requesterOptions = signal<UserAccount[]>([]);
+  readonly implementoOptions = signal<ImplementoOption[]>([]);
+  readonly newImplementoId = signal('');
+  readonly newUserId = signal('');
+  readonly newRequesterRoleLabel = 'Docente';
+  readonly newStartDate = signal(todayIso());
+  readonly newEndDate = signal(todayIso());
   readonly newNote = signal('');
   readonly newLoanSubmitted = signal(false);
   readonly newLoanSubmitting = signal(false);
@@ -162,6 +174,9 @@ export class LoansComponent implements OnInit {
       }
       this.loading.set(false);
     });
+
+    this.usersApi.getUsers().subscribe((users) => this.requesterOptions.set(users));
+    this.implementosApi.getAll().subscribe((implementos) => this.implementoOptions.set(implementos));
   }
 
   setStatusFilter(status: 'todos' | LoanStatus): void {
@@ -265,11 +280,10 @@ export class LoansComponent implements OnInit {
   }
 
   openNewLoanModal(): void {
-    this.newItemCode.set('');
-    this.newRequesterName.set('');
-    this.newRequesterRole.set(null);
-    this.newPickupDate.set('');
-    this.newPickupTime.set('09:00');
+    this.newImplementoId.set(this.implementoOptions()[0]?.id ?? '');
+    this.newUserId.set(this.requesterOptions()[0]?.id ?? '');
+    this.newStartDate.set(todayIso());
+    this.newEndDate.set(todayIso());
     this.newNote.set('');
     this.newLoanSubmitted.set(false);
     this.newLoanMessage.set(null);
@@ -280,48 +294,43 @@ export class LoansComponent implements OnInit {
     this.newLoanModalOpen.set(false);
   }
 
-  selectRole(role: RequesterRole): void {
-    this.newRequesterRole.set(role);
-  }
-
   submitNewLoan(): void {
     this.newLoanSubmitted.set(true);
 
-    const itemCode = this.newItemCode();
-    const requesterName = this.newRequesterName().trim();
-    const role = this.newRequesterRole();
-    const pickupDate = this.newPickupDate();
+    const implementoId = this.newImplementoId();
+    const userId = this.newUserId();
+    const startDate = this.newStartDate();
+    const endDate = this.newEndDate();
 
-    if (!itemCode || !requesterName || !role || !pickupDate) {
+    if (!implementoId || !userId || !startDate || !endDate) {
       return;
     }
 
-    const item = this.catalog().find((candidate) => candidate.code === itemCode);
-    if (!item) {
+    if (endDate < startDate) {
+      this.newLoanMessage.set('La fecha de fin debe ser igual o posterior a la fecha de inicio.');
       return;
     }
 
     this.newLoanSubmitting.set(true);
-    this.loansApi
-      .createLoan({
-        itemName: item.name,
-        itemCode: item.code,
-        requesterName,
-        requesterRole: role,
-        pickupDateIso: pickupDate,
-        pickupTime: this.newPickupTime() || '09:00',
-        note: this.newNote().trim() || undefined,
+    this.implementoPrestadoApi
+      .create({
+        userId,
+        implementoId,
+        tipoRevisionId: TIPO_REVISION_INICIO,
+        estadoTipo: ESTADO_TIPO_BUENO,
+        fechaInicio: startDate,
+        fechaFin: endDate,
+        observacion: this.newNote().trim() || undefined,
       })
       .subscribe({
-        next: (created) => {
-          this.loans.update((list) => [created, ...list]);
+        next: () => {
           this.newLoanSubmitting.set(false);
-          this.newLoanMessage.set('Solicitud creada correctamente.');
+          this.newLoanMessage.set('Solicitud de préstamo registrada correctamente.');
           setTimeout(() => this.closeNewLoanModal(), 900);
         },
-        error: () => {
+        error: (error: Error) => {
           this.newLoanSubmitting.set(false);
-          this.newLoanMessage.set('No fue posible crear la solicitud. Intenta nuevamente.');
+          this.newLoanMessage.set(error.message || 'No fue posible registrar la solicitud. Intenta nuevamente.');
         },
       });
   }
