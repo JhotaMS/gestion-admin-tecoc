@@ -1,11 +1,11 @@
-using System.Net;
-using System.Net.Http.Json;
 using gestionAdminTECOCApi.Application.Features.Auth.Login;
 using gestionAdminTECOCApi.Domain.Users;
 using gestionAdminTECOCApi.Infrastructure.PostgreSql.Persistence;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net;
+using System.Net.Http.Json;
 
 namespace gestionAdminTECOCApi.Api.Tests.Integration;
 
@@ -17,7 +17,8 @@ public class AuthLoginTests : IClassFixture<WebApplicationFactory<Program>> {
             builder.ConfigureServices( services => {
                 var descriptor = services.SingleOrDefault(
                     d => d.ServiceType == typeof( DbContextOptions<ApplicationDbContext> ) );
-                if (descriptor is not null) services.Remove( descriptor );
+                if (descriptor is not null)
+                    services.Remove( descriptor );
                 services.AddDbContext<ApplicationDbContext>( options =>
                     options.UseInMemoryDatabase( "tecoc-login-tests" ) );
             } );
@@ -55,8 +56,8 @@ public class AuthLoginTests : IClassFixture<WebApplicationFactory<Program>> {
         Assert.Equal( HttpStatusCode.OK, response.StatusCode );
         var body = await response.Content.ReadFromJsonAsync<LoginResponse>();
         Assert.NotNull( body );
-        Assert.Equal( "docente@tecoc.edu.co", body.Email );
-        Assert.NotEqual( Guid.Empty, body.UserId );
+        Assert.Equal( "docente@tecoc.edu.co", body.User.Email );
+        Assert.NotEqual( Guid.Empty, body.User.Id );
     }
 
     [Fact]
