@@ -22,7 +22,7 @@ export class ImplementosHttpApi extends ImplementosApi {
 
   getAll(): Observable<ImplementoOption[]> {
     return this.http
-      .get<GetAllImplementosResponseDto>(`${environment.apiBaseUrl}/v1/Implementos/disponibles`)
+      .get<GetAllImplementosResponseDto>(`${environment.apiBaseUrl}/api/v1/Implementos`)
       .pipe(map((response) => response.implementos));
   }
 }
