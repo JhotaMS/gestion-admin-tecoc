@@ -11,20 +11,20 @@ export class AuthHttpApi extends AuthApi {
 
   login(request: LoginRequest): Observable<LoginResponse> {
     return this.httpClient.post<LoginResponse>(
-      `${environment.apiBaseUrl}/api/v1/auth/login`,
+      `${environment.apiBaseUrl}/v1/Auth/login`,
       request,
     );
   }
 
   register(request: RegisterRequest): Observable<AuthUser> {
     return this.httpClient.post<AuthUser>(
-      `${environment.apiBaseUrl}/api/v1/user/register`,
+      `${environment.apiBaseUrl}/v1/user/register`,
       request,
     );
   }
 
   getCurrentUser(token: string): Observable<AuthUser> {
-    return this.httpClient.get<AuthUser>(`${environment.apiBaseUrl}/api/v1/auth/me`, {
+    return this.httpClient.get<AuthUser>(`${environment.apiBaseUrl}/v1/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
   }

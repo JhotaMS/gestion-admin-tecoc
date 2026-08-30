@@ -16,7 +16,7 @@ export class UserRegistrationHttpApi extends UserRegistrationApi {
 
   createUser(request: CreateUserRequest): Observable<CreateUserResponse> {
     return this.http
-      .post<CreateUserResponse>(`${environment.apiBaseUrl}/User`, request)
+      .post<CreateUserResponse>(`${environment.apiBaseUrl}/v1/User`, request)
       .pipe(catchError((error: HttpErrorResponse) => throwError(() => new Error(this.extractMessage(error)))));
   }
 

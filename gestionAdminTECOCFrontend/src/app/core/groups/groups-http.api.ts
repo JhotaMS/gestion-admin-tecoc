@@ -21,7 +21,7 @@ interface ApiErrorBody {
   message?: string;
 }
 
-const BASE_URL = `${environment.apiBaseUrl}/api/v1/Group`;
+const BASE_URL = `${environment.apiBaseUrl}/v1/Group`;
 
 @Injectable()
 export class GroupsHttpApi extends GroupsApi {

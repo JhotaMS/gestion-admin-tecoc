@@ -49,7 +49,7 @@ export class UsersHttpApi extends UsersApi {
 
   getUsers(): Observable<UserAccount[]> {
     return this.http
-      .get<GetAllUsersResponseDto>(`${environment.apiBaseUrl}/api/v1/User`)
+      .get<GetAllUsersResponseDto>(`${environment.apiBaseUrl}/v1/User`)
       .pipe(map((response) => response.users.map(toUserAccount)));
   }
 
@@ -65,7 +65,7 @@ export class UsersHttpApi extends UsersApi {
           : '';
 
         return this.http
-          .put<UpdateUserResponseDto>(`${environment.apiBaseUrl}/api/v1/User/${request.id}`, {
+          .put<UpdateUserResponseDto>(`${environment.apiBaseUrl}/v1/User/${request.id}`, {
             id: request.id,
             fullName: request.name,
             documentType: documentTypeCode,

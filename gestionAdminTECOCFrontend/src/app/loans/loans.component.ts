@@ -192,8 +192,6 @@ export class LoansComponent implements OnInit {
   readonly editingLoan = signal<LoanRequest | null>(null);
   readonly editSaving = signal(false);
 
-  readonly selectedLoanId = signal<string | null>(null);
-
   readonly deleteMatch = computed<LoanRequest | null>(() => {
     const id = this.deleteIdInput().trim();
     if (!id) return null;
@@ -484,6 +482,12 @@ export class LoansComponent implements OnInit {
       return;
     }
 
+    const requesterName = this.requesterOptions().find((user) => user.id === userId)?.name ?? '';
+    const item = this.implementoOptions().find((candidate) => candidate.id === implementoId);
+    if (!item) {
+      return;
+    }
+
     // Regla de negocio: una persona solo puede tener un préstamo activo a la vez.
     const hasActiveLoan = this.loans().some(
       (loan) =>
@@ -495,11 +499,6 @@ export class LoansComponent implements OnInit {
         text: `${requesterName} ya tiene un préstamo activo. Solo se permite un préstamo por persona.`,
         tone: 'error',
       });
-      return;
-    }
-
-    const item = this.catalog().find((candidate) => candidate.code === itemCode);
-    if (!item) {
       return;
     }
 

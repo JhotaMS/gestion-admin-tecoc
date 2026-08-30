@@ -23,13 +23,13 @@ export class ImplementoPrestadoHttpApi extends ImplementoPrestadoApi {
 
   create(request: CreateImplementoPrestadoRequest): Observable<ImplementoPrestadoResponse> {
     return this.http
-      .post<ImplementoPrestadoResponse>(`${environment.apiBaseUrl}/api/v1/ImplementosPrestados`, request)
+      .post<ImplementoPrestadoResponse>(`${environment.apiBaseUrl}/v1/ImplementosPrestados`, request)
       .pipe(catchError((error: HttpErrorResponse) => throwError(() => new Error(this.extractMessage(error)))));
   }
 
   getAll(): Observable<ImplementoPrestadoDto[]> {
     return this.http
-      .get<GetAllImplementosPrestadosResponse>(`${environment.apiBaseUrl}/api/v1/ImplementosPrestados`)
+      .get<GetAllImplementosPrestadosResponse>(`${environment.apiBaseUrl}/v1/ImplementosPrestados`)
       .pipe(map((response) => response.implementosPrestados));
   }
 

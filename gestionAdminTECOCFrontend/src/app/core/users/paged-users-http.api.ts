@@ -12,6 +12,6 @@ export class PagedUsersHttpApi extends PagedUsersApi {
   getPage(pageNumber: number, pageSize: number): Observable<PagedResult<PagedUser>> {
     const params = new HttpParams().set('pageNumber', pageNumber).set('pageSize', pageSize);
 
-    return this.http.get<PagedResult<PagedUser>>(`${environment.apiBaseUrl}/api/v1/User/paged`, { params });
+    return this.http.get<PagedResult<PagedUser>>(`${environment.apiBaseUrl}/v1/User/paged`, { params });
   }
 }
