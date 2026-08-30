@@ -1,4 +1,5 @@
-﻿using gestionAdminTECOCApi.Domain.DocumentTypes;
+using gestionAdminTECOCApi.Domain.DocumentTypes;
+using gestionAdminTECOCApi.Domain.Loans;
 using gestionAdminTECOCApi.Domain.Users;
 using gestionAdminTECOCApi.Domain.WeatherForecasts;
 using gestionAdminTECOCApi.Domain.WeatherForecastsHistories;
@@ -24,6 +25,9 @@ public partial class ApplicationDbContext : DbContext {
     public virtual DbSet<DocumentTypeEntity> DocumentTypes { get; set; }
     public virtual DbSet<WeatherForecast> WeatherForecasts { get; set; }
     public virtual DbSet<WeatherForecastsHistory> WeatherForecastsHistories { get; set; }
+    public virtual DbSet<ImplementoPrestado> ImplementosPrestados { get; set; }
+    public virtual DbSet<Implemento> Implementos { get; set; }
+    public virtual DbSet<TipoRevision> TiposRevision { get; set; }
 
     public override Task<int> SaveChangesAsync( CancellationToken cancellationToken = default ) {
         return base.SaveChangesAsync( cancellationToken );
