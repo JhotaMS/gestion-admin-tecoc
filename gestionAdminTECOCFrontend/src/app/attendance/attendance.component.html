@@ -15,7 +15,7 @@
     </button>
   </div>
 
-  @if (loading()) {
+  @if (loading() || studentsLoading()) {
     <div class="rounded-md border border-tecoc-border bg-white px-5 py-10 text-center text-sm text-tecoc-ink">
       Cargando asistencia…
     </div>
@@ -170,7 +170,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (row of rows(); track row.student.id; let i = $index) {
+              @for (row of rows(); track row.student.id) {
                 <tr class="border-t border-tecoc-border transition hover:bg-tecoc-tint/60">
                   <td class="px-5 py-3.5">
                     <div class="flex items-center gap-3">
@@ -213,7 +213,7 @@
                         step="1"
                         class="w-14 rounded-md border border-tecoc-line bg-white px-1.5 py-1.5 text-center text-sm font-bold text-slate-900 outline-none transition focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
                         [ngModel]="row.hours"
-                        (ngModelChange)="setHours(i, $event)"
+                        (ngModelChange)="setHours(row.student.id, $event)"
                         [attr.aria-label]="'Horas de ' + row.student.fullName"
                       />
                       <span class="whitespace-nowrap text-xs font-bold text-tecoc-ink">/ {{ row.duration }}h</span>
@@ -238,6 +238,46 @@
             </tbody>
           </table>
         </div>
+
+        @if (totalPages() > 1) {
+          <div class="flex flex-wrap items-center justify-between gap-3 border-t border-tecoc-border bg-slate-50 px-5 py-3.5">
+            <span class="text-[12.5px] text-tecoc-ink">
+              Página {{ currentPage() }} de {{ totalPages() }} · {{ totalStudents() }} estudiantes en total
+            </span>
+            <div class="flex items-center gap-1.5">
+              <button
+                type="button"
+                class="rounded-md border border-tecoc-line bg-white px-3 py-1.5 text-[11px] font-bold text-tecoc-ink transition hover:border-tecoc-blue hover:text-tecoc-navy disabled:cursor-not-allowed disabled:opacity-50"
+                [disabled]="currentPage() === 1"
+                (click)="goToPage(currentPage() - 1)"
+              >
+                Anterior
+              </button>
+              @for (page of pageNumbers(); track page) {
+                <button
+                  type="button"
+                  class="h-8 w-8 rounded-md border text-[11px] font-bold transition"
+                  [class]="
+                    currentPage() === page
+                      ? 'border-tecoc-navy bg-tecoc-navy text-white'
+                      : 'border-tecoc-line bg-white text-tecoc-ink hover:border-tecoc-blue hover:text-tecoc-navy'
+                  "
+                  (click)="goToPage(page)"
+                >
+                  {{ page }}
+                </button>
+              }
+              <button
+                type="button"
+                class="rounded-md border border-tecoc-line bg-white px-3 py-1.5 text-[11px] font-bold text-tecoc-ink transition hover:border-tecoc-blue hover:text-tecoc-navy disabled:cursor-not-allowed disabled:opacity-50"
+                [disabled]="currentPage() === totalPages()"
+                (click)="goToPage(currentPage() + 1)"
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
+        }
 
         <div class="grid grid-cols-2 gap-4 border-t border-tecoc-border px-5 py-5 sm:grid-cols-4">
           <div class="rounded-md border border-tecoc-border bg-white p-4">

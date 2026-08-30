@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AttendanceApi } from './attendance-api';
 import { AttendanceStatus, AttendanceStudent, ClassSession } from './attendance.models';
+import { PagedUsersApi } from '../core/users/paged-users-api';
 
 interface StudentRow {
   student: AttendanceStudent;
@@ -24,7 +25,7 @@ function statusFor(hours: number, duration: number): AttendanceStatus {
 }
 
 function cloneSessions(sessions: ClassSession[]): ClassSession[] {
-  return sessions.map((session) => ({ ...session, hours: [...session.hours] }));
+  return sessions.map((session) => ({ ...session, hours: { ...session.hours } }));
 }
 
 @Component({
@@ -35,7 +36,16 @@ function cloneSessions(sessions: ClassSession[]): ClassSession[] {
 })
 export class AttendanceComponent implements OnInit {
   private readonly attendanceApi = inject(AttendanceApi);
+  private readonly pagedUsersApi = inject(PagedUsersApi);
   private lastSaved: ClassSession[] = [];
+
+  // Paginación real de estudiantes: al superar este tamaño de página se requiere
+  // avanzar a la página 2 para ver el resto.
+  readonly pageSize = 8;
+  readonly studentsLoading = signal(true);
+  readonly currentPage = signal(1);
+  readonly totalPages = signal(0);
+  readonly totalStudents = signal(0);
 
   readonly durationOptions = [4, 8];
 
@@ -83,13 +93,15 @@ export class AttendanceComponent implements OnInit {
     const session = this.selectedSession();
     if (!session) return [];
 
-    return this.students().map((student, index) => {
-      const hours = session.hours[index] ?? 0;
+    return this.students().map((student) => {
+      const hours = session.hours[student.id] ?? 0;
       const status = statusFor(hours, session.duration);
       const bars = Array.from({ length: session.duration }, (_, hour) => ({ filled: hour < hours }));
       return { student, hours, duration: session.duration, status, bars };
     });
   });
+
+  readonly pageNumbers = computed(() => Array.from({ length: this.totalPages() }, (_, i) => i + 1));
 
   readonly summary = computed(() => {
     const rows = this.rows();
@@ -105,12 +117,42 @@ export class AttendanceComponent implements OnInit {
     this.attendanceApi.getSnapshot().subscribe((snapshot) => {
       this.groupName.set(snapshot.groupName);
       this.subjectName.set(snapshot.subjectName);
-      this.students.set(snapshot.students);
       this.sessions.set(snapshot.sessions);
       this.lastSaved = cloneSessions(snapshot.sessions);
       this.selectedSessionId.set(snapshot.sessions.at(-1)?.id ?? null);
       this.loading.set(false);
     });
+
+    this.loadStudentsPage(1);
+  }
+
+  private loadStudentsPage(pageNumber: number): void {
+    this.studentsLoading.set(true);
+    this.pagedUsersApi.getPage(pageNumber, this.pageSize).subscribe({
+      next: (page) => {
+        this.students.set(
+          page.items.map((user) => ({
+            id: user.id,
+            fullName: user.fullName,
+            documentType: user.documentType,
+            documentNumber: user.documentNumber,
+            email: user.email,
+          })),
+        );
+        this.currentPage.set(page.pageNumber);
+        this.totalPages.set(page.totalPages);
+        this.totalStudents.set(page.totalCount);
+        this.studentsLoading.set(false);
+      },
+      error: () => {
+        this.studentsLoading.set(false);
+      },
+    });
+  }
+
+  goToPage(pageNumber: number): void {
+    if (pageNumber < 1 || pageNumber > this.totalPages() || pageNumber === this.currentPage()) return;
+    this.loadStudentsPage(pageNumber);
   }
 
   statusLabel(status: AttendanceStatus): string {
@@ -139,14 +181,20 @@ export class AttendanceComponent implements OnInit {
     this.sessions.update((sessions) =>
       sessions.map((session) =>
         session.id === sessionId
-          ? { ...session, duration, hours: session.hours.map((hours) => Math.min(hours, duration)) }
+          ? {
+              ...session,
+              duration,
+              hours: Object.fromEntries(
+                Object.entries(session.hours).map(([studentId, hours]) => [studentId, Math.min(hours, duration)]),
+              ),
+            }
           : session,
       ),
     );
     this.saveNote.set('La jornada cambió y las horas superiores al máximo fueron ajustadas.');
   }
 
-  setHours(index: number, value: string): void {
+  setHours(studentId: string, value: string): void {
     const sessionId = this.selectedSessionId();
     const session = this.selectedSession();
     if (!sessionId || !session) return;
@@ -157,7 +205,7 @@ export class AttendanceComponent implements OnInit {
     this.sessions.update((sessions) =>
       sessions.map((current) =>
         current.id === sessionId
-          ? { ...current, hours: current.hours.map((hours, i) => (i === index ? clamped : hours)) }
+          ? { ...current, hours: { ...current.hours, [studentId]: clamped } }
           : current,
       ),
     );
