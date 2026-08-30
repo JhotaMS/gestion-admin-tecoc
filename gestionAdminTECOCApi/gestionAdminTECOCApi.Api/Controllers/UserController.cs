@@ -1,7 +1,7 @@
 using gestionAdminTECOCApi.Api.Errors;
 using gestionAdminTECOCApi.Application.Features.Users.CreateUser;
-using gestionAdminTECOCApi.Application.Features.Users.UpdateUser;
 using gestionAdminTECOCApi.Application.Features.Users.GetAllUsers;
+using gestionAdminTECOCApi.Application.Features.Users.UpdateUser;
 using gestionAdminTECOCApi.Application.Messaging;
 using gestionAdminTECOCApi.Domain.Abstractions;
 using gestionAdminTECOCApi.Domain.Helpers;
@@ -75,6 +75,19 @@ public class UserController(
 
         Result<UpdateUserCommandResponse> result = await dispatch.Send(
             request,
+            cancellationToken
+        );
+
+        if (result.IsFailure) {
+            return StatusCode(
+                StatusCodeByError( result.Error ),
+                new CodeError( StatusCodeByError( result.Error ), result.Error.Name )
+            );
+        }
+
+        return StatusCode( (int)HttpStatusCode.OK, result.Value );
+    }
+
     [HttpGet()]
     [ProducesResponseType( typeof( GetAllUsersResponse ), (int)HttpStatusCode.OK )]
     [ProducesResponseType( typeof( CodeError ), (int)HttpStatusCode.BadRequest )]
