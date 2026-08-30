@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using gestionAdminTECOCApi.Infrastructure.PostgreSql.Persistence;
@@ -11,9 +12,11 @@ using gestionAdminTECOCApi.Infrastructure.PostgreSql.Persistence;
 namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260830153133_V1_0_4_ImplementosPrestados")]
+    partial class V1_0_4_ImplementosPrestados
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,34 +53,38 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
                     b.ToTable("DocumentTypes", "gestionAdminTECOCApiMS");
                 });
 
-            modelBuilder.Entity("gestionAdminTECOCApi.Domain.Groups.Group", b =>
+            modelBuilder.Entity("gestionAdminTECOCApi.Domain.Loans.Implemento", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Code")
+                    b.Property<string>("Codigo")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
 
+                    b.Property<string>("Descripcion")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<bool>("Enabled")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Code")
+                    b.HasIndex("Codigo")
                         .IsUnique();
 
-                    b.ToTable("Groups", "gestionAdminTECOCApiMS");
+                    b.ToTable("Implementos", "gestionAdminTECOCApiMS");
                 });
 
-            modelBuilder.Entity("gestionAdminTECOCApi.Domain.Prestamos.Prestamo", b =>
+            modelBuilder.Entity("gestionAdminTECOCApi.Domain.Loans.ImplementoPrestado", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -88,30 +95,75 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
 
                     b.Property<string>("EstadoTipo")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
-                    b.Property<DateTime>("Fin")
+                    b.Property<DateTime>("FechaFin")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("FechaInicio")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("ImplementoId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("Inicio")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Observacion")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
-                    b.Property<Guid>("TipoRevisionId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("TipoRevisionId")
+                        .HasColumnType("integer");
 
-                    b.Property<Guid>("UuserId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Prestamos", "gestionAdminTECOCApiMS");
+                    b.HasIndex("FechaInicio");
+
+                    b.HasIndex("ImplementoId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ImplementosPrestados", "gestionAdminTECOCApiMS");
+                });
+
+            modelBuilder.Entity("gestionAdminTECOCApi.Domain.Loans.TipoRevision", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Descripcion")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TiposRevision", "gestionAdminTECOCApiMS");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Descripcion = "Revisión al inicio/entrega del implemento",
+                            Enabled = true,
+                            Nombre = "Inicio"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Descripcion = "Revisión a la entrega/devolución final del implemento",
+                            Enabled = true,
+                            Nombre = "Entrega"
+                        });
                 });
 
             modelBuilder.Entity("gestionAdminTECOCApi.Domain.Users.User", b =>
@@ -143,9 +195,6 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
-                    b.Property<Guid?>("GroupId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -160,8 +209,6 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique();
-
-                    b.HasIndex("GroupId");
 
                     b.HasIndex("UserName")
                         .IsUnique();
@@ -225,16 +272,6 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("WeatherForecastsHistories", "gestionAdminTECOCApiMS");
-                });
-
-            modelBuilder.Entity("gestionAdminTECOCApi.Domain.Users.User", b =>
-                {
-                    b.HasOne("gestionAdminTECOCApi.Domain.Groups.Group", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Group");
                 });
 #pragma warning restore 612, 618
         }

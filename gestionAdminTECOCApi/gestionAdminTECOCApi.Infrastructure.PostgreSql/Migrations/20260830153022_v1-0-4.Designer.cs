@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using gestionAdminTECOCApi.Infrastructure.PostgreSql.Persistence;
@@ -11,9 +12,11 @@ using gestionAdminTECOCApi.Infrastructure.PostgreSql.Persistence;
 namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260830153022_v1-0-4")]
+    partial class v104
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,33 +51,6 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
                         .IsUnique();
 
                     b.ToTable("DocumentTypes", "gestionAdminTECOCApiMS");
-                });
-
-            modelBuilder.Entity("gestionAdminTECOCApi.Domain.Groups.Group", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
-
-                    b.Property<bool>("Enabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.ToTable("Groups", "gestionAdminTECOCApiMS");
                 });
 
             modelBuilder.Entity("gestionAdminTECOCApi.Domain.Prestamos.Prestamo", b =>
@@ -143,9 +119,6 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
-                    b.Property<Guid?>("GroupId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -160,8 +133,6 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique();
-
-                    b.HasIndex("GroupId");
 
                     b.HasIndex("UserName")
                         .IsUnique();
@@ -225,16 +196,6 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("WeatherForecastsHistories", "gestionAdminTECOCApiMS");
-                });
-
-            modelBuilder.Entity("gestionAdminTECOCApi.Domain.Users.User", b =>
-                {
-                    b.HasOne("gestionAdminTECOCApi.Domain.Groups.Group", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Group");
                 });
 #pragma warning restore 612, 618
         }

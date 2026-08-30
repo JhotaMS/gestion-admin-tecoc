@@ -1,6 +1,7 @@
-﻿using gestionAdminTECOCApi.Api.Errors;
+using gestionAdminTECOCApi.Api.Errors;
 using gestionAdminTECOCApi.Application.Features.Users.CreateUser;
 using gestionAdminTECOCApi.Application.Features.Users.UpdateUser;
+using gestionAdminTECOCApi.Application.Features.Users.GetAllUsers;
 using gestionAdminTECOCApi.Application.Messaging;
 using gestionAdminTECOCApi.Domain.Abstractions;
 using gestionAdminTECOCApi.Domain.Helpers;
@@ -74,6 +75,14 @@ public class UserController(
 
         Result<UpdateUserCommandResponse> result = await dispatch.Send(
             request,
+    [HttpGet()]
+    [ProducesResponseType( typeof( GetAllUsersResponse ), (int)HttpStatusCode.OK )]
+    [ProducesResponseType( typeof( CodeError ), (int)HttpStatusCode.BadRequest )]
+    public async Task<ActionResult<GetAllUsersResponse>> GetAllAsync(
+        CancellationToken cancellationToken
+    ) {
+        Result<GetAllUsersResponse> result = await dispatch.Send(
+            new GetAllUsersQuery(),
             cancellationToken
         );
 
