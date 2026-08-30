@@ -6,6 +6,7 @@ import {
   ItemCondition,
   LoanRequest,
   LoanStatus,
+  RequesterRole,
   ReviewMoment,
   StockItem,
   TeacherItem,
@@ -196,7 +197,9 @@ export class LoansComponent implements OnInit {
     });
 
     this.usersApi.getUsers().subscribe((users) => this.requesterOptions.set(users));
-    this.implementosApi.getAll().subscribe((implementos) => this.implementoOptions.set(implementos));
+    this.implementosApi
+      .getAll()
+      .subscribe((implementos) => this.implementoOptions.set(implementos));
   }
 
   setStatusFilter(status: 'todos' | LoanStatus): void {
@@ -257,9 +260,6 @@ export class LoansComponent implements OnInit {
     this.loansApi.deleteLoan(match.id).subscribe({
       next: () => {
         this.loans.update((list) => list.filter((loan) => loan.id !== match.id));
-        if (this.selectedLoanId() === match.id) {
-          this.selectedLoanId.set(this.loans()[0]?.id ?? null);
-        }
         this.deleteSubmitting.set(false);
         this.deleteModalOpen.set(false);
       },
@@ -288,7 +288,9 @@ export class LoansComponent implements OnInit {
     this.editSaving.set(true);
     this.loansApi.updateLoan(loan).subscribe({
       next: (updated) => {
-        this.loans.update((list) => list.map((current) => (current.id === updated.id ? updated : current)));
+        this.loans.update((list) =>
+          list.map((current) => (current.id === updated.id ? updated : current)),
+        );
         this.editSaving.set(false);
         this.editingLoan.set(null);
       },
@@ -346,7 +348,10 @@ export class LoansComponent implements OnInit {
               ? list.map((loan) => (loan.id === updated.id ? updated : loan))
               : [updated, ...list];
           });
-          this.reviewMessage.set({ text: 'Revisión y préstamo registrado correctamente.', tone: 'success' });
+          this.reviewMessage.set({
+            text: 'Revisión y préstamo registrado correctamente.',
+            tone: 'success',
+          });
           this.reviewNote.set('');
           this.submitting.set(false);
           setTimeout(() => this.reviewMessage.set(null), 3500);
@@ -412,7 +417,9 @@ export class LoansComponent implements OnInit {
         },
         error: (error: Error) => {
           this.newLoanSubmitting.set(false);
-          this.newLoanMessage.set(error.message || 'No fue posible registrar la solicitud. Intenta nuevamente.');
+          this.newLoanMessage.set(
+            error.message || 'No fue posible registrar la solicitud. Intenta nuevamente.',
+          );
         },
       });
   }
