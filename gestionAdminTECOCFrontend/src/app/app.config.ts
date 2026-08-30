@@ -11,6 +11,8 @@ import { UsersApi } from './users/users-api';
 import { UsersHttpApi } from './core/users/users-http.api';
 import { UserRegistrationApi } from './core/users/user-registration-api';
 import { UserRegistrationHttpApi } from './core/users/user-registration-http.api';
+import { GroupsApi } from './groups/groups-api';
+import { GroupsHttpApi } from './core/groups/groups-http.api';
 import { LoansApi } from './loans/loans-api';
 import { LoansMockApi } from './mocks/loans/loans-mock.api';
 import { AttendanceApi } from './attendance/attendance-api';
@@ -26,6 +28,7 @@ export const appConfig: ApplicationConfig = {
     { provide: DashboardApi, useClass: DashboardMockApi },
     { provide: UsersApi, useClass: UsersHttpApi },
     { provide: UserRegistrationApi, useClass: UserRegistrationHttpApi },
+    { provide: GroupsApi, useClass: GroupsHttpApi },
     { provide: LoansApi, useClass: LoansMockApi },
     { provide: AttendanceApi, useClass: AttendanceMockApi },
   ],
