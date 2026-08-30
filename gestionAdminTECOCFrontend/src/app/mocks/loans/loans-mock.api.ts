@@ -6,7 +6,6 @@ import {
   CatalogItem,
   LoanRequest,
   LoanReviewRequest,
-  LoanStatus,
   LoansSnapshot,
   NewLoanRequest,
   StockItem,
@@ -103,10 +102,8 @@ export class LoansMockApi extends LoansApi {
     }
 
     const updatedCondition = request.condition;
-    // "Inicio Préstamo" entrega el implemento; "Fin Préstamo" lo marca como devuelto.
-    const isStart =
-      request.moment === 'inicio' || request.moment === 'entrega' || request.moment === '1';
-    const updatedStatus: LoanStatus = isStart ? 'entregado' : 'devuelto';
+    const isEntrega = request.moment === 'entrega' || request.moment === '2';
+    const updatedStatus = isEntrega ? 'entregado' : 'devuelto';
 
     if (target) {
       const updated: LoanRequest = {
@@ -115,11 +112,6 @@ export class LoansMockApi extends LoansApi {
         status: updatedStatus,
         startDate: request.startDate,
         endDate: request.endDate,
-        scheduleLabel:
-          updatedStatus === 'devuelto'
-            ? `Devuelto ${request.endDate ?? ''}`.trim()
-            : target.scheduleLabel,
-        dueInDays: updatedStatus === 'devuelto' ? null : target.dueInDays,
       };
       loans = loans.map((loan) => (loan.id === target!.id ? updated : loan));
       return of(updated).pipe(delay(300));
@@ -149,17 +141,6 @@ export class LoansMockApi extends LoansApi {
   }
 
   createLoan(request: NewLoanRequest): Observable<LoanRequest> {
-    const alreadyHasLoan = loans.some(
-      (loan) =>
-        loan.requesterName.trim().toLowerCase() === request.requesterName.trim().toLowerCase() &&
-        loan.status !== 'devuelto',
-    );
-    if (alreadyHasLoan) {
-      return throwError(
-        () => new Error('Solo se permite un préstamo activo por persona.'),
-      ).pipe(delay(300));
-    }
-
     const { label, dueInDays } = scheduleFromPickup(request.pickupDateIso, request.pickupTime);
 
     const created: LoanRequest = {
