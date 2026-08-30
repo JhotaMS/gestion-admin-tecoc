@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { UsersApi } from '../../users/users-api';
-import { UserAccount } from '../../users/users.models';
+import { UpdateUserAccountRequest, UserAccount } from '../../users/users.models';
 
-const USERS: UserAccount[] = [
+let USERS: UserAccount[] = [
   { id: 'u1', name: 'Camila Restrepo', email: 'camila.restrepo@tecoc.edu.co', role: 'Recursos Humanos', registeredAtIso: '2026-08-12', status: 'activo' },
   { id: 'u2', name: 'Julián Torres', email: 'julian.torres@tecoc.edu.co', role: 'Operaciones', registeredAtIso: '2026-08-10', status: 'activo' },
   { id: 'u3', name: 'Valentina Gómez', email: 'valentina.gomez@tecoc.edu.co', role: 'Finanzas', registeredAtIso: '2026-08-07', status: 'pendiente' },
@@ -20,6 +20,18 @@ const USERS: UserAccount[] = [
 @Injectable()
 export class UsersMockApi extends UsersApi {
   getUsers(): Observable<UserAccount[]> {
-    return of(USERS).pipe(delay(300));
+    return of([...USERS]).pipe(delay(300));
+  }
+
+  updateUser(request: UpdateUserAccountRequest): Observable<UserAccount> {
+    const target = USERS.find((user) => user.id === request.id);
+    if (!target) {
+      return throwError(() => new Error('Usuario no encontrado.'));
+    }
+
+    const updated: UserAccount = { ...target, name: request.name, email: request.email, role: request.role, status: request.status };
+    USERS = USERS.map((user) => (user.id === request.id ? updated : user));
+
+    return of(updated).pipe(delay(300));
   }
 }

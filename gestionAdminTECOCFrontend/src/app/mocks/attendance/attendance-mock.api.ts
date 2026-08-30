@@ -12,12 +12,12 @@ import {
 } from '../../attendance/attendance.models';
 
 const students: AttendanceStudent[] = [
-  { id: 'E-014', name: 'Ana Sofía Rojas' },
-  { id: 'E-015', name: 'Camilo Peña' },
-  { id: 'E-016', name: 'Daniela Cárdenas' },
-  { id: 'E-017', name: 'Emilio Suárez' },
-  { id: 'E-018', name: 'Felipa Torres' },
-  { id: 'E-019', name: 'Gabriel Niño' },
+  { id: 'E-014', fullName: 'Ana Sofía Rojas', documentType: 'TI', documentNumber: '1020304051', email: 'ana.rojas@tecoc.edu.co' },
+  { id: 'E-015', fullName: 'Camilo Peña', documentType: 'TI', documentNumber: '1020304052', email: 'camilo.pena@tecoc.edu.co' },
+  { id: 'E-016', fullName: 'Daniela Cárdenas', documentType: 'CC', documentNumber: '1020304053', email: 'daniela.cardenas@tecoc.edu.co' },
+  { id: 'E-017', fullName: 'Emilio Suárez', documentType: 'TI', documentNumber: '1020304054', email: 'emilio.suarez@tecoc.edu.co' },
+  { id: 'E-018', fullName: 'Felipa Torres', documentType: 'CC', documentNumber: '1020304055', email: 'felipa.torres@tecoc.edu.co' },
+  { id: 'E-019', fullName: 'Gabriel Niño', documentType: 'TI', documentNumber: '1020304056', email: 'gabriel.nino@tecoc.edu.co' },
 ];
 
 let sessions: ClassSession[] = [

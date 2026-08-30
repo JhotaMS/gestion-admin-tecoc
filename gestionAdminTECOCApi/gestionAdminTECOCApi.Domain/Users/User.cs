@@ -42,4 +42,18 @@ public class User : Entity<Guid> {
         email,
         passwordHash
     );
+
+    public void Update(
+        string fullName,
+        DocumentType documentType,
+        string documentNumber,
+        string userName,
+        string email
+    ) {
+        FullName = fullName;
+        DocumentType = documentType;
+        DocumentNumber = documentNumber;
+        UserName = userName;
+        Email = email;
+    }
 }

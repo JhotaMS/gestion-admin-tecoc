@@ -76,6 +76,7 @@
               <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Rol</th>
               <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Fecha de registro</th>
               <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Estado</th>
+              <th class="px-5 py-3"></th>
             </tr>
           </thead>
           <tbody>
@@ -114,10 +115,19 @@
                     {{ user.status === 'activo' ? 'Activo' : 'Pendiente' }}
                   </span>
                 </td>
+                <td class="px-5 py-3.5 text-right">
+                  <button
+                    type="button"
+                    class="rounded-md border border-tecoc-line bg-white px-3 py-1.5 text-[11px] font-semibold text-tecoc-ink transition hover:border-tecoc-blue hover:text-tecoc-navy"
+                    (click)="openEdit(user)"
+                  >
+                    Editar
+                  </button>
+                </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="4" class="px-5 py-10 text-center text-sm text-tecoc-ink">
+                <td colspan="5" class="px-5 py-10 text-center text-sm text-tecoc-ink">
                   No se encontraron usuarios que coincidan con la búsqueda.
                 </td>
               </tr>
@@ -127,4 +137,73 @@
       </div>
     }
   </div>
+
+  @if (editingUser(); as user) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-tecoc-deep/45 p-6 backdrop-blur-sm" (click)="closeEdit()">
+      <div class="w-full max-w-sm rounded-lg bg-white p-6 shadow-[0_30px_60px_-20px_rgba(0,20,60,0.5)]" (click)="$event.stopPropagation()">
+        <h3 class="m-0 mb-4 text-[17px] font-bold text-tecoc-deep">Editar usuario</h3>
+
+        <label class="mb-3 block">
+          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Nombre</span>
+          <input
+            type="text"
+            class="w-full rounded-md border border-tecoc-line px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+            [ngModel]="user.name"
+            (ngModelChange)="updateEditingField('name', $event)"
+          />
+        </label>
+
+        <label class="mb-3 block">
+          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Correo</span>
+          <input
+            type="email"
+            class="w-full rounded-md border border-tecoc-line px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+            [ngModel]="user.email"
+            (ngModelChange)="updateEditingField('email', $event)"
+          />
+        </label>
+
+        <label class="mb-3 block">
+          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Rol</span>
+          <input
+            type="text"
+            class="w-full rounded-md border border-tecoc-line px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+            [ngModel]="user.role"
+            (ngModelChange)="updateEditingField('role', $event)"
+          />
+        </label>
+
+        <label class="mb-5 block">
+          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Estado</span>
+          <select
+            class="w-full rounded-md border border-tecoc-line bg-white px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+            [ngModel]="user.status"
+            (ngModelChange)="updateEditingField('status', $event)"
+          >
+            @for (option of statusOptions; track option.key) {
+              <option [value]="option.key">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+
+        <div class="flex justify-end gap-2.5">
+          <button
+            type="button"
+            class="rounded-md border border-tecoc-line bg-white px-4 py-2.5 text-sm font-semibold text-tecoc-ink transition hover:border-tecoc-blue hover:text-tecoc-navy"
+            (click)="closeEdit()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="rounded-md bg-gradient-to-r from-tecoc-navy to-tecoc-blue px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_20px_-10px_rgba(0,56,146,0.85)] transition hover:brightness-105 disabled:opacity-60"
+            [disabled]="editSaving()"
+            (click)="saveEdit()"
+          >
+            {{ editSaving() ? 'Guardando…' : 'Guardar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>
