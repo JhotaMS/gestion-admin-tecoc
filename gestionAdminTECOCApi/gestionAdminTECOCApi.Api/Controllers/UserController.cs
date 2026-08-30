@@ -1,5 +1,6 @@
 ﻿using gestionAdminTECOCApi.Api.Errors;
 using gestionAdminTECOCApi.Application.Features.Users.CreateUser;
+using gestionAdminTECOCApi.Application.Features.Users.GetAllUsers;
 using gestionAdminTECOCApi.Application.Messaging;
 using gestionAdminTECOCApi.Domain.Abstractions;
 using gestionAdminTECOCApi.Domain.Helpers;
@@ -44,6 +45,26 @@ public class UserController(
         }
 
         return StatusCode( (int)HttpStatusCode.Created, result.Value );
+    }
+
+    [HttpGet()]
+    [ProducesResponseType( typeof( GetAllUsersResponse ), (int)HttpStatusCode.OK )]
+    public async Task<IActionResult> GetAllAsync(
+        CancellationToken cancellationToken
+    ) {
+        Result<GetAllUsersResponse> result = await dispatch.Send(
+            new GetAllUsersQuery(),
+            cancellationToken
+        );
+
+        if (result.IsFailure) {
+            return StatusCode(
+                StatusCodeByError( result.Error ),
+                new CodeError( StatusCodeByError( result.Error ), result.Error.Name )
+            );
+        }
+
+        return Ok( result.Value );
     }
 
     private static int StatusCodeByError( Error error ) => error.Code switch {

@@ -1,0 +1,41 @@
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable, map } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { UsersApi } from '../../users/users-api';
+import { UserAccount } from '../../users/users.models';
+
+interface UserDto {
+  userId: string;
+  fullName: string;
+  documentType: string;
+  documentNumber: string;
+  userName: string;
+  email: string;
+}
+
+interface GetAllUsersResponseDto {
+  users: UserDto[];
+}
+
+@Injectable()
+export class UsersHttpApi extends UsersApi {
+  private readonly http = inject(HttpClient);
+
+  getUsers(): Observable<UserAccount[]> {
+    return this.http
+      .get<GetAllUsersResponseDto>(`${environment.apiBaseUrl}/api/v1/User`)
+      .pipe(map((response) => response.users.map(toUserAccount)));
+  }
+}
+
+function toUserAccount(dto: UserDto): UserAccount {
+  return {
+    id: dto.userId,
+    name: dto.fullName,
+    userName: dto.userName,
+    documentType: dto.documentType,
+    documentNumber: dto.documentNumber,
+    email: dto.email,
+  };
+}
