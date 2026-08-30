@@ -1,22 +1,22 @@
-<header class="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6">
-  <div class="text-sm text-slate-500">Bienvenido de nuevo</div>
-
-  <div class="flex items-center gap-4">
-    @if (currentUser()) {
-      <div class="text-right">
-        <p class="text-sm font-medium text-slate-800">{{ currentUser()!.name }}</p>
-        <p class="text-xs text-slate-500">{{ currentUser()!.role }}</p>
+<header class="flex h-16 items-center justify-end gap-4 border-b border-tecoc-border bg-white px-6">
+  @if (currentUser()) {
+    <div class="flex items-center gap-3 rounded-full bg-slate-50 py-1.5 pl-4 pr-1.5 shadow-sm ring-1 ring-tecoc-border">
+      <div class="text-right leading-tight">
+        <p class="text-sm font-semibold text-tecoc-deep">{{ currentUser()!.name }}</p>
+        <p class="text-xs text-tecoc-ink">{{ currentUser()!.role }}</p>
       </div>
-      <div class="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700">
+      <div
+        class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-tecoc-blue to-tecoc-navy text-sm font-semibold text-white"
+      >
         {{ currentUser()!.name.charAt(0) }}
       </div>
-      <button
-        type="button"
-        class="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
-        (click)="logout()"
-      >
-        Salir
-      </button>
-    }
-  </div>
+    </div>
+    <button
+      type="button"
+      class="rounded-full border border-tecoc-border bg-white px-4 py-2 text-sm font-medium text-tecoc-ink shadow-sm transition hover:border-tecoc-blue hover:text-tecoc-navy"
+      (click)="logout()"
+    >
+      Cerrar sesión
+    </button>
+  }
 </header>

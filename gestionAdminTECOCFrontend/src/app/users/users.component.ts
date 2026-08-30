@@ -1,5 +1,4 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { UsersApi } from './users-api';
@@ -11,7 +10,7 @@ import { CreateUserRequest } from '../core/models/user-registration.models';
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [DatePipe, FormsModule],
+  imports: [FormsModule],
   templateUrl: './users.component.html',
 })
 export class UsersComponent implements OnInit {

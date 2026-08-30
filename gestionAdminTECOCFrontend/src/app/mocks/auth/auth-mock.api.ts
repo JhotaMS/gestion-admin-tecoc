@@ -2,7 +2,12 @@ import { Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { AuthApi } from '../../core/auth/auth-api';
-import { AuthUser, LoginRequest, LoginResponse, RegisterRequest } from '../../core/models/auth.models';
+import {
+  AuthUser,
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+} from '../../core/models/auth.models';
 
 interface MockAccount {
   username: string;
@@ -55,7 +60,9 @@ export class AuthMockApi extends AuthApi {
 
   login(request: LoginRequest): Observable<LoginResponse> {
     const account = this.accounts.find(
-      (a) => a.username === request.username && a.password === request.password
+      (a) =>
+        (a.username === request.username || a.user.email === request.username) &&
+        a.password === request.password,
     );
 
     if (!account) {

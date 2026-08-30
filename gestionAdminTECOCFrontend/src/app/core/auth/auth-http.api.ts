@@ -40,11 +40,24 @@ export class AuthHttpApi extends AuthApi {
       );
   }
 
+ login(request: LoginRequest): Observable<LoginResponse> {
+    return this.httpClient.post<LoginResponse>(
+      `${environment.apiBaseUrl}/v1/Auth/login`,
+      request,
+    );
+  }
+
   register(request: RegisterRequest): Observable<AuthUser> {
-    return throwError(() => new Error('El registro de autenticación no está habilitado con la API real. Usa el registro de usuarios.'));
+    return this.httpClient.post<AuthUser>(
+      `${environment.apiBaseUrl}/v1/user/register`,
+      request,
+    );
   }
 
   getCurrentUser(token: string): Observable<AuthUser> {
-    return throwError(() => new Error(`No se pudo recuperar el usuario actual para el token ${token}.`));
+    return this.httpClient.get<AuthUser>(`${environment.apiBaseUrl}/v1/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
   }
 }

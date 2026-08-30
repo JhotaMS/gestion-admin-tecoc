@@ -1,4 +1,9 @@
-﻿using gestionAdminTECOCApi.Domain.Users;
+﻿using gestionAdminTECOCApi.Domain.DocumentTypes;
+using gestionAdminTECOCApi.Domain.ScheduledClasses;
+using gestionAdminTECOCApi.Domain.Loans;
+using gestionAdminTECOCApi.Domain.Prestamos;
+using gestionAdminTECOCApi.Domain.Groups;
+using gestionAdminTECOCApi.Domain.Users;
 using gestionAdminTECOCApi.Domain.WeatherForecasts;
 using gestionAdminTECOCApi.Domain.WeatherForecastsHistories;
 using Microsoft.EntityFrameworkCore;
@@ -19,9 +24,16 @@ public partial class ApplicationDbContext : DbContext {
         _config = config;
     }
 
+    public virtual DbSet<ScheduledClass> ScheduledClasses { get; set; }
     public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<Prestamo> Prestamo { get; set; }
+    public virtual DbSet<Group> Groups { get; set; }
+    public virtual DbSet<DocumentTypeEntity> DocumentTypes { get; set; }
     public virtual DbSet<WeatherForecast> WeatherForecasts { get; set; }
     public virtual DbSet<WeatherForecastsHistory> WeatherForecastsHistories { get; set; }
+    public virtual DbSet<ImplementoPrestado> ImplementosPrestados { get; set; }
+    public virtual DbSet<Implemento> Implementos { get; set; }
+    public virtual DbSet<TipoRevision> TiposRevision { get; set; }
 
     public override Task<int> SaveChangesAsync( CancellationToken cancellationToken = default ) {
         return base.SaveChangesAsync( cancellationToken );

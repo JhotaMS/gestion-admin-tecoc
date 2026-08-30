@@ -4,6 +4,8 @@ import { of } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { UserRegistrationApi } from '../../../core/users/user-registration-api';
 import { RegisterComponent } from './register.component';
+import { AuthApi } from '../../../core/auth/auth-api';
+import { UserRegistrationApi } from '../../../core/users/user-registration-api';
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;

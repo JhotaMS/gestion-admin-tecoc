@@ -27,6 +27,19 @@ export const routes: Routes = [
         path: 'usuarios',
         loadComponent: () => import('./users/users.component').then((m) => m.UsersComponent),
       },
+      {
+        path: 'grupos',
+        loadComponent: () => import('./groups/groups.component').then((m) => m.GroupsComponent),
+      },
+      {
+        path: 'prestamos',
+        loadComponent: () => import('./loans/loans.component').then((m) => m.LoansComponent),
+      },
+      {
+        path: 'asistencia',
+        loadComponent: () =>
+          import('./attendance/attendance.component').then((m) => m.AttendanceComponent),
+      },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },

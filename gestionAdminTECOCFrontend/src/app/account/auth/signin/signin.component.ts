@@ -11,7 +11,13 @@ interface PasswordStrength {
 }
 
 const STRENGTH_COLORS = ['#bbbbbb', '#53565a', '#0073cb', '#003892', '#00215e'];
-const STRENGTH_LABELS = ['', 'Contraseña débil', 'Contraseña aceptable', 'Contraseña segura', 'Contraseña muy segura'];
+const STRENGTH_LABELS = [
+  '',
+  'Contraseña débil',
+  'Contraseña aceptable',
+  'Contraseña segura',
+  'Contraseña muy segura',
+];
 
 @Component({
   selector: 'app-signin',

@@ -12,6 +12,9 @@ export const SIDEBAR_MENU: MenuItem[] = [
     children: [
       { label: 'Solicitudes', icon: 'file-text', link: '/dashboard' },
       { label: 'Usuarios', icon: 'users', link: '/usuarios' },
+      { label: 'Grupos', icon: 'folder-kanban', link: '/grupos' },
+      { label: 'Préstamo de implementos', icon: 'package', link: '/prestamos' },
+      { label: 'Asistencia', icon: 'calendar-check', link: '/asistencia' },
     ],
   },
   { label: 'Configuración', icon: 'settings', link: '/dashboard' },

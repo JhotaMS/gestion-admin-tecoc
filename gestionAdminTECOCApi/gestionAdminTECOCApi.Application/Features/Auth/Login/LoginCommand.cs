@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 namespace gestionAdminTECOCApi.Application.Features.Auth.Login;
 
 public record LoginCommand(
-    [property: JsonPropertyName( "email" )] string Email,
-    [property: JsonPropertyName( "password" )] string Password
+    string UserName,
+    string Password,
+    string? Email = null
 ) : ICommand<LoginResponse>;

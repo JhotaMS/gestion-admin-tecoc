@@ -24,7 +24,6 @@ const STRENGTH_LABELS = ['', 'Contraseña débil', 'Contraseña aceptable', 'Con
 export class RegisterComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
-  private readonly authService = inject(AuthService);
   private readonly userRegistrationApi = inject(UserRegistrationApi);
 
   readonly documentTypeOptions = DOCUMENT_TYPE_OPTIONS;
