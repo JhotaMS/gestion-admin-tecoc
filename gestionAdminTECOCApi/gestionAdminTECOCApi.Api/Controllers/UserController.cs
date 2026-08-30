@@ -2,6 +2,7 @@ using gestionAdminTECOCApi.Api.Errors;
 using gestionAdminTECOCApi.Application.Features.Users.CreateUser;
 using gestionAdminTECOCApi.Application.Features.Users.GetAllUsers;
 using gestionAdminTECOCApi.Application.Features.Users.UpdateUser;
+using gestionAdminTECOCApi.Application.Features.Users.GetPagedUsers;
 using gestionAdminTECOCApi.Application.Messaging;
 using gestionAdminTECOCApi.Domain.Abstractions;
 using gestionAdminTECOCApi.Domain.Helpers;
@@ -11,7 +12,8 @@ using System.Net;
 
 namespace gestionAdminTECOCApi.Api.Controllers;
 
-[Route( "api/v1/[controller]" )]
+[ApiController]
+[Route( "v1/[controller]" )]
 public class UserController(
     ILogger<UserController> logger,
     IDispatch dispatch
@@ -32,6 +34,10 @@ public class UserController(
                 nameof( CreateUserAsync ),
                 nameof( UserController )
         );
+
+        if (request is null) {
+            return BadRequest( new CodeError( (int)HttpStatusCode.BadRequest, "El cuerpo de la solicitud es obligatorio." ) );
+        }
 
         Result<UserCommandResponse> result = await dispatch.Send(
             request,
@@ -98,6 +104,32 @@ public class UserController(
             new GetAllUsersQuery(),
             cancellationToken
         );
+
+        if (result.IsFailure) {
+            return StatusCode(
+                StatusCodeByError( result.Error ),
+                new CodeError( StatusCodeByError( result.Error ), result.Error.Name )
+            );
+        }
+
+        return StatusCode( (int)HttpStatusCode.OK, result.Value );
+    }
+
+    // GET /api/v1/User/paged?pageNumber=1&pageSize=8
+    // pageNumber y pageSize son opcionales (nullable): si no se envían, se usa página 1 con 10
+    // registros. Si se envían con un valor inválido (ej. pageNumber=0), el query los valida y
+    // responde 400 en vez de aplicar el valor por defecto silenciosamente.
+    [HttpGet( "paged" )]
+    [ProducesResponseType( typeof( GetPagedUsersResponse ), (int)HttpStatusCode.OK )]
+    [ProducesResponseType( typeof( CodeError ), (int)HttpStatusCode.BadRequest )]
+    public async Task<ActionResult<GetPagedUsersResponse>> GetPagedAsync(
+        [FromQuery] int? pageNumber,
+        [FromQuery] int? pageSize,
+        CancellationToken cancellationToken
+    ) {
+        var query = new GetPagedUsersQuery( pageNumber ?? 1, pageSize ?? 10 );
+
+        Result<GetPagedUsersResponse> result = await dispatch.Send( query, cancellationToken );
 
         if (result.IsFailure) {
             return StatusCode(

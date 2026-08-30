@@ -226,19 +226,13 @@
         </div>
 
         <label class="flex cursor-pointer items-center gap-2.5 select-none">
-          <button
-            type="button"
-            class="tecoc-check"
-            [class.tecoc-check--on]="acceptTerms()"
-            (click)="toggleTerms()"
+          <input
+            type="checkbox"
+            class="h-4 w-4 accent-tecoc-blue"
+            [checked]="acceptTerms()"
+            (change)="toggleTerms()"
             aria-label="Aceptar términos y condiciones"
-          >
-            @if (acceptTerms()) {
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                <path d="M20 6L9 17l-5-5" />
-              </svg>
-            }
-          </button>
+          />
           <span class="text-sm text-tecoc-ink">Acepto los <a href="#" class="font-semibold text-tecoc-blue hover:text-tecoc-navy hover:underline">términos y condiciones</a></span>
         </label>
 

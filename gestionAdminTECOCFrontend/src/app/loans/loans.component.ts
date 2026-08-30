@@ -10,7 +10,6 @@ import {
   RequesterRole,
   ReviewMoment,
   StockItem,
-  TeacherItem,
 } from './loans.models';
 import { UsersApi } from '../users/users-api';
 import { UserAccount } from '../users/users.models';
@@ -21,6 +20,7 @@ import { PrestamoDetalle } from '../core/models/prestamo-detalle.models';
 import {
   ESTADO_TIPO_BUENO,
   ImplementoOption,
+  ImplementoPrestadoDto,
   TIPO_REVISION_INICIO,
 } from '../core/models/implemento-prestado.models';
 
@@ -79,6 +79,53 @@ function todayIso(): string {
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }
 
+const CONDITION_BY_ESTADO_TIPO: Record<string, ItemCondition> = {
+  Bueno: 'bueno',
+  Regular: 'regular',
+  Malo: 'malo',
+};
+
+// El backend real (ImplementosPrestados) todavía no expone un estado explícito de
+// "reservado/entregado/devuelto": se deriva a partir de las fechas de inicio y fin.
+function statusFromDates(fechaInicio: string, fechaFin: string): LoanStatus {
+  const today = todayIso();
+  const inicio = fechaInicio.slice(0, 10);
+  const fin = fechaFin.slice(0, 10);
+  if (fin < today) return 'atrasado';
+  if (inicio <= today) return 'entregado';
+  return 'reservado';
+}
+
+function scheduleLabelFromDates(fechaInicio: string, fechaFin: string): string {
+  const inicio = fechaInicio.slice(0, 10);
+  const fin = fechaFin.slice(0, 10);
+  return inicio === fin ? `Del ${inicio} al ${fin}` : `Desde ${inicio} hasta ${fin}`;
+}
+
+function dueInDaysFromDate(fechaFin: string): number {
+  const [year, month, day] = fechaFin.slice(0, 10).split('-').map(Number);
+  const due = new Date(year, month - 1, day);
+  const today = new Date();
+  const today0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return Math.round((due.getTime() - today0.getTime()) / 86_400_000);
+}
+
+function loanFromImplementoPrestado(dto: ImplementoPrestadoDto): LoanRequest {
+  return {
+    id: dto.id,
+    itemName: dto.itemName,
+    itemCode: dto.itemCode,
+    requesterName: dto.requesterName,
+    requesterRole: 'Docente',
+    status: statusFromDates(dto.fechaInicio, dto.fechaFin),
+    scheduleLabel: scheduleLabelFromDates(dto.fechaInicio, dto.fechaFin),
+    dueInDays: dueInDaysFromDate(dto.fechaFin),
+    condition: CONDITION_BY_ESTADO_TIPO[dto.estadoTipo] ?? 'pend',
+    startDate: dto.fechaInicio.slice(0, 10),
+    endDate: dto.fechaFin.slice(0, 10),
+  };
+}
+
 @Component({
   selector: 'app-loans',
   standalone: true,
@@ -109,13 +156,11 @@ export class LoansComponent implements OnInit {
   readonly loans = signal<LoanRequest[]>([]);
   readonly stock = signal<StockItem[]>([]);
   readonly catalog = signal<CatalogItem[]>([]);
-  readonly teachers = signal<TeacherItem[]>([]);
   readonly searchTerm = signal('');
   readonly statusFilter = signal<'todos' | LoanStatus>('todos');
 
-  // Formulario lateral de revisión / estado de préstamo
-  readonly selectedTeacherId = signal<string>('');
-  readonly selectedItemCode = signal<string>('');
+  // Formulario lateral de revisión / estado de un préstamo existente
+  readonly selectedLoanId = signal<string>('');
   readonly reviewMoment = signal<ReviewMoment>('inicio');
   readonly reviewCondition = signal<ItemCondition | null>('bueno');
   readonly reviewStartDate = signal<string>(todayIso());
@@ -124,7 +169,11 @@ export class LoansComponent implements OnInit {
   readonly reviewMessage = signal<{ text: string; tone: 'success' | 'error' } | null>(null);
   readonly submitting = signal(false);
 
-  // Modal "Nueva solicitud" — registra el préstamo contra el backend real (ImplementosPrestados)
+  readonly selectedLoan = computed(
+    () => this.loans().find((loan) => loan.id === this.selectedLoanId()) ?? null,
+  );
+
+  // Modal "Nueva solicitud"
   readonly newLoanModalOpen = signal(false);
   readonly requesterOptions = signal<UserAccount[]>([]);
   readonly implementoOptions = signal<ImplementoOption[]>([]);
@@ -136,7 +185,7 @@ export class LoansComponent implements OnInit {
   readonly newNote = signal('');
   readonly newLoanSubmitted = signal(false);
   readonly newLoanSubmitting = signal(false);
-  readonly newLoanMessage = signal<string | null>(null);
+  readonly newLoanMessage = signal<{ text: string; tone: 'success' | 'error' } | null>(null);
 
   // Fila actualmente resaltada/seleccionada en la tabla (si la solicitud seleccionada se
   // elimina, se limpia o se mueve a la primera restante).
@@ -198,26 +247,64 @@ export class LoansComponent implements OnInit {
 
   ngOnInit(): void {
     this.loansApi.getSnapshot().subscribe((snapshot) => {
-      this.loans.set(snapshot.loans);
       this.stock.set(snapshot.stock);
       this.catalog.set(snapshot.catalog);
-      this.teachers.set(snapshot.teachers || []);
 
-      if (snapshot.teachers && snapshot.teachers.length > 0) {
-        this.selectedTeacherId.set(snapshot.teachers[0].name);
+      const initial =
+        snapshot.loans.find((loan) => loan.status !== 'devuelto') ?? snapshot.loans[0];
+      if (initial) {
+        this.selectLoan(initial.id);
       }
-      if (snapshot.catalog && snapshot.catalog.length > 0) {
-        this.selectedItemCode.set(snapshot.catalog[0].code);
-      }
-      this.loading.set(false);
     });
 
+    // Tabla "Solicitudes de préstamo": datos reales de la base de datos, ya no de relleno.
+    this.loadRealLoans();
+
     this.usersApi.getUsers().subscribe((users) => this.requesterOptions.set(users));
-    this.implementosApi.getAll().subscribe((implementos) => this.implementoOptions.set(implementos));
+    this.implementosApi
+      .getAll()
+      .subscribe((implementos) => this.implementoOptions.set(implementos));
+  }
+
+  private loadRealLoans(): void {
+    this.implementoPrestadoApi.getAll().subscribe({
+      next: (dtos) => {
+        const mapped = dtos.map(loanFromImplementoPrestado);
+        this.loans.set(mapped);
+        this.selectedLoanId.set(mapped[0]?.id ?? null);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loans.set([]);
+        this.loading.set(false);
+      },
+    });
   }
 
   setStatusFilter(status: 'todos' | LoanStatus): void {
     this.statusFilter.set(status);
+  }
+
+  selectLoan(loanId: string): void {
+    this.selectedLoanId.set(loanId);
+    this.reviewMessage.set(null);
+
+    const loan = this.loans().find((item) => item.id === loanId);
+    if (!loan) {
+      return;
+    }
+
+    // "Fin Préstamo" aplica a implementos ya entregados; el resto parte de "Inicio".
+    this.reviewMoment.set(loan.status === 'entregado' ? 'fin' : 'inicio');
+
+    const editableConditions: ItemCondition[] = ['malo', 'regular', 'bueno'];
+    this.reviewCondition.set(
+      editableConditions.includes(loan.condition) ? loan.condition : null,
+    );
+
+    this.reviewStartDate.set(loan.startDate ?? todayIso());
+    this.reviewEndDate.set(loan.endDate ?? todayIso());
+    this.reviewNote.set('');
   }
 
   selectCondition(condition: ItemCondition): void {
@@ -274,9 +361,6 @@ export class LoansComponent implements OnInit {
     this.loansApi.deleteLoan(match.id).subscribe({
       next: () => {
         this.loans.update((list) => list.filter((loan) => loan.id !== match.id));
-        if (this.selectedLoanId() === match.id) {
-          this.selectedLoanId.set(this.loans()[0]?.id ?? null);
-        }
         this.deleteSubmitting.set(false);
         this.deleteModalOpen.set(false);
       },
@@ -340,7 +424,9 @@ export class LoansComponent implements OnInit {
     this.editSaving.set(true);
     this.loansApi.updateLoan(loan).subscribe({
       next: (updated) => {
-        this.loans.update((list) => list.map((current) => (current.id === updated.id ? updated : current)));
+        this.loans.update((list) =>
+          list.map((current) => (current.id === updated.id ? updated : current)),
+        );
         this.editSaving.set(false);
         this.editingLoan.set(null);
       },
@@ -356,13 +442,20 @@ export class LoansComponent implements OnInit {
   }
 
   submitReview(): void {
-    const teacher = this.selectedTeacherId();
-    const itemCode = this.selectedItemCode();
+    const loan = this.selectedLoan();
     const condition = this.reviewCondition();
 
-    if (!teacher || !itemCode || !condition) {
+    if (!loan) {
       this.reviewMessage.set({
-        text: 'Por favor selecciona el docente, implemento y estado.',
+        text: 'Selecciona un préstamo existente para registrar la revisión.',
+        tone: 'error',
+      });
+      return;
+    }
+
+    if (!condition) {
+      this.reviewMessage.set({
+        text: 'Selecciona el estado del implemento.',
         tone: 'error',
       });
       return;
@@ -376,14 +469,13 @@ export class LoansComponent implements OnInit {
       return;
     }
 
-    const item = this.catalog().find((candidate) => candidate.code === itemCode);
-
     this.submitting.set(true);
     this.loansApi
       .reviewLoan({
-        teacherName: teacher,
-        itemCode: itemCode,
-        itemName: item?.name,
+        loanId: loan.id,
+        teacherName: loan.requesterName,
+        itemCode: loan.itemCode,
+        itemName: loan.itemName,
         moment: this.reviewMoment(),
         condition,
         startDate: this.reviewStartDate(),
@@ -392,13 +484,14 @@ export class LoansComponent implements OnInit {
       })
       .subscribe({
         next: (updated) => {
-          this.loans.update((list) => {
-            const exists = list.some((loan) => loan.id === updated.id);
-            return exists
-              ? list.map((loan) => (loan.id === updated.id ? updated : loan))
-              : [updated, ...list];
+          this.loans.update((list) =>
+            list.map((item) => (item.id === updated.id ? updated : item)),
+          );
+          this.selectedLoanId.set(updated.id);
+          this.reviewMessage.set({
+            text: 'Revisión registrada y préstamo actualizado.',
+            tone: 'success',
           });
-          this.reviewMessage.set({ text: 'Revisión y préstamo registrado correctamente.', tone: 'success' });
           this.reviewNote.set('');
           this.submitting.set(false);
           setTimeout(() => this.reviewMessage.set(null), 3500);
@@ -440,8 +533,23 @@ export class LoansComponent implements OnInit {
       return;
     }
 
-    if (endDate < startDate) {
-      this.newLoanMessage.set('La fecha de fin debe ser igual o posterior a la fecha de inicio.');
+    const requesterName = this.requesterOptions().find((user) => user.id === userId)?.name ?? '';
+    const item = this.implementoOptions().find((candidate) => candidate.id === implementoId);
+    if (!item) {
+      return;
+    }
+
+    // Regla de negocio: una persona solo puede tener un préstamo activo a la vez.
+    const hasActiveLoan = this.loans().some(
+      (loan) =>
+        loan.requesterName.trim().toLowerCase() === requesterName.toLowerCase() &&
+        loan.status !== 'devuelto',
+    );
+    if (hasActiveLoan) {
+      this.newLoanMessage.set({
+        text: `${requesterName} ya tiene un préstamo activo. Solo se permite un préstamo por persona.`,
+        tone: 'error',
+      });
       return;
     }
 
@@ -459,12 +567,15 @@ export class LoansComponent implements OnInit {
       .subscribe({
         next: () => {
           this.newLoanSubmitting.set(false);
-          this.newLoanMessage.set('Solicitud de préstamo registrada correctamente.');
+          this.newLoanMessage.set({ text: 'Solicitud creada correctamente.', tone: 'success' });
           setTimeout(() => this.closeNewLoanModal(), 900);
         },
         error: (error: Error) => {
           this.newLoanSubmitting.set(false);
-          this.newLoanMessage.set(error.message || 'No fue posible registrar la solicitud. Intenta nuevamente.');
+          this.newLoanMessage.set({
+            text: 'No fue posible crear la solicitud. Intenta nuevamente.',
+            tone: 'error',
+          });
         },
       });
   }
