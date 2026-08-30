@@ -10,6 +10,16 @@ import {
   ReviewMoment,
   StockItem,
 } from './loans.models';
+import { UsersApi } from '../users/users-api';
+import { UserAccount } from '../users/users.models';
+import { ImplementosApi } from '../core/loans/implementos-api';
+import { ImplementoPrestadoApi } from '../core/loans/implemento-prestado-api';
+import {
+  ESTADO_TIPO_BUENO,
+  ImplementoOption,
+  ImplementoPrestadoDto,
+  TIPO_REVISION_INICIO,
+} from '../core/models/implemento-prestado.models';
 
 interface StatusFilterOption {
   key: 'todos' | LoanStatus;
@@ -66,6 +76,53 @@ function todayIso(): string {
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }
 
+const CONDITION_BY_ESTADO_TIPO: Record<string, ItemCondition> = {
+  Bueno: 'bueno',
+  Regular: 'regular',
+  Malo: 'malo',
+};
+
+// El backend real (ImplementosPrestados) todavía no expone un estado explícito de
+// "reservado/entregado/devuelto": se deriva a partir de las fechas de inicio y fin.
+function statusFromDates(fechaInicio: string, fechaFin: string): LoanStatus {
+  const today = todayIso();
+  const inicio = fechaInicio.slice(0, 10);
+  const fin = fechaFin.slice(0, 10);
+  if (fin < today) return 'atrasado';
+  if (inicio <= today) return 'entregado';
+  return 'reservado';
+}
+
+function scheduleLabelFromDates(fechaInicio: string, fechaFin: string): string {
+  const inicio = fechaInicio.slice(0, 10);
+  const fin = fechaFin.slice(0, 10);
+  return inicio === fin ? `Del ${inicio} al ${fin}` : `Desde ${inicio} hasta ${fin}`;
+}
+
+function dueInDaysFromDate(fechaFin: string): number {
+  const [year, month, day] = fechaFin.slice(0, 10).split('-').map(Number);
+  const due = new Date(year, month - 1, day);
+  const today = new Date();
+  const today0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return Math.round((due.getTime() - today0.getTime()) / 86_400_000);
+}
+
+function loanFromImplementoPrestado(dto: ImplementoPrestadoDto): LoanRequest {
+  return {
+    id: dto.id,
+    itemName: dto.itemName,
+    itemCode: dto.itemCode,
+    requesterName: dto.requesterName,
+    requesterRole: 'Docente',
+    status: statusFromDates(dto.fechaInicio, dto.fechaFin),
+    scheduleLabel: scheduleLabelFromDates(dto.fechaInicio, dto.fechaFin),
+    dueInDays: dueInDaysFromDate(dto.fechaFin),
+    condition: CONDITION_BY_ESTADO_TIPO[dto.estadoTipo] ?? 'pend',
+    startDate: dto.fechaInicio.slice(0, 10),
+    endDate: dto.fechaFin.slice(0, 10),
+  };
+}
+
 @Component({
   selector: 'app-loans',
   standalone: true,
@@ -74,6 +131,9 @@ function todayIso(): string {
 })
 export class LoansComponent implements OnInit {
   private readonly loansApi = inject(LoansApi);
+  private readonly usersApi = inject(UsersApi);
+  private readonly implementosApi = inject(ImplementosApi);
+  private readonly implementoPrestadoApi = inject(ImplementoPrestadoApi);
 
   readonly statusFilters = STATUS_FILTERS;
   readonly conditionOptions: { key: ItemCondition; label: string }[] = [
@@ -82,6 +142,10 @@ export class LoansComponent implements OnInit {
     { key: 'bueno', label: 'Bueno' },
   ];
   readonly roleOptions: RequesterRole[] = ['Estudiante', 'Docente'];
+  readonly editStatusOptions = STATUS_FILTERS.filter((option) => option.key !== 'todos') as {
+    key: LoanStatus;
+    label: string;
+  }[];
   readonly minPickupDate = todayIso();
 
   readonly loading = signal(true);
@@ -107,15 +171,34 @@ export class LoansComponent implements OnInit {
 
   // Modal "Nueva solicitud"
   readonly newLoanModalOpen = signal(false);
-  readonly newItemCode = signal('');
-  readonly newRequesterName = signal('');
-  readonly newRequesterRole = signal<RequesterRole | null>(null);
-  readonly newPickupDate = signal('');
-  readonly newPickupTime = signal('09:00');
+  readonly requesterOptions = signal<UserAccount[]>([]);
+  readonly implementoOptions = signal<ImplementoOption[]>([]);
+  readonly newImplementoId = signal('');
+  readonly newUserId = signal('');
+  readonly newRequesterRoleLabel = 'Docente';
+  readonly newStartDate = signal(todayIso());
+  readonly newEndDate = signal(todayIso());
   readonly newNote = signal('');
   readonly newLoanSubmitted = signal(false);
   readonly newLoanSubmitting = signal(false);
   readonly newLoanMessage = signal<{ text: string; tone: 'success' | 'error' } | null>(null);
+
+  // Modal "Eliminar por ID"
+  readonly deleteModalOpen = signal(false);
+  readonly deleteIdInput = signal('');
+  readonly deleteSubmitting = signal(false);
+
+  // Modal "Editar solicitud"
+  readonly editingLoan = signal<LoanRequest | null>(null);
+  readonly editSaving = signal(false);
+
+  readonly selectedLoanId = signal<string | null>(null);
+
+  readonly deleteMatch = computed<LoanRequest | null>(() => {
+    const id = this.deleteIdInput().trim();
+    if (!id) return null;
+    return this.loans().find((loan) => loan.id === id) ?? null;
+  });
 
   readonly filteredLoans = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
@@ -150,7 +233,6 @@ export class LoansComponent implements OnInit {
 
   ngOnInit(): void {
     this.loansApi.getSnapshot().subscribe((snapshot) => {
-      this.loans.set(snapshot.loans);
       this.stock.set(snapshot.stock);
       this.catalog.set(snapshot.catalog);
 
@@ -159,7 +241,29 @@ export class LoansComponent implements OnInit {
       if (initial) {
         this.selectLoan(initial.id);
       }
-      this.loading.set(false);
+    });
+
+    // Tabla "Solicitudes de préstamo": datos reales de la base de datos, ya no de relleno.
+    this.loadRealLoans();
+
+    this.usersApi.getUsers().subscribe((users) => this.requesterOptions.set(users));
+    this.implementosApi
+      .getAll()
+      .subscribe((implementos) => this.implementoOptions.set(implementos));
+  }
+
+  private loadRealLoans(): void {
+    this.implementoPrestadoApi.getAll().subscribe({
+      next: (dtos) => {
+        const mapped = dtos.map(loanFromImplementoPrestado);
+        this.loans.set(mapped);
+        this.selectedLoanId.set(mapped[0]?.id ?? null);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loans.set([]);
+        this.loading.set(false);
+      },
     });
   }
 
@@ -220,6 +324,67 @@ export class LoansComponent implements OnInit {
       return BLUE;
     }
     return SUCCESS;
+  }
+
+  openDeleteModal(): void {
+    this.deleteIdInput.set('');
+    this.deleteModalOpen.set(true);
+  }
+
+  closeDeleteModal(): void {
+    this.deleteModalOpen.set(false);
+  }
+
+  setDeleteIdInput(value: string): void {
+    this.deleteIdInput.set(value.replace(/[^0-9]/g, ''));
+  }
+
+  confirmDeleteById(): void {
+    const match = this.deleteMatch();
+    if (!match) return;
+
+    this.deleteSubmitting.set(true);
+    this.loansApi.deleteLoan(match.id).subscribe({
+      next: () => {
+        this.loans.update((list) => list.filter((loan) => loan.id !== match.id));
+        this.deleteSubmitting.set(false);
+        this.deleteModalOpen.set(false);
+      },
+      error: () => {
+        this.deleteSubmitting.set(false);
+      },
+    });
+  }
+
+  openEditLoan(loan: LoanRequest): void {
+    this.editingLoan.set({ ...loan });
+  }
+
+  closeEditLoan(): void {
+    this.editingLoan.set(null);
+  }
+
+  updateEditingLoanField<K extends keyof LoanRequest>(field: K, value: LoanRequest[K]): void {
+    this.editingLoan.update((loan) => (loan ? { ...loan, [field]: value } : loan));
+  }
+
+  saveEditLoan(): void {
+    const loan = this.editingLoan();
+    if (!loan || !loan.itemName.trim() || !loan.requesterName.trim()) return;
+
+    this.editSaving.set(true);
+    this.loansApi.updateLoan(loan).subscribe({
+      next: (updated) => {
+        this.loans.update((list) =>
+          list.map((current) => (current.id === updated.id ? updated : current)),
+        );
+        this.editSaving.set(false);
+        this.editingLoan.set(null);
+      },
+      error: () => {
+        this.editSaving.set(false);
+      },
+    });
   }
 
   initials(name: string): string {
@@ -293,11 +458,10 @@ export class LoansComponent implements OnInit {
   }
 
   openNewLoanModal(): void {
-    this.newItemCode.set('');
-    this.newRequesterName.set('');
-    this.newRequesterRole.set(null);
-    this.newPickupDate.set('');
-    this.newPickupTime.set('09:00');
+    this.newImplementoId.set(this.implementoOptions()[0]?.id ?? '');
+    this.newUserId.set(this.requesterOptions()[0]?.id ?? '');
+    this.newStartDate.set(todayIso());
+    this.newEndDate.set(todayIso());
     this.newNote.set('');
     this.newLoanSubmitted.set(false);
     this.newLoanMessage.set(null);
@@ -308,19 +472,15 @@ export class LoansComponent implements OnInit {
     this.newLoanModalOpen.set(false);
   }
 
-  selectRole(role: RequesterRole): void {
-    this.newRequesterRole.set(role);
-  }
-
   submitNewLoan(): void {
     this.newLoanSubmitted.set(true);
 
-    const itemCode = this.newItemCode();
-    const requesterName = this.newRequesterName().trim();
-    const role = this.newRequesterRole();
-    const pickupDate = this.newPickupDate();
+    const implementoId = this.newImplementoId();
+    const userId = this.newUserId();
+    const startDate = this.newStartDate();
+    const endDate = this.newEndDate();
 
-    if (!itemCode || !requesterName || !role || !pickupDate) {
+    if (!implementoId || !userId || !startDate || !endDate) {
       return;
     }
 
@@ -344,24 +504,23 @@ export class LoansComponent implements OnInit {
     }
 
     this.newLoanSubmitting.set(true);
-    this.loansApi
-      .createLoan({
-        itemName: item.name,
-        itemCode: item.code,
-        requesterName,
-        requesterRole: role,
-        pickupDateIso: pickupDate,
-        pickupTime: this.newPickupTime() || '09:00',
-        note: this.newNote().trim() || undefined,
+    this.implementoPrestadoApi
+      .create({
+        userId,
+        implementoId,
+        tipoRevisionId: TIPO_REVISION_INICIO,
+        estadoTipo: ESTADO_TIPO_BUENO,
+        fechaInicio: startDate,
+        fechaFin: endDate,
+        observacion: this.newNote().trim() || undefined,
       })
       .subscribe({
-        next: (created) => {
-          this.loans.update((list) => [created, ...list]);
+        next: () => {
           this.newLoanSubmitting.set(false);
           this.newLoanMessage.set({ text: 'Solicitud creada correctamente.', tone: 'success' });
           setTimeout(() => this.closeNewLoanModal(), 900);
         },
-        error: () => {
+        error: (error: Error) => {
           this.newLoanSubmitting.set(false);
           this.newLoanMessage.set({
             text: 'No fue posible crear la solicitud. Intenta nuevamente.',

@@ -11,6 +11,7 @@ import {
   NewLoanRequest,
   StockItem,
   TeacherItem,
+  UpdateLoanRequest,
 } from '../../loans/loans.models';
 
 const TEACHERS: TeacherItem[] = [
@@ -23,17 +24,19 @@ const TEACHERS: TeacherItem[] = [
 ];
 
 let loans: LoanRequest[] = [
-  { id: 'l1', itemName: 'Multímetro digital', itemCode: 'MT-014', requesterName: 'Camila Restrepo', requesterRole: 'Estudiante', status: 'entregado', scheduleLabel: 'Vence 29 ago 2026', dueInDays: 6, condition: 'bueno' },
-  { id: 'l2', itemName: 'Taladro inalámbrico', itemCode: 'TL-002', requesterName: 'Julián Torres', requesterRole: 'Docente', status: 'reservado', scheduleLabel: 'Retiro hoy 15:00', dueInDays: 0, condition: 'pend' },
-  { id: 'l3', itemName: 'Kit de disección', itemCode: 'KD-031', requesterName: 'Valentina Gómez', requesterRole: 'Estudiante', status: 'atrasado', scheduleLabel: 'Venció 18 ago 2026', dueInDays: -5, condition: 'regular' },
-  { id: 'l4', itemName: 'Proyector portátil', itemCode: 'PR-005', requesterName: 'Andrés Muñoz', requesterRole: 'Docente', status: 'devuelto', scheduleLabel: 'Devuelto 20 ago 2026', dueInDays: null, condition: 'bueno' },
-  { id: 'l5', itemName: 'Osciloscopio de banco', itemCode: 'OS-009', requesterName: 'Laura Serna', requesterRole: 'Estudiante', status: 'entregado', scheduleLabel: 'Vence 30 ago 2026', dueInDays: 7, condition: 'bueno' },
-  { id: 'l6', itemName: 'Cámara réflex', itemCode: 'CM-017', requesterName: 'Esteban Cárdenas', requesterRole: 'Estudiante', status: 'reservado', scheduleLabel: 'Retiro hoy 16:30', dueInDays: 0, condition: 'pend' },
-  { id: 'l7', itemName: 'Microscopio óptico', itemCode: 'MC-006', requesterName: 'Daniela Peña', requesterRole: 'Docente', status: 'atrasado', scheduleLabel: 'Venció 19 ago 2026', dueInDays: -4, condition: 'danado' },
-  { id: 'l8', itemName: 'Estación de soldadura', itemCode: 'ES-021', requesterName: 'Ricardo Bermúdez', requesterRole: 'Estudiante', status: 'devuelto', scheduleLabel: 'Devuelto 19 ago 2026', dueInDays: null, condition: 'regular' },
-  { id: 'l9', itemName: 'Trípode profesional', itemCode: 'TR-011', requesterName: 'Sofía Londoño', requesterRole: 'Estudiante', status: 'entregado', scheduleLabel: 'Vence 24 ago 2026', dueInDays: 1, condition: 'bueno' },
-  { id: 'l10', itemName: 'Calculadora científica', itemCode: 'CC-044', requesterName: 'Mateo Cifuentes', requesterRole: 'Estudiante', status: 'reservado', scheduleLabel: 'Retiro mañana 09:00', dueInDays: 1, condition: 'pend' },
+  { id: '1', itemName: 'Multímetro digital', itemCode: 'MT-014', requesterName: 'Camila Restrepo', requesterRole: 'Estudiante', status: 'entregado', scheduleLabel: 'Vence 29 ago 2026', dueInDays: 6, condition: 'bueno' },
+  { id: '2', itemName: 'Taladro inalámbrico', itemCode: 'TL-002', requesterName: 'Julián Torres', requesterRole: 'Docente', status: 'reservado', scheduleLabel: 'Retiro hoy 15:00', dueInDays: 0, condition: 'pend' },
+  { id: '3', itemName: 'Kit de disección', itemCode: 'KD-031', requesterName: 'Valentina Gómez', requesterRole: 'Estudiante', status: 'atrasado', scheduleLabel: 'Venció 18 ago 2026', dueInDays: -5, condition: 'regular' },
+  { id: '4', itemName: 'Proyector portátil', itemCode: 'PR-005', requesterName: 'Andrés Muñoz', requesterRole: 'Docente', status: 'devuelto', scheduleLabel: 'Devuelto 20 ago 2026', dueInDays: null, condition: 'bueno' },
+  { id: '5', itemName: 'Osciloscopio de banco', itemCode: 'OS-009', requesterName: 'Laura Serna', requesterRole: 'Estudiante', status: 'entregado', scheduleLabel: 'Vence 30 ago 2026', dueInDays: 7, condition: 'bueno' },
+  { id: '6', itemName: 'Cámara réflex', itemCode: 'CM-017', requesterName: 'Esteban Cárdenas', requesterRole: 'Estudiante', status: 'reservado', scheduleLabel: 'Retiro hoy 16:30', dueInDays: 0, condition: 'pend' },
+  { id: '7', itemName: 'Microscopio óptico', itemCode: 'MC-006', requesterName: 'Daniela Peña', requesterRole: 'Docente', status: 'atrasado', scheduleLabel: 'Venció 19 ago 2026', dueInDays: -4, condition: 'danado' },
+  { id: '8', itemName: 'Estación de soldadura', itemCode: 'ES-021', requesterName: 'Ricardo Bermúdez', requesterRole: 'Estudiante', status: 'devuelto', scheduleLabel: 'Devuelto 19 ago 2026', dueInDays: null, condition: 'regular' },
+  { id: '9', itemName: 'Trípode profesional', itemCode: 'TR-011', requesterName: 'Sofía Londoño', requesterRole: 'Estudiante', status: 'entregado', scheduleLabel: 'Vence 24 ago 2026', dueInDays: 1, condition: 'bueno' },
+  { id: '10', itemName: 'Calculadora científica', itemCode: 'CC-044', requesterName: 'Mateo Cifuentes', requesterRole: 'Estudiante', status: 'reservado', scheduleLabel: 'Retiro mañana 09:00', dueInDays: 1, condition: 'pend' },
 ];
+
+let nextLoanId = 11;
 
 const stock: StockItem[] = [
   { name: 'Multímetro digital', available: 3, total: 8 },
@@ -160,7 +163,7 @@ export class LoansMockApi extends LoansApi {
     const { label, dueInDays } = scheduleFromPickup(request.pickupDateIso, request.pickupTime);
 
     const created: LoanRequest = {
-      id: `loan-${Date.now()}`,
+      id: String(nextLoanId++),
       itemName: request.itemName,
       itemCode: request.itemCode,
       requesterName: request.requesterName,
@@ -174,5 +177,36 @@ export class LoansMockApi extends LoansApi {
     loans = [created, ...loans];
 
     return of(created).pipe(delay(400));
+  }
+
+  updateLoan(request: UpdateLoanRequest): Observable<LoanRequest> {
+    const target = loans.find((loan) => loan.id === request.id);
+    if (!target) {
+      return throwError(() => new Error('Solicitud no encontrada.'));
+    }
+
+    const updated: LoanRequest = {
+      ...target,
+      itemName: request.itemName,
+      itemCode: request.itemCode,
+      requesterName: request.requesterName,
+      requesterRole: request.requesterRole,
+      status: request.status,
+      condition: request.condition,
+    };
+    loans = loans.map((loan) => (loan.id === request.id ? updated : loan));
+
+    return of(updated).pipe(delay(300));
+  }
+
+  deleteLoan(loanId: string): Observable<void> {
+    const exists = loans.some((loan) => loan.id === loanId);
+    if (!exists) {
+      return throwError(() => new Error('Solicitud no encontrada.'));
+    }
+
+    loans = loans.filter((loan) => loan.id !== loanId);
+
+    return of(undefined).pipe(delay(300));
   }
 }

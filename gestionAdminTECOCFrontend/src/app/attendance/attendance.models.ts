@@ -2,7 +2,12 @@ export type AttendanceStatus = 'completa' | 'parcial' | 'ausente';
 
 export interface AttendanceStudent {
   id: string;
-  name: string;
+  fullName: string;
+  // Texto legible (ej. "Cédula de ciudadanía"), tal como lo entrega el backend real —
+  // no el código corto, para que se muestre igual que en el resto de la app.
+  documentType: string;
+  documentNumber: string;
+  email: string;
 }
 
 export interface ClassSession {
@@ -10,20 +15,21 @@ export interface ClassSession {
   label: string;
   day: string;
   duration: number;
-  hours: number[];
+  // Horas asistidas por estudiante, indexadas por su id (no por posición), para que
+  // sigan siendo válidas sin importar qué página de estudiantes esté visible.
+  hours: Record<string, number>;
 }
 
 export interface AttendanceSnapshot {
   groupName: string;
   subjectName: string;
-  students: AttendanceStudent[];
   sessions: ClassSession[];
 }
 
 export interface SaveAttendanceRequest {
   sessionId: string;
   duration: number;
-  hours: number[];
+  hours: Record<string, number>;
 }
 
 export interface NewSessionRequest {

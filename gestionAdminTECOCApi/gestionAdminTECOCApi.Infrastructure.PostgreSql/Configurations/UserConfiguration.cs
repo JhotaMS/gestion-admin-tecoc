@@ -42,6 +42,8 @@ internal sealed class UserConfiguration
             .IsRequired( true );
 
         builder.Property( property => property.Enabled );
+        
+        builder.HasQueryFilter( user => user.Enabled );
 
         builder
             .HasIndex( index => new { index.DocumentType, index.DocumentNumber } )
@@ -54,5 +56,11 @@ internal sealed class UserConfiguration
         builder
             .HasIndex( index => index.Email )
             .IsUnique();
+
+        builder
+            .HasOne( user => user.Group )
+            .WithMany()
+            .HasForeignKey( user => user.GroupId )
+            .OnDelete( DeleteBehavior.SetNull );
     }
 }

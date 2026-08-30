@@ -485,4 +485,5 @@ $RECYCLE.BIN/
 .serena/
 forge.ledger
 fpl.db
+.claude/settings.local.json
 

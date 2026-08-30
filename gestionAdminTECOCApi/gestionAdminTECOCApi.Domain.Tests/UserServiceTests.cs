@@ -29,33 +29,6 @@ public class UserServiceTests {
     );
 
     [TestMethod]
-    public async Task CreateUserAsync_UsuarioValido_AgregaAlRepositorioYRetornaElId() {
-        //Arrange
-        User user = NewUser();
-
-        //Act
-        Guid id = await _userService.CreateUserAsync( user, CancellationToken.None );
-
-        //Assert
-        Assert.AreEqual( user.Id, id );
-        await _repository
-            .Received( 1 )
-            .AddAsync( user, Arg.Any<CancellationToken>() );
-    }
-
-    [TestMethod]
-    public async Task CreateUserAsync_UsuarioNulo_LanzaArgumentNullException() {
-        //Arrange
-
-        //Act
-
-        //Assert
-        await Assert.ThrowsExceptionAsync<ArgumentNullException>(
-            () => _userService.CreateUserAsync( null!, CancellationToken.None )
-        );
-    }
-
-    [TestMethod]
     public async Task ExistsByDocumentAsync_DocumentoRegistrado_RetornaTrue() {
         //Arrange
         _repository

@@ -16,7 +16,16 @@ public record UserSummaryDto(
     string FullName,
     string UserName,
     string Email,
-    string DocumentNumber
+    string DocumentType,
+    string DocumentNumber,
+    bool Enabled,
+    GroupDto? Group
+);
+
+public record GroupDto(
+    Guid Id,
+    string Name,
+    string Code
 );
 
 internal sealed class GetAllUsersQueryHandler(
@@ -28,7 +37,13 @@ internal sealed class GetAllUsersQueryHandler(
         CancellationToken cancellationToken
     ) {
         var repo = unitOfWork.Repository<User>();
-        var items = await repo.GetAllAsync( cancellationToken );
+        var items = await repo.GetAsync(
+            predicate: null,
+            orderBy: null,
+            includeString: "Group",
+            disableTracking: true,
+            cancellationToken: cancellationToken
+        );
 
         var dtos = items
             .Select( u => new UserSummaryDto(
@@ -36,11 +51,15 @@ internal sealed class GetAllUsersQueryHandler(
                 u.FullName,
                 u.UserName,
                 u.Email,
-                u.DocumentNumber
+                DocumentTypeCodes.ToDescription( u.DocumentType ),
+                u.DocumentNumber,
+                u.Enabled,
+                u.Group is null
+                    ? null
+                    : new GroupDto( u.Group.Id, u.Group.Name, u.Group.Code )
             ) )
             .ToList();
 
         return Result.Success( new GetAllUsersResponse( dtos ) );
     }
 }
-

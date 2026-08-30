@@ -10,15 +10,21 @@ export class AuthHttpApi extends AuthApi {
   private readonly httpClient = inject(HttpClient);
 
   login(request: LoginRequest): Observable<LoginResponse> {
-    return this.httpClient.post<LoginResponse>(`${environment.apiBaseUrl}/auth/login`, request);
+    return this.httpClient.post<LoginResponse>(
+      `${environment.apiBaseUrl}/api/v1/auth/login`,
+      request,
+    );
   }
 
   register(request: RegisterRequest): Observable<AuthUser> {
-    return this.httpClient.post<AuthUser>(`${environment.apiBaseUrl}/user/register`, request);
+    return this.httpClient.post<AuthUser>(
+      `${environment.apiBaseUrl}/api/v1/user/register`,
+      request,
+    );
   }
 
   getCurrentUser(token: string): Observable<AuthUser> {
-    return this.httpClient.get<AuthUser>(`${environment.apiBaseUrl}/auth/me`, {
+    return this.httpClient.get<AuthUser>(`${environment.apiBaseUrl}/api/v1/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
   }

@@ -19,14 +19,10 @@ public class WeatherForecastsHistory : Entity<Guid> {
         , DateOnly? createdDate
         , string? createdByUser
     ) => new() {
-        Id = new Guid()
-        ,
-        Proccess = proccess
-        ,
-        Enabled = enabled
-        ,
-        CreatedDate = createdDate
-        ,
+        Id = new Guid(),
+        Proccess = proccess,
+        Enabled = enabled,
+        CreatedDate = createdDate,
         CreatedByUser = createdByUser
     };
 }
