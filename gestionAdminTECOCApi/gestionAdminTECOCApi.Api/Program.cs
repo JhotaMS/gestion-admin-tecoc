@@ -39,18 +39,15 @@ builder.Services.AddCors( options => {
 
 WebApplication app = builder.Build();
 
-app.UsePathBase( "/api" );
+//app.UsePathBase( "/api" );
 app.UseRouting();
 app.UseCors( "AllowFrontend" );
 
-if (app.Environment.IsDevelopment()) {
-    app.UseSwagger();
-    app.UseSwaggerUI( options => {
-        options.SwaggerEndpoint( "/api/swagger/v1/swagger.json", "gestionAdminTECOCApi.Api" );
-        options.RoutePrefix = "api/swagger";
-    } );
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI( options => {
+    options.SwaggerEndpoint( "/swagger/v1/swagger.json", "gestionAdminTECOCApi.Api" );
+    options.RoutePrefix = "swagger";
+} );
 
 app.UseMiddleware<ExceptionMiddleware>();
 //app.UseHttpsRedirection();

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace gestionAdminTECOCApi.Api.Controllers;
 
-[Route( "v1/[controller]" )]
+[Route( "api/v1/[controller]" )]
 public class AuthController(
     IDispatch dispatch
 ) : ControllerBase {

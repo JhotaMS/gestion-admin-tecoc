@@ -8,7 +8,7 @@ using System.Globalization;
 
 namespace gestionAdminTECOCApi.Api.Controllers;
 
-[Route( "v1/[controller]" )]
+[Route( "api/v1/[controller]" )]
 public class WeatherForecastController(
     ILogger<WeatherForecastController> logger,
     IDispatch dispatch
