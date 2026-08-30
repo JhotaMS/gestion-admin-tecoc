@@ -23,7 +23,6 @@ export class UsersComponent implements OnInit {
   readonly users = signal<UserAccount[]>([]);
   readonly searchTerm = signal('');
 
-  // Modal "Detalle de usuario"
   readonly detailsModalOpen = signal(false);
   readonly selectedUser = signal<UserAccount | null>(null);
 

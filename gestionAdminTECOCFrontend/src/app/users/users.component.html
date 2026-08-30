@@ -46,6 +46,7 @@
               <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Usuario</th>
               <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Nombre de usuario</th>
               <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Documento</th>
+              <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Grupo</th>
             </tr>
           </thead>
           <tbody>
@@ -69,10 +70,19 @@
                 </td>
                 <td class="px-5 py-3.5 text-sm text-slate-700">{{ user.userName }}</td>
                 <td class="px-5 py-3.5 text-sm text-slate-700">{{ user.documentType }} {{ user.documentNumber }}</td>
+                <td class="px-5 py-3.5">
+                  @if (user.group) {
+                    <span class="rounded-full bg-tecoc-tint px-2.5 py-1 text-[11px] font-semibold text-tecoc-navy" [title]="user.group.code">
+                      {{ user.group.name }}
+                    </span>
+                  } @else {
+                    <span class="text-xs text-tecoc-ink">Sin grupo registrado</span>
+                  }
+                </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="3" class="px-5 py-10 text-center text-sm text-tecoc-ink">
+                <td colspan="4" class="px-5 py-10 text-center text-sm text-tecoc-ink">
                   No se encontraron usuarios que coincidan con la búsqueda.
                 </td>
               </tr>
@@ -94,9 +104,7 @@
         >
           <div class="flex items-start justify-between gap-4 bg-gradient-to-r from-tecoc-deep to-tecoc-navy px-6 py-5">
             <div class="flex items-center gap-3.5">
-              <div
-                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/15 text-sm font-bold text-white"
-              >
+              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/15 text-sm font-bold text-white">
                 {{ initials(user.name) }}
               </div>
               <div>
@@ -117,31 +125,34 @@
           <div class="max-h-[65vh] overflow-y-auto px-6 py-5">
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">
-                  Nombre de usuario
-                </span>
+                <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Nombre de usuario</span>
                 <span class="text-sm text-slate-700">{{ user.userName }}</span>
               </div>
 
               <div>
-                <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">
-                  Correo electrónico
-                </span>
+                <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Correo electrónico</span>
                 <span class="text-sm text-slate-700">{{ user.email }}</span>
               </div>
 
               <div>
-                <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">
-                  Tipo de documento
-                </span>
+                <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Tipo de documento</span>
                 <span class="text-sm text-slate-700">{{ documentTypeLabel(user.documentType) }} ({{ user.documentType }})</span>
               </div>
 
               <div>
-                <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">
-                  Número de documento
-                </span>
+                <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Número de documento</span>
                 <span class="text-sm text-slate-700">{{ user.documentNumber }}</span>
+              </div>
+
+              <div>
+                <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Grupo</span>
+                @if (user.group) {
+                  <span class="rounded-full bg-tecoc-tint px-2.5 py-1 text-[11px] font-semibold text-tecoc-navy" [title]="user.group.code">
+                    {{ user.group.name }}
+                  </span>
+                } @else {
+                  <span class="text-sm text-tecoc-ink">Sin grupo registrado</span>
+                }
               </div>
             </div>
           </div>
