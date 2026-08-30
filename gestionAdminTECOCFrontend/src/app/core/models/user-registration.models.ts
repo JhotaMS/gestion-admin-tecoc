@@ -15,7 +15,7 @@ export const DOCUMENT_TYPE_OPTIONS: DocumentTypeOption[] = [
 
 export interface CreateUserRequest {
   fullName: string;
-  documentType: DocumentTypeCode;
+  documentType: DocumentTypeCode | '';
   documentNumber: string;
   userName: string;
   email: string;

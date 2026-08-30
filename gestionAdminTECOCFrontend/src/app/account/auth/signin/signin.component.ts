@@ -35,11 +35,21 @@ export class SigninComponent {
   readonly submitted = signal(false);
   readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly successMessage = signal<string | null>(null);
   readonly showPassword = signal(false);
   readonly remember = signal(true);
 
+  constructor() {
+    const registered = this.route.snapshot.queryParamMap.get('registered');
+    if (registered === 'true') {
+      this.successMessage.set('Registro exitoso. Ya puedes iniciar sesión con tus credenciales.');
+    }
+  }
+
+  readonly providers = ['Microsoft', 'Google', 'SSO'];
+
   readonly loginForm = this.formBuilder.group({
-    username: ['', [Validators.required]],
+    username: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
   });
 

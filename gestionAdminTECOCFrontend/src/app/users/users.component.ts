@@ -1,14 +1,11 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+
 import { UsersApi } from './users-api';
 import { UserAccount } from './users.models';
 
-const DOCUMENT_TYPE_LABELS: Record<string, string> = {
-  CC: 'Cédula de ciudadanía',
-  CE: 'Cédula de extranjería',
-  TI: 'Tarjeta de identidad',
-  NIT: 'Número de identificación tributaria',
-};
+import { UserRegistrationApi } from '../core/users/user-registration-api';
+import { CreateUserRequest } from '../core/models/user-registration.models';
 
 @Component({
   selector: 'app-users',
@@ -17,83 +14,231 @@ const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   templateUrl: './users.component.html',
 })
 export class UsersComponent implements OnInit {
+
+  // ================================
+  // SERVICIOS
+  // ================================
+
   private readonly usersApi = inject(UsersApi);
+  private readonly userRegistrationApi = inject(UserRegistrationApi);
+
+
+  // ================================
+  // REGISTRO DE USUARIOS
+  // ================================
+
+  readonly showRegisterForm = signal(false);
+  readonly registering = signal(false);
+  readonly registerError = signal('');
+
+  newUser: CreateUserRequest = {
+    fullName: '',
+    documentType: '',
+    documentNumber: '',
+    userName: '',
+    email: '',
+    password: '',
+  };
+
+
+  // ================================
+  // LISTADO DE USUARIOS
+  // ================================
 
   readonly loading = signal(true);
   readonly users = signal<UserAccount[]>([]);
   readonly searchTerm = signal('');
 
-  // Modal "Detalle de usuario"
-  readonly detailsModalOpen = signal(false);
-  readonly selectedUser = signal<UserAccount | null>(null);
 
-  // Modal "Editar usuario"
-  readonly editingUser = signal<UserAccount | null>(null);
-  readonly editSaving = signal(false);
+  // ================================
+  // FILTRO DE USUARIOS
+  // ================================
 
   readonly filteredUsers = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
+
     if (!term) {
       return this.users();
     }
+
     return this.users().filter(
-      (user) => user.name.toLowerCase().includes(term) || user.email.toLowerCase().includes(term),
+      (user) =>
+        user.name.toLowerCase().includes(term) ||
+        user.email.toLowerCase().includes(term),
     );
   });
 
-  readonly totalUsers = computed(() => this.users().length);
+
+  // ================================
+  // ESTADÍSTICAS
+  // ================================
+
+  readonly stats = computed(() => {
+    const all = this.users();
+
+    const total = all.length;
+
+    const activos = all.filter(
+      (user) => user.status === 'activo',
+    ).length;
+
+    const pendientes = total - activos;
+
+    const now = new Date();
+
+    const nuevos = all.filter((user) => {
+      const registered = new Date(user.registeredAtIso);
+
+      return (
+        registered.getFullYear() === now.getFullYear() &&
+        registered.getMonth() === now.getMonth()
+      );
+    }).length;
+
+    return {
+      total,
+      activos,
+      pendientes,
+      nuevos,
+
+      activosPercent: total
+        ? Math.round((activos / total) * 100)
+        : 0,
+
+      pendientesPercent: total
+        ? Math.round((pendientes / total) * 100)
+        : 0,
+
+      nuevosPercent: total
+        ? Math.round((nuevos / total) * 100)
+        : 0,
+    };
+  });
+
+
+  // ================================
+  // INICIALIZACIÓN
+  // ================================
 
   ngOnInit(): void {
-    this.usersApi.getUsers().subscribe((users) => {
-      this.users.set(users);
-      this.loading.set(false);
+    this.loadUsers();
+  }
+
+
+  // ================================
+  // CARGAR USUARIOS
+  // ================================
+
+  private loadUsers(): void {
+    this.loading.set(true);
+
+    this.usersApi.getUsers().subscribe({
+      next: (users) => {
+        this.users.set(users);
+        this.loading.set(false);
+      },
+
+      error: () => {
+        this.loading.set(false);
+      },
     });
   }
 
+
+  // ================================
+  // INICIALES DEL USUARIO
+  // ================================
+
   initials(name: string): string {
     const parts = name.trim().split(/\s+/);
-    return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase();
+
+    return (
+      (parts[0]?.[0] ?? '') +
+      (parts[1]?.[0] ?? '')
+    ).toUpperCase();
   }
+
+
+  // ================================
+  // BUSCADOR
+  // ================================
 
   onSearchInput(value: string): void {
     this.searchTerm.set(value);
   }
 
-  openUserDetails(user: UserAccount): void {
-    this.selectedUser.set(user);
-    this.detailsModalOpen.set(true);
+
+  // ================================
+  // ABRIR FORMULARIO DE REGISTRO
+  // ================================
+
+  openRegisterForm(): void {
+    this.registerError.set('');
+
+    this.newUser = {
+      fullName: '',
+      documentType: '',
+      documentNumber: '',
+      userName: '',
+      email: '',
+      password: '',
+    };
+
+    this.showRegisterForm.set(true);
   }
 
-  closeUserDetails(): void {
-    this.detailsModalOpen.set(false);
+
+  // ================================
+  // CERRAR FORMULARIO
+  // ================================
+
+  closeRegisterForm(): void {
+    this.showRegisterForm.set(false);
+    this.registerError.set('');
   }
 
-  openEdit(user: UserAccount): void {
-    this.editingUser.set({ ...user });
-  }
 
-  closeEdit(): void {
-    this.editingUser.set(null);
-  }
+  // ================================
+  // REGISTRAR USUARIO
+  // ================================
 
-  updateEditingField<K extends keyof UserAccount>(field: K, value: UserAccount[K]): void {
-    this.editingUser.update((user) => (user ? { ...user, [field]: value } : user));
-  }
+  registerUser(form: any): void {
+    if (form.invalid) {
+      return;
+    }
 
-  saveEdit(): void {
-    const user = this.editingUser();
-    if (!user || !user.name.trim() || !user.email.trim()) return;
+    this.registering.set(true);
+    this.registerError.set('');
 
-    this.editSaving.set(true);
-    this.usersApi.updateUser({ id: user.id, name: user.name.trim(), email: user.email.trim() }).subscribe({
-      next: (updated) => {
-        this.users.update((list) => list.map((u) => (u.id === updated.id ? updated : u)));
-        this.editSaving.set(false);
-        this.editingUser.set(null);
+    this.userRegistrationApi.createUser(this.newUser).subscribe({
+
+      // ------------------------------
+      // REGISTRO EXITOSO
+      // ------------------------------
+
+      next: () => {
+        this.registering.set(false);
+
+        this.closeRegisterForm();
+
+        // Recargar la lista de usuarios
+        this.loadUsers();
       },
-      error: () => {
-        this.editSaving.set(false);
+
+
+      // ------------------------------
+      // ERROR
+      // ------------------------------
+
+      error: (error: Error) => {
+        this.registering.set(false);
+
+        this.registerError.set(
+          error.message ||
+          'No fue posible registrar el usuario.',
+        );
       },
+
     });
   }
 }

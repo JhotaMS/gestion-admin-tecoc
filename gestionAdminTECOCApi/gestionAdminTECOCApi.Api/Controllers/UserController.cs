@@ -12,7 +12,8 @@ using System.Net;
 
 namespace gestionAdminTECOCApi.Api.Controllers;
 
-[Route( "api/v1/[controller]" )]
+[ApiController]
+[Route( "v1/[controller]" )]
 public class UserController(
     ILogger<UserController> logger,
     IDispatch dispatch
@@ -33,6 +34,10 @@ public class UserController(
                 nameof( CreateUserAsync ),
                 nameof( UserController )
         );
+
+        if (request is null) {
+            return BadRequest( new CodeError( (int)HttpStatusCode.BadRequest, "El cuerpo de la solicitud es obligatorio." ) );
+        }
 
         Result<UserCommandResponse> result = await dispatch.Send(
             request,
