@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using gestionAdminTECOCApi.Application.Features.Prestamos.GetPagedPrestamos;
+using gestionAdminTECOCApi.Application.Features.Prestamos.GetPrestamoById;
 using gestionAdminTECOCApi.Domain.Loans;
 using gestionAdminTECOCApi.Domain.Prestamos;
 using gestionAdminTECOCApi.Domain.Users;
@@ -173,5 +174,56 @@ public class PrestamoTests : IClassFixture<WebApplicationFactory<Program>> {
         Assert.Equal( "(no encontrado)", dto.RequesterName );
         Assert.Equal( "(no encontrado)", dto.ImplementoNombre );
         Assert.Equal( "(no encontrado)", dto.TipoRevisionNombre );
+    }
+
+    [Fact]
+    public async Task Detalle_de_prestamo_existente_trae_id_y_nombre_de_cada_fk() {
+        ResetDatabase();
+
+        var user = User.Create( "Camila Restrepo", DocumentType.CedulaCiudadania, "1000200031", "camilar2", "camila2@tecoc.edu", "hash" );
+        var implemento = Implemento.Create( "MT-015", "Multímetro digital", "Uso en laboratorio", estado: "Disponible" );
+        var tipoRevision = TipoRevision.Create( 502, "Inicio Préstamo", "Revisión al inicio del préstamo" );
+        var prestamoId = Guid.NewGuid();
+
+        using (var scope = _factory.Services.CreateScope()) {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            db.Users.Add( user );
+            db.Set<Implemento>().Add( implemento );
+            db.Set<TipoRevision>().Add( tipoRevision );
+            db.Prestamo.Add( new Prestamo {
+                Id = prestamoId,
+                UuserId = user.Id,
+                ImplementoId = implemento.Id,
+                TipoRevisionId = tipoRevision.Id,
+                EstadoTipo = "reservado",
+                Inicio = DateTime.UtcNow,
+                Fin = DateTime.UtcNow.AddDays( 1 ),
+                Observacion = "Con relaciones reales"
+            } );
+            db.SaveChanges();
+        }
+
+        var client = Client();
+        var response = await client.GetFromJsonAsync<GetPrestamoByIdResponse>( $"/api/v1/Prestamo/{prestamoId}" );
+
+        Assert.NotNull( response );
+        Assert.Equal( prestamoId, response.Id );
+        Assert.Equal( "Camila Restrepo", response.RequesterName );
+        Assert.Equal( "camila2@tecoc.edu", response.RequesterEmail );
+        Assert.Equal( "Cédula de ciudadanía", response.RequesterDocumentType );
+        Assert.Equal( "1000200031", response.RequesterDocumentNumber );
+        Assert.Equal( "Multímetro digital", response.ImplementoNombre );
+        Assert.Equal( "Disponible", response.ImplementoEstado );
+        Assert.Equal( "Inicio Préstamo", response.TipoRevisionNombre );
+    }
+
+    [Fact]
+    public async Task Detalle_de_prestamo_inexistente_retorna_notfound() {
+        ResetDatabase();
+        var client = Client();
+
+        var response = await client.GetAsync( $"/api/v1/Prestamo/{Guid.NewGuid()}" );
+
+        Assert.Equal( HttpStatusCode.NotFound, response.StatusCode );
     }
 }

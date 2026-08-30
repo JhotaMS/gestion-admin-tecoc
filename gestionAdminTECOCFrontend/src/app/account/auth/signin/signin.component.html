@@ -89,21 +89,28 @@
         <p class="m-0 text-sm text-tecoc-ink">Accede con tu cuenta institucional TECOC.</p>
       </div>
 
+      @if (successMessage()) {
+        <div class="border-l-[3px] border-emerald-600 bg-emerald-50 px-3.5 py-2.5 text-[13px] text-emerald-800">
+          {{ successMessage() }}
+        </div>
+      }
+
       <form class="flex flex-col gap-[18px]" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <label class="flex flex-col gap-2">
-          <span class="text-xs font-semibold uppercase tracking-[1.4px] text-tecoc-ink"
-            >Usuario</span
-          >
+          <span class="text-xs font-semibold uppercase tracking-[1.4px] text-tecoc-ink">Correo electrónico</span>
           <input
-            type="text"
+            type="email"
             formControlName="username"
-            placeholder="Ej: juan.perez"
-            autocomplete="username"
+            placeholder="nombre.apellido@tecoc.edu.co"
+            autocomplete="email"
             class="tecoc-input"
             [class.tecoc-input--error]="submitted() && f.username.errors"
           />
           @if (submitted() && f.username.errors?.['required']) {
-            <span class="text-xs text-red-500">El usuario es obligatorio</span>
+            <span class="text-xs text-red-500">El correo es obligatorio</span>
+          }
+          @if (submitted() && f.username.errors?.['email']) {
+            <span class="text-xs text-red-500">Ingresa un correo válido</span>
           }
         </label>
 

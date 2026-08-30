@@ -12,4 +12,9 @@ public static class PrestamoErrors {
         "Prestamo.InvalidPageSize",
         $"El tamaño de página debe estar entre 1 y {maxPageSize}"
     );
+
+    public static Error NotFound( Guid id ) => new(
+        "Prestamo.NotFound",
+        $"No se encontró el préstamo con id '{id}'"
+    );
 }

@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/auth/auth.service';
 import { UserRegistrationApi } from '../../../core/users/user-registration-api';
 import { DOCUMENT_TYPE_OPTIONS, DocumentTypeCode } from '../../../core/models/user-registration.models';
 
@@ -124,7 +125,9 @@ export class RegisterComponent {
       .subscribe({
         next: () => {
           this.loading.set(false);
-          this.router.navigateByUrl('/login');
+          this.router.navigate(['/login'], {
+            queryParams: { registered: 'true' },
+          });
         },
         error: (error: Error) => {
           this.loading.set(false);
