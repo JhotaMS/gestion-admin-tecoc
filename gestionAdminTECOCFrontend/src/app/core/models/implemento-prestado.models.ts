@@ -31,3 +31,19 @@ export interface ImplementoPrestadoResponse {
   fechaFin: string;
   observacion?: string;
 }
+
+// Coincide con ImplementoPrestadoDto (GetAllImplementosPrestadosQuery), ya enriquecido en el
+// backend con el nombre/código del implemento y el nombre del solicitante.
+export interface ImplementoPrestadoDto {
+  id: string;
+  userId: string;
+  requesterName: string;
+  implementoId: string;
+  itemName: string;
+  itemCode: string;
+  tipoRevisionId: number;
+  estadoTipo: string;
+  fechaInicio: string;
+  fechaFin: string;
+  observacion?: string;
+}
