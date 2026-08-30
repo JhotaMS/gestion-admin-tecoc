@@ -11,6 +11,8 @@ import { UsersApi } from './users/users-api';
 import { UsersHttpApi } from './core/users/users-http.api';
 import { UserRegistrationApi } from './core/users/user-registration-api';
 import { UserRegistrationHttpApi } from './core/users/user-registration-http.api';
+import { GroupsApi } from './groups/groups-api';
+import { GroupsHttpApi } from './core/groups/groups-http.api';
 import { PagedUsersApi } from './core/users/paged-users-api';
 import { PagedUsersHttpApi } from './core/users/paged-users-http.api';
 import { LoansApi } from './loans/loans-api';
