@@ -9,6 +9,7 @@ import {
   LoansSnapshot,
   NewLoanRequest,
   StockItem,
+  TeacherItem,
   UpdateLoanRequest,
 } from '../../loans/loans.models';
 

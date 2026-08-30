@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LoansApi } from './loans-api';
 import {
@@ -6,6 +7,7 @@ import {
   ItemCondition,
   LoanRequest,
   LoanStatus,
+  RequesterRole,
   ReviewMoment,
   StockItem,
   TeacherItem,
@@ -14,6 +16,8 @@ import { UsersApi } from '../users/users-api';
 import { UserAccount } from '../users/users.models';
 import { ImplementosApi } from '../core/loans/implementos-api';
 import { ImplementoPrestadoApi } from '../core/loans/implemento-prestado-api';
+import { PrestamoDetalleApi } from '../core/loans/prestamo-detalle-api';
+import { PrestamoDetalle } from '../core/models/prestamo-detalle.models';
 import {
   ESTADO_TIPO_BUENO,
   ImplementoOption,
@@ -78,7 +82,7 @@ function todayIso(): string {
 @Component({
   selector: 'app-loans',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, DatePipe],
   templateUrl: './loans.component.html',
 })
 export class LoansComponent implements OnInit {
@@ -86,6 +90,7 @@ export class LoansComponent implements OnInit {
   private readonly usersApi = inject(UsersApi);
   private readonly implementosApi = inject(ImplementosApi);
   private readonly implementoPrestadoApi = inject(ImplementoPrestadoApi);
+  private readonly prestamoDetalleApi = inject(PrestamoDetalleApi);
 
   readonly statusFilters = STATUS_FILTERS;
   readonly conditionOptions: { key: ItemCondition; label: string }[] = [
@@ -133,10 +138,22 @@ export class LoansComponent implements OnInit {
   readonly newLoanSubmitting = signal(false);
   readonly newLoanMessage = signal<string | null>(null);
 
+  // Fila actualmente resaltada/seleccionada en la tabla (si la solicitud seleccionada se
+  // elimina, se limpia o se mueve a la primera restante).
+  readonly selectedLoanId = signal<string | null>(null);
+
   // Modal "Eliminar por ID"
   readonly deleteModalOpen = signal(false);
   readonly deleteIdInput = signal('');
   readonly deleteSubmitting = signal(false);
+
+  // Modal "Ver detalle por ID" — consulta el detalle real contra el backend
+  // (GET /api/v1/Prestamo/{id}), independiente de que la lista de arriba use datos mock.
+  readonly detailModalOpen = signal(false);
+  readonly detailIdInput = signal('');
+  readonly detailLoading = signal(false);
+  readonly detailResult = signal<PrestamoDetalle | null>(null);
+  readonly detailError = signal<string | null>(null);
 
   // Modal "Editar solicitud"
   readonly editingLoan = signal<LoanRequest | null>(null);
@@ -265,6 +282,41 @@ export class LoansComponent implements OnInit {
       },
       error: () => {
         this.deleteSubmitting.set(false);
+      },
+    });
+  }
+
+  openDetailModal(): void {
+    this.detailIdInput.set('');
+    this.detailResult.set(null);
+    this.detailError.set(null);
+    this.detailModalOpen.set(true);
+  }
+
+  closeDetailModal(): void {
+    this.detailModalOpen.set(false);
+  }
+
+  setDetailIdInput(value: string): void {
+    this.detailIdInput.set(value.trim());
+  }
+
+  fetchDetail(): void {
+    const id = this.detailIdInput().trim();
+    if (!id) return;
+
+    this.detailLoading.set(true);
+    this.detailResult.set(null);
+    this.detailError.set(null);
+
+    this.prestamoDetalleApi.getById(id).subscribe({
+      next: (detalle) => {
+        this.detailResult.set(detalle);
+        this.detailLoading.set(false);
+      },
+      error: () => {
+        this.detailError.set(`No se encontró ningún préstamo con el ID "${id}".`);
+        this.detailLoading.set(false);
       },
     });
   }

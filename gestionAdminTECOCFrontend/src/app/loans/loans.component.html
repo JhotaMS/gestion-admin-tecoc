@@ -10,6 +10,13 @@
     <div class="flex gap-2.5">
       <button
         type="button"
+        class="whitespace-nowrap rounded-md border border-tecoc-line bg-white px-5 py-2.5 text-sm font-semibold text-tecoc-navy transition hover:border-tecoc-blue"
+        (click)="openDetailModal()"
+      >
+        Ver detalle por ID
+      </button>
+      <button
+        type="button"
         class="whitespace-nowrap rounded-md border border-tecoc-danger/40 bg-white px-5 py-2.5 text-sm font-semibold text-tecoc-danger transition hover:bg-tecoc-danger-tint"
         (click)="openDeleteModal()"
       >
@@ -639,6 +646,116 @@
             (click)="confirmDeleteById()"
           >
             {{ deleteSubmitting() ? 'Eliminando…' : 'Eliminar solicitud' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (detailModalOpen()) {
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center bg-tecoc-deep/45 p-6 backdrop-blur-sm"
+      (click)="closeDetailModal()"
+    >
+      <div
+        class="w-full max-w-md overflow-hidden rounded-lg bg-white shadow-[0_30px_60px_-20px_rgba(0,20,60,0.5)]"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="flex items-start justify-between gap-4 bg-gradient-to-r from-tecoc-deep to-tecoc-navy px-6 py-5">
+          <div>
+            <h3 class="m-0 mb-1 text-[17px] font-bold text-white">Detalle del préstamo</h3>
+            <p class="m-0 max-w-sm text-[12.5px] text-white/70">
+              Escribe el ID (GUID) del préstamo para ver su detalle completo.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
+            (click)="closeDetailModal()"
+            aria-label="Cerrar"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="px-6 py-5">
+          <label class="mb-4 block">
+            <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">ID del préstamo</span>
+            <div class="flex gap-2">
+              <input
+                type="text"
+                placeholder="Ej: ea5ed434-e75a-41d2-86ab-d51442cb26de"
+                class="w-full rounded-md border border-tecoc-line px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+                [ngModel]="detailIdInput()"
+                (ngModelChange)="setDetailIdInput($event)"
+                (keyup.enter)="fetchDetail()"
+              />
+              <button
+                type="button"
+                class="whitespace-nowrap rounded-md bg-tecoc-deep px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-125 disabled:opacity-60"
+                [disabled]="!detailIdInput() || detailLoading()"
+                (click)="fetchDetail()"
+              >
+                {{ detailLoading() ? 'Buscando…' : 'Buscar' }}
+              </button>
+            </div>
+          </label>
+
+          @if (detailError(); as error) {
+            <div class="rounded-md bg-tecoc-danger-tint px-3.5 py-2.5 text-[12.5px] font-semibold text-tecoc-danger">
+              {{ error }}
+            </div>
+          }
+
+          @if (detailResult(); as detalle) {
+            <div class="space-y-3 rounded-md border border-tecoc-border bg-slate-50 px-4 py-4 text-sm">
+              <div>
+                <div class="text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Nombre del usuario</div>
+                <div class="font-semibold text-slate-900">{{ detalle.requesterName }}</div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Correo</div>
+                  <div class="text-slate-800">{{ detalle.requesterEmail }}</div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Tipo / N.º documento</div>
+                  <div class="text-slate-800">{{ detalle.requesterDocumentType }} · {{ detalle.requesterDocumentNumber }}</div>
+                </div>
+              </div>
+              <div>
+                <div class="text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Nombre del implemento</div>
+                <div class="font-semibold text-slate-900">{{ detalle.implementoNombre }}</div>
+              </div>
+              <div>
+                <div class="text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Estado del implemento</div>
+                <div class="text-slate-800">{{ detalle.implementoEstado }}</div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Fecha inicio</div>
+                  <div class="text-slate-800">{{ detalle.inicio | date: 'dd/MM/yyyy HH:mm' }}</div>
+                </div>
+                <div>
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Fecha fin</div>
+                  <div class="text-slate-800">{{ detalle.fin | date: 'dd/MM/yyyy HH:mm' }}</div>
+                </div>
+              </div>
+              <div>
+                <div class="text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Observación</div>
+                <div class="text-slate-800">{{ detalle.observacion || '—' }}</div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="flex justify-end gap-2.5 border-t border-tecoc-border bg-slate-50 px-6 py-4">
+          <button
+            type="button"
+            class="rounded-md border border-tecoc-line bg-white px-4 py-2.5 text-sm font-semibold text-tecoc-ink transition hover:border-tecoc-blue hover:text-tecoc-navy"
+            (click)="closeDetailModal()"
+          >
+            Cerrar
           </button>
         </div>
       </div>

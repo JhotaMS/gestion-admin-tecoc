@@ -3,6 +3,15 @@ import { FormsModule } from '@angular/forms';
 import { UsersApi } from './users-api';
 import { UserAccount } from './users.models';
 
+// UsersHttpApi ya trae documentType como texto descriptivo (ej. "Cédula de ciudadanía"), pero
+// se deja este mapa por si llega el código corto (CC/CE/TI/NIT), como con el mock de usuarios.
+const DOCUMENT_TYPE_LABELS: Record<string, string> = {
+  CC: 'Cédula de ciudadanía',
+  CE: 'Cédula de extranjería',
+  TI: 'Tarjeta de identidad',
+  NIT: 'Número de identificación tributaria',
+};
+
 @Component({
   selector: 'app-users',
   standalone: true,
