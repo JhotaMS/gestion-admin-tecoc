@@ -1,5 +1,6 @@
 using gestionAdminTECOCApi.Application.Features.Auth.Login;
 using gestionAdminTECOCApi.Application.Messaging;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace gestionAdminTECOCApi.Api.Controllers;
@@ -10,6 +11,7 @@ public class AuthController(
 ) : ControllerBase {
 
     [HttpPost( "login" )]
+    [AllowAnonymous]
     public async Task<IActionResult> LoginAsync(
         [FromBody] LoginCommand request,
         CancellationToken cancellationToken
