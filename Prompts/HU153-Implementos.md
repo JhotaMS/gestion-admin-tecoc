@@ -1,4 +1,4 @@
-# HU153 — Obtener los implementos
+# HU153 — Obtener implementos disponibles
 
 | | |
 |---|---|
@@ -8,71 +8,82 @@
 
 ## Historia de usuario
 
-> **Como** encargado del préstamo de implementos,
-> **quiero** consultar desde el sistema el listado de los implementos registrados
-> con su código, nombre, descripción, cantidades total y disponible, estado y si
-> están activos,
-> **para** saber qué puedo prestar, en qué condición está cada equipo y cuántas
-> unidades quedan antes de atender una solicitud.
+> **Como** usuario del sistema,
+> **quiero** obtener el listado de implementos que se encuentran disponibles,
+> **para** conocer los implementos que puedo solicitar en préstamo.
 
-## Campos del implemento
+## Regla de negocio
 
-| Campo | Contrato | Regla |
-|---|---|---|
-| Identificador | `implementoId` | `Guid`, generado por el sistema |
-| Código | `codigo` | Obligatorio, único, máximo 20 caracteres |
-| Nombre | `nombre` | Obligatorio, máximo 100 caracteres |
-| Descripción | `descripcion` | Obligatorio, máximo 250 caracteres |
-| Cantidad total | `cantidadTotal` | Entero, unidades que posee la institución |
-| Cantidad disponible | `cantidadDisponible` | Entero, unidades no prestadas |
-| Estado | `estado` | Obligatorio, texto libre, máximo 50 caracteres |
-| Activo | `activo` | Booleano |
+Un implemento está disponible cuando tiene **una o más unidades disponibles**
+(`CantidadDisponible > 0`) **y se encuentra activo** (`Activo = true`). Las dos
+condiciones se exigen a la vez.
 
 ## Criterios de aceptación
 
-1. El endpoint devuelve la lista completa de los implementos registrados.
-2. Cada implemento incluye identificador, código, nombre, descripción, cantidad
-   total, cantidad disponible, estado y si está activo.
-3. Si no hay implementos registrados, responde `200` con una lista vacía, no un
-   error.
-4. La lista se devuelve ordenada alfabéticamente por nombre.
-5. El código de cada implemento es único en el sistema.
-6. La consulta devuelve también los implementos marcados como no activos; filtrar
-   por ese campo es responsabilidad de quien consume el endpoint.
+| | | Estado |
+|---|---|---|
+| **CA01** | El sistema consulta los registros de la entidad `Implemento`. | Cubierto |
+| **CA02** | Retorna únicamente los implementos con `CantidadDisponible > 0` y `Activo = true`. | Cubierto |
+| **CA03** | Retorna `Id`, `Nombre`, `Codigo`, `Descripcion`, `CantidadTotal`, `CantidadDisponible` y `Estado`. | Cubierto |
+| **CA04** | Los implementos con `CantidadDisponible = 0` no se incluyen. | Cubierto |
+| **CA05** | Los implementos con `Activo = false` no se retornan aunque tengan unidades. | Cubierto |
+| **CA06** | Sin resultados, retorna listado vacío e informa que no hay implementos disponibles. | Cubierto |
 
 ## Contrato del endpoint
 
-`GET /api/v1/Implemento`
+`GET /api/implementos/disponibles`
 
-Respuesta `200 OK`:
+Respuesta `200 OK` con resultados:
 
 ```json
 {
   "implementos": [
     {
-      "implementoId": "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
-      "codigo": "MT-014",
+      "id": "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
       "nombre": "Multímetro digital",
+      "codigo": "MT-014",
       "descripcion": "Multímetro digital de gama media",
       "cantidadTotal": 8,
       "cantidadDisponible": 3,
-      "estado": "Bueno",
-      "activo": true
+      "estado": "Bueno"
     }
-  ]
+  ],
+  "mensaje": null
 }
 ```
+
+Respuesta `200 OK` sin resultados (CA06):
+
+```json
+{
+  "implementos": [],
+  "mensaje": "No hay implementos disponibles"
+}
+```
+
+## Estructura de la entidad Implemento
+
+| Campo | Descripción | Regla |
+|---|---|---|
+| `Id` | Identificador del implemento | `Guid`, generado por el sistema |
+| `Nombre` | Nombre del implemento | Obligatorio, máximo 100 caracteres |
+| `Codigo` | Código del implemento | Obligatorio, único, máximo 20 caracteres |
+| `Descripcion` | Descripción del implemento | Obligatorio, máximo 250 caracteres |
+| `CantidadTotal` | Cantidad total registrada | Entero |
+| `CantidadDisponible` | Cantidad disponible para préstamo | Entero |
+| `Estado` | Estado actual del implemento | Obligatorio, texto libre, máximo 50 caracteres |
+| `Activo` | Indica si el implemento está activo | Booleano |
 
 ## Archivos
 
 | Capa | Archivo |
 |---|---|
 | Domain | `gestionAdminTECOCApi.Domain/Implementos/Implemento.cs` |
-| Application | `gestionAdminTECOCApi.Application/Features/Implementos/GetAllImplementos/GetAllImplementosQuery.cs` |
+| Application | `gestionAdminTECOCApi.Application/Features/Implementos/GetImplementosDisponibles/GetImplementosDisponiblesQuery.cs` |
 | Infrastructure | `gestionAdminTECOCApi.Infrastructure.PostgreSql/Configurations/ImplementoConfiguration.cs` |
 | Infrastructure | `Migrations/20260830154520_V1-0-5-Hu153Implementos.cs` (+ `.Designer.cs`) |
-| Api | `gestionAdminTECOCApi.Api/Controllers/ImplementoController.cs` |
-| Tests | `gestionAdminTECOCApi.Api.Tests/Integration/ImplementoTests.cs` |
+| Api | `gestionAdminTECOCApi.Api/Controllers/ImplementosController.cs` |
+| Tests | `gestionAdminTECOCApi.Api.Tests/Integration/ImplementosDisponiblesTests.cs` |
 
 ## Decisiones de implementación
 
@@ -80,32 +91,30 @@ Respuesta `200 OK`:
   entró en `develop` con el PR #25 declara `public Guid ImplementoId`, así que el
   modelo del equipo ya espera ese nombre. Namespace `Domain.Implementos`, tabla
   `Implementos`.
-- **`activo` se apoya en el `Enabled` que hereda `Entity<Guid>`.** La clase base
-  ya persiste una columna booleana; agregar además una columna `Activo` dejaría
-  dos banderas con el mismo significado en la misma tabla. La API expone el campo
-  como `activo` y por dentro lee `Enabled`, así que el contrato queda completo con
-  una sola columna. El constructor privado recibe el parámetro como `enabled`
-  porque EF Core enlaza los parámetros del constructor por nombre de propiedad, y
-  con `activo` falla al construir el modelo.
+- **La ruta es la de la historia**, `api/implementos/disponibles`. Se aparta de la
+  convención `api/v1/[controller]` que usan los demás controllers, pero el
+  criterio de aceptación fija esa URL y manda la historia.
+- **`Activo` se apoya en el `Enabled` que hereda `Entity<Guid>`.** La clase base ya
+  persiste una columna booleana; agregar además una columna `Activo` dejaría dos
+  banderas con el mismo significado en la misma tabla. El filtro del CA02 y CA05
+  se aplica sobre `Enabled`. El constructor privado recibe el parámetro como
+  `enabled` porque EF Core enlaza los parámetros del constructor por nombre de
+  propiedad, y con `activo` falla al construir el modelo.
+- **`Activo` no se retorna** (CA03 no lo lista). Como el endpoint solo devuelve
+  implementos activos, el campo sería siempre `true` y no aporta información.
+- **El filtro se aplica en base de datos**, no en memoria, para no traer todo el
+  inventario y descartarlo después.
 - **`estado` es texto libre**, igual que `EstadoTipo` en `Prestamo`. No se
   restringe a una lista de valores para no rechazar lo que envíe el `POST` de la
   historia de alta.
-- **La consulta no filtra por `activo`.** Devuelve todos los implementos y deja
-  el filtro a quien consume, que es lo que necesita la pantalla de inventario
-  para poder mostrar también los dados de baja.
 - **El ordenamiento por nombre se hace en el handler**, no en base de datos, para
   no depender de la colación del servidor PostgreSQL: los nombres llevan tildes y
   el orden debe ser estable entre el entorno local y el desplegado.
-- **La ruta lleva el prefijo `api/` en el atributo** (`[Route("api/v1/[controller]")]`),
-  igual que el resto de los controllers. `app.UsePathBase("/api")` está comentado
-  en `Program.cs`, así que el prefijo NO lo agrega el pipeline.
 - **La tabla nace vacía y no se siembra.** Los implementos del mock del frontend
   (`loans-mock.api.ts`) son datos de relleno para maquetar, no inventario real, y
   cargarlos con `HasData` los dejaría en la base de producción. El alta se hace
-  desde la aplicación con el `POST` de la historia correspondiente. Hasta
-  entonces el endpoint responde `200` con lista vacía, comportamiento cubierto
-  por la prueba `Listar_implementos_sin_registros_retorna_lista_vacia`.
-- **Solo lectura.** La historia pide obtener los implementos; no se implementó
-  `POST`, `PUT` ni `DELETE`.
+  desde la aplicación con el `POST` de la historia correspondiente.
+- **Solo lectura.** La historia pide obtener los implementos disponibles; no se
+  implementó `POST`, `PUT` ni `DELETE`.
 - **No se tocó el frontend.** `app.config.ts` sigue con
   `{ provide: LoansApi, useClass: LoansMockApi }`.
