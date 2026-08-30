@@ -59,7 +59,10 @@ public class UserController(
         );
 
         if (result.IsFailure) {
-            return BadRequest( new CodeError( (int)HttpStatusCode.BadRequest, result.Error.Name ) );
+            return StatusCode(
+                StatusCodeByError( result.Error ),
+                new CodeError( StatusCodeByError( result.Error ), result.Error.Name )
+            );
         }
 
         return Ok( result.Value );

@@ -43,4 +43,3 @@ internal sealed class GetAllUsersQueryHandler(
         return Result.Success( new GetAllUsersResponse( dtos ) );
     }
 }
-
