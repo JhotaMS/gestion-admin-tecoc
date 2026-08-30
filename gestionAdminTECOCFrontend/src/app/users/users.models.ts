@@ -19,6 +19,5 @@ export interface UpdateUserAccountRequest {
   id: string;
   name: string;
   email: string;
-  role: string;
-  status: UserStatus;
+  enabled: boolean;
 }

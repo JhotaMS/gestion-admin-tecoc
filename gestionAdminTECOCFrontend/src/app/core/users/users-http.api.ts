@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { UsersApi } from '../../users/users-api';
-import { UserAccount } from '../../users/users.models';
+import { UpdateUserAccountRequest, UserAccount } from '../../users/users.models';
 
 interface UserDto {
   id: string;
@@ -32,8 +32,14 @@ export class UsersHttpApi extends UsersApi {
 
   getUsers(): Observable<UserAccount[]> {
     return this.http
-      .get<GetAllUsersResponseDto>(`${environment.apiBaseUrl}/User`)
+      .get<GetAllUsersResponseDto>(`${environment.apiBaseUrl}/api/v1/User`)
       .pipe(map((response) => response.users.map(toUserAccount)));
+  }
+
+  updateUser(request: UpdateUserAccountRequest): Observable<UserAccount> {
+    return this.http
+      .put<UserDto>(`${environment.apiBaseUrl}/api/v1/User/${request.id}`, request)
+      .pipe(map(toUserAccount));
   }
 }
 

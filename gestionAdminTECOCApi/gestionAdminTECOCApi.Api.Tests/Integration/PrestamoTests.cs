@@ -1,7 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using gestionAdminTECOCApi.Application.Features.Prestamos.GetPagedPrestamos;
+using gestionAdminTECOCApi.Domain.Loans;
 using gestionAdminTECOCApi.Domain.Prestamos;
+using gestionAdminTECOCApi.Domain.Users;
 using gestionAdminTECOCApi.Infrastructure.PostgreSql.Persistence;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -44,7 +46,9 @@ public class PrestamoTests : IClassFixture<WebApplicationFactory<Program>> {
                 Id = Guid.NewGuid(),
                 UuserId = Guid.NewGuid(),
                 ImplementoId = Guid.NewGuid(),
-                TipoRevisionId = Guid.NewGuid(),
+                // TipoRevision 1 y 2 vienen precargados por seed data del modelo (HasData);
+                // se usa un Id fuera de ese rango para poder probar el caso "no encontrado".
+                TipoRevisionId = 9999,
                 EstadoTipo = "reservado",
                 // Cada préstamo con una fecha de inicio distinta para poder comprobar el orden.
                 Inicio = new DateTime( 2026, 1, 1, 0, 0, 0, DateTimeKind.Utc ).AddDays( i ),
@@ -114,5 +118,60 @@ public class PrestamoTests : IClassFixture<WebApplicationFactory<Program>> {
         var response = await client.GetAsync( $"/api/v1/Prestamo?{queryString}" );
 
         Assert.Equal( HttpStatusCode.BadRequest, response.StatusCode );
+    }
+
+    [Fact]
+    public async Task Prestamo_con_relaciones_existentes_trae_id_y_nombre_de_cada_fk() {
+        ResetDatabase();
+
+        // Id de TipoRevision fuera del rango 1/2 que usan los seeds reales (y otros tests de
+        // esta clase), para no chocar con datos que otro test haya insertado en la misma base.
+        var user = User.Create( "Camila Restrepo", DocumentType.CedulaCiudadania, "1000200030", "camilar", "camila@tecoc.edu", "hash" );
+        var implemento = Implemento.Create( "MT-014", "Multímetro digital", "Uso en laboratorio" );
+        var tipoRevision = TipoRevision.Create( 501, "Inicio Préstamo", "Revisión al inicio del préstamo" );
+        var prestamoId = Guid.NewGuid();
+
+        using (var scope = _factory.Services.CreateScope()) {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            db.Users.Add( user );
+            db.Set<Implemento>().Add( implemento );
+            db.Set<TipoRevision>().Add( tipoRevision );
+            db.Prestamo.Add( new Prestamo {
+                Id = prestamoId,
+                UuserId = user.Id,
+                ImplementoId = implemento.Id,
+                TipoRevisionId = tipoRevision.Id,
+                EstadoTipo = "reservado",
+                Inicio = DateTime.UtcNow,
+                Fin = DateTime.UtcNow.AddDays( 1 ),
+                Observacion = "Con relaciones reales"
+            } );
+            db.SaveChanges();
+        }
+
+        var client = Client();
+        var response = await client.GetFromJsonAsync<GetPagedPrestamosResponse>( "/api/v1/Prestamo" );
+
+        var dto = response!.Items.Single();
+        Assert.Equal( user.Id, dto.UuserId );
+        Assert.Equal( "Camila Restrepo", dto.RequesterName );
+        Assert.Equal( implemento.Id, dto.ImplementoId );
+        Assert.Equal( "Multímetro digital", dto.ImplementoNombre );
+        Assert.Equal( tipoRevision.Id, dto.TipoRevisionId );
+        Assert.Equal( "Inicio Préstamo", dto.TipoRevisionNombre );
+    }
+
+    [Fact]
+    public async Task Prestamo_con_fk_sin_coincidencia_no_falla_y_usa_texto_por_defecto() {
+        ResetDatabase();
+        SeedPrestamos( 1 );
+
+        var client = Client();
+        var response = await client.GetFromJsonAsync<GetPagedPrestamosResponse>( "/api/v1/Prestamo" );
+
+        var dto = response!.Items.Single();
+        Assert.Equal( "(no encontrado)", dto.RequesterName );
+        Assert.Equal( "(no encontrado)", dto.ImplementoNombre );
+        Assert.Equal( "(no encontrado)", dto.TipoRevisionNombre );
     }
 }

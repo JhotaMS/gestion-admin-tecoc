@@ -1,18 +1,26 @@
 using gestionAdminTECOCApi.Application.Messaging;
 using gestionAdminTECOCApi.Domain.Abstractions;
+using gestionAdminTECOCApi.Domain.Loans;
 using gestionAdminTECOCApi.Domain.Ports;
 using gestionAdminTECOCApi.Domain.Prestamos;
+using gestionAdminTECOCApi.Domain.Users;
 
 namespace gestionAdminTECOCApi.Application.Features.Prestamos.GetPagedPrestamos;
 
 // PageNumber arranca en 1 (no en 0). PageSize es cuántos préstamos trae cada página.
 public record GetPagedPrestamosQuery( int PageNumber = 1, int PageSize = 10 ) : IQuery<GetPagedPrestamosResponse>;
 
+// Por cada llave foránea se trae el Id crudo Y el nombre ya resuelto (RequesterName,
+// ImplementoNombre, TipoRevisionNombre), para que el frontend no tenga que hacer
+// consultas aparte solo para mostrar un nombre legible.
 public record PrestamoDto(
     Guid Id,
     Guid UuserId,
+    string RequesterName,
     Guid ImplementoId,
-    Guid TipoRevisionId,
+    string ImplementoNombre,
+    int TipoRevisionId,
+    string TipoRevisionNombre,
     string EstadoTipo,
     DateTime Inicio,
     DateTime Fin,
@@ -34,6 +42,7 @@ internal sealed class GetPagedPrestamosQueryHandler(
 ) : IQueryHandler<GetPagedPrestamosQuery, GetPagedPrestamosResponse> {
 
     private const int MaxPageSize = 100;
+    private const string NombreNoEncontrado = "(no encontrado)";
 
     public async Task<Result<GetPagedPrestamosResponse>> Handle(
         GetPagedPrestamosQuery request,
@@ -56,12 +65,33 @@ internal sealed class GetPagedPrestamosQueryHandler(
             cancellationToken: cancellationToken
         );
 
+        // Se resuelven los 3 nombres con UNA sola consulta batch por cada tabla relacionada
+        // (usuarios, implementos, tipos de revisión), usando los Id distintos de esta página,
+        // en vez de una consulta por cada préstamo (que sería N+1 tres veces).
+        var userIds = items.Select( p => p.UuserId ).Distinct().ToList();
+        var users = await unitOfWork.Repository<User>().GetAsync(
+            u => userIds.Contains( u.Id ), cancellationToken: cancellationToken );
+        var userNamesById = users.ToDictionary( u => u.Id, u => u.FullName );
+
+        var implementoIds = items.Select( p => p.ImplementoId ).Distinct().ToList();
+        var implementos = await unitOfWork.Repository<Implemento>().GetAsync(
+            i => implementoIds.Contains( i.Id ), cancellationToken: cancellationToken );
+        var implementoNamesById = implementos.ToDictionary( i => i.Id, i => i.Nombre );
+
+        var tipoRevisionIds = items.Select( p => p.TipoRevisionId ).Distinct().ToList();
+        var tiposRevision = await unitOfWork.Repository<TipoRevision>().GetAsync(
+            t => tipoRevisionIds.Contains( t.Id ), cancellationToken: cancellationToken );
+        var tipoRevisionNamesById = tiposRevision.ToDictionary( t => t.Id, t => t.Nombre );
+
         var dtos = items
             .Select( p => new PrestamoDto(
                 p.Id,
                 p.UuserId,
+                userNamesById.GetValueOrDefault( p.UuserId, NombreNoEncontrado ),
                 p.ImplementoId,
+                implementoNamesById.GetValueOrDefault( p.ImplementoId, NombreNoEncontrado ),
                 p.TipoRevisionId,
+                tipoRevisionNamesById.GetValueOrDefault( p.TipoRevisionId, NombreNoEncontrado ),
                 p.EstadoTipo,
                 p.Inicio,
                 p.Fin,
