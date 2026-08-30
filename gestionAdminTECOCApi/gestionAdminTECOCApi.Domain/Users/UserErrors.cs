@@ -17,4 +17,14 @@ public static class UserErrors {
         "User.NotFound",
         $"No se encontró el usuario con id '{userId}'"
     );
+
+    public static Error InvalidPageNumber => new(
+        "User.InvalidPageNumber",
+        "El número de página debe ser mayor o igual a 1"
+    );
+
+    public static Error InvalidPageSize( int maxPageSize ) => new(
+        "User.InvalidPageSize",
+        $"El tamaño de página debe estar entre 1 y {maxPageSize}"
+    );
 }

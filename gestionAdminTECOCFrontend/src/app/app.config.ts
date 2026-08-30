@@ -11,6 +11,10 @@ import { UsersApi } from './users/users-api';
 import { UsersHttpApi } from './core/users/users-http.api';
 import { UserRegistrationApi } from './core/users/user-registration-api';
 import { UserRegistrationHttpApi } from './core/users/user-registration-http.api';
+import { GroupsApi } from './groups/groups-api';
+import { GroupsHttpApi } from './core/groups/groups-http.api';
+import { PagedUsersApi } from './core/users/paged-users-api';
+import { PagedUsersHttpApi } from './core/users/paged-users-http.api';
 import { LoansApi } from './loans/loans-api';
 import { LoansMockApi } from './mocks/loans/loans-mock.api';
 import { ImplementosApi } from './core/loans/implementos-api';
@@ -30,6 +34,7 @@ export const appConfig: ApplicationConfig = {
     { provide: DashboardApi, useClass: DashboardMockApi },
     { provide: UsersApi, useClass: UsersHttpApi },
     { provide: UserRegistrationApi, useClass: UserRegistrationHttpApi },
+    { provide: PagedUsersApi, useClass: PagedUsersHttpApi },
     { provide: ImplementosApi, useClass: ImplementosHttpApi },
     { provide: ImplementoPrestadoApi, useClass: ImplementoPrestadoHttpApi },
     { provide: LoansApi, useClass: LoansMockApi },
