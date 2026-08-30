@@ -13,6 +13,7 @@ export const SIDEBAR_MENU: MenuItem[] = [
       { label: 'Solicitudes', icon: 'file-text', link: '/dashboard' },
       { label: 'Usuarios', icon: 'users', link: '/usuarios' },
       { label: 'Préstamo de implementos', icon: 'package', link: '/prestamos' },
+      { label: 'Asistencia', icon: 'calendar-check', link: '/asistencia' },
     ],
   },
   { label: 'Configuración', icon: 'settings', link: '/dashboard' },

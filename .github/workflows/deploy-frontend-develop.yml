@@ -1,0 +1,66 @@
+name: Deploy Frontend to Azure (develop)
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'gestionAdminTECOCFrontend/**'
+      - '.github/workflows/deploy-frontend-develop.yml'
+
+env:
+  AZURE_WEBAPP_NAME: tecoc
+  NODE_VERSION: '24.x'
+  FRONTEND_PATH: gestionAdminTECOCFrontend
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.FRONTEND_PATH }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.FRONTEND_PATH }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build (production)
+        run: npm run build -- --configuration production
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: ${{ env.FRONTEND_PATH }}/dist/gestionAdminTECOCFrontend/browser
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: develop
+      url: ${{ steps.deploy-step.outputs.webapp-url }}
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist
+
+      - name: Deploy to Azure Web App
+        id: deploy-step
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_TECOC_PUBLISH_PROFILE }}
+          package: dist

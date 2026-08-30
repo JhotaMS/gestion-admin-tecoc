@@ -112,6 +112,9 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
+                    b.Property<Guid?>("GroupId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -126,6 +129,8 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique();
+
+                    b.HasIndex("GroupId");
 
                     b.HasIndex("UserName")
                         .IsUnique();
@@ -189,6 +194,16 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("WeatherForecastsHistories", "gestionAdminTECOCApiMS");
+                });
+
+            modelBuilder.Entity("gestionAdminTECOCApi.Domain.Users.User", b =>
+                {
+                    b.HasOne("gestionAdminTECOCApi.Domain.Groups.Group", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Group");
                 });
 #pragma warning restore 612, 618
         }
