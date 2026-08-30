@@ -1,5 +1,6 @@
 using System.Net;
 using gestionAdminTECOCApi.Application.Features.Prestamos.GetPagedPrestamos;
+using gestionAdminTECOCApi.Application.Features.Prestamos.GetPrestamoById;
 using gestionAdminTECOCApi.Application.Messaging;
 using gestionAdminTECOCApi.Domain.Abstractions;
 using Microsoft.AspNetCore.Mvc;
@@ -31,6 +32,22 @@ public class PrestamoController(
         var result = await dispatch.Send( query, cancellationToken );
         if (result.IsFailure)
             return BadRequest( result.Error );
+        return Ok( result.Value );
+    }
+
+    // GET /api/v1/Prestamo/{id}
+    [HttpGet( "{id:guid}" )]
+    [ProducesResponseType( typeof( GetPrestamoByIdResponse ), (int)HttpStatusCode.OK )]
+    [ProducesResponseType( typeof( Error ), (int)HttpStatusCode.NotFound )]
+    public async Task<IActionResult> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken
+    ) {
+        var query = new GetPrestamoByIdQuery( id );
+
+        var result = await dispatch.Send( query, cancellationToken );
+        if (result.IsFailure)
+            return NotFound( result.Error );
         return Ok( result.Value );
     }
 }
