@@ -30,7 +30,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddCors( options => {
     options.AddPolicy( "AllowFrontend", policy => {
         policy
-            .WithOrigins( "http://localhost:4200", "http://localhost:4201", "https://tecoc-cdhbb5hyaud0erce.centralus-01.azurewebsites.net" )
+            .WithOrigins( "http://localhost:4200", "http://localhost:4300", "https://tecoc-cdhbb5hyaud0erce.centralus-01.azurewebsites.net" )
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();

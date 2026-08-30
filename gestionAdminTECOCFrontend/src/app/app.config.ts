@@ -13,6 +13,8 @@ import { UserRegistrationApi } from './core/users/user-registration-api';
 import { UserRegistrationHttpApi } from './core/users/user-registration-http.api';
 import { LoansApi } from './loans/loans-api';
 import { LoansMockApi } from './mocks/loans/loans-mock.api';
+import { AttendanceApi } from './attendance/attendance-api';
+import { AttendanceMockApi } from './mocks/attendance/attendance-mock.api';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -26,5 +28,6 @@ export const appConfig: ApplicationConfig = {
     // Este sí habla con el backend real (no tiene mock): v1/User.
     { provide: UserRegistrationApi, useClass: UserRegistrationHttpApi },
     { provide: LoansApi, useClass: LoansMockApi },
+    { provide: AttendanceApi, useClass: AttendanceMockApi },
   ],
 };
