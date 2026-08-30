@@ -3,6 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { UsersApi } from './users-api';
 import { UserAccount } from './users.models';
 
+const DOCUMENT_TYPE_LABELS: Record<string, string> = {
+  CC: 'Cédula de ciudadanía',
+  CE: 'Cédula de extranjería',
+  TI: 'Tarjeta de identidad',
+  NIT: 'Número de identificación tributaria',
+};
+
 @Component({
   selector: 'app-users',
   standalone: true,
