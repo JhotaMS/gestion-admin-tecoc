@@ -43,6 +43,10 @@ export class UsersComponent implements OnInit {
     });
   }
 
+  documentTypeLabel(documentType: string): string {
+    return DOCUMENT_TYPE_LABELS[documentType] ?? documentType;
+  }
+
   initials(name: string): string {
     const parts = name.trim().split(/\s+/);
     return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase();
