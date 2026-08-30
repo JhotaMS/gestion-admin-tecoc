@@ -9,14 +9,19 @@ namespace gestionAdminTECOCApi.Application.Features.Prestamos.GetPrestamoById;
 
 public record GetPrestamoByIdQuery( Guid Id ) : IQuery<GetPrestamoByIdResponse>;
 
-// Mismo shape que PrestamoDto en GetPagedPrestamos (Id/nombre resuelto por cada FK), para que
-// el frontend reutilice el mismo modelo tanto en la tabla paginada como en el detalle.
+// Trae, además de lo que ya expone el listado paginado, los datos que pide la vista de
+// detalle: correo y documento del usuario, y el estado propio del implemento (no el del
+// préstamo, que ya viene en EstadoTipo).
 public record GetPrestamoByIdResponse(
     Guid Id,
     Guid UuserId,
     string RequesterName,
+    string RequesterEmail,
+    string RequesterDocumentType,
+    string RequesterDocumentNumber,
     Guid ImplementoId,
     string ImplementoNombre,
+    string ImplementoEstado,
     int TipoRevisionId,
     string TipoRevisionNombre,
     string EstadoTipo,
@@ -52,8 +57,12 @@ internal sealed class GetPrestamoByIdQueryHandler(
             prestamo.Id,
             prestamo.UuserId,
             user?.FullName ?? NombreNoEncontrado,
+            user?.Email ?? NombreNoEncontrado,
+            user is null ? NombreNoEncontrado : DocumentTypeCodes.ToDescription( user.DocumentType ),
+            user?.DocumentNumber ?? NombreNoEncontrado,
             prestamo.ImplementoId,
             implemento?.Nombre ?? NombreNoEncontrado,
+            implemento?.Estado ?? NombreNoEncontrado,
             prestamo.TipoRevisionId,
             tipoRevision?.Nombre ?? NombreNoEncontrado,
             prestamo.EstadoTipo,

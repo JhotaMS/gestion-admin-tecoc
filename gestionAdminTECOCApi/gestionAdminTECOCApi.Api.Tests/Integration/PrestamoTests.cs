@@ -181,7 +181,7 @@ public class PrestamoTests : IClassFixture<WebApplicationFactory<Program>> {
         ResetDatabase();
 
         var user = User.Create( "Camila Restrepo", DocumentType.CedulaCiudadania, "1000200031", "camilar2", "camila2@tecoc.edu", "hash" );
-        var implemento = Implemento.Create( "MT-015", "Multímetro digital", "Uso en laboratorio" );
+        var implemento = Implemento.Create( "MT-015", "Multímetro digital", "Uso en laboratorio", estado: "Disponible" );
         var tipoRevision = TipoRevision.Create( 502, "Inicio Préstamo", "Revisión al inicio del préstamo" );
         var prestamoId = Guid.NewGuid();
 
@@ -209,7 +209,11 @@ public class PrestamoTests : IClassFixture<WebApplicationFactory<Program>> {
         Assert.NotNull( response );
         Assert.Equal( prestamoId, response.Id );
         Assert.Equal( "Camila Restrepo", response.RequesterName );
+        Assert.Equal( "camila2@tecoc.edu", response.RequesterEmail );
+        Assert.Equal( "Cédula de ciudadanía", response.RequesterDocumentType );
+        Assert.Equal( "1000200031", response.RequesterDocumentNumber );
         Assert.Equal( "Multímetro digital", response.ImplementoNombre );
+        Assert.Equal( "Disponible", response.ImplementoEstado );
         Assert.Equal( "Inicio Préstamo", response.TipoRevisionNombre );
     }
 
