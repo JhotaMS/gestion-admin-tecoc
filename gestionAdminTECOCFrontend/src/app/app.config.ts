@@ -34,6 +34,7 @@ export const appConfig: ApplicationConfig = {
     { provide: DashboardApi, useClass: DashboardMockApi },
     { provide: UsersApi, useClass: UsersHttpApi },
     { provide: UserRegistrationApi, useClass: UserRegistrationHttpApi },
+    { provide: GroupsApi, useClass: GroupsHttpApi },
     { provide: PagedUsersApi, useClass: PagedUsersHttpApi },
     { provide: ImplementosApi, useClass: ImplementosHttpApi },
     { provide: ImplementoPrestadoApi, useClass: ImplementoPrestadoHttpApi },
