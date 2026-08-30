@@ -1,0 +1,65 @@
+name: Deploy API to Azure (develop)
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'gestionAdminTECOCApi/**'
+      - '.github/workflows/deploy-api-develop.yml'
+
+env:
+  AZURE_WEBAPP_NAME: gestion-admin-tecoc
+  DOTNET_VERSION: '10.0.x'
+  API_PROJECT_PATH: gestionAdminTECOCApi/gestionAdminTECOCApi.Api/gestionAdminTECOCApi.Api.csproj
+  PUBLISH_DIR: ${{ github.workspace }}/publish
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore gestionAdminTECOCApi/gestionAdminTECOCApi.sln
+
+      - name: Build
+        run: dotnet build gestionAdminTECOCApi/gestionAdminTECOCApi.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test gestionAdminTECOCApi/gestionAdminTECOCApi.sln --configuration Release --no-build --verbosity normal
+
+      - name: Publish API
+        run: dotnet publish ${{ env.API_PROJECT_PATH }} --configuration Release --no-build --output ${{ env.PUBLISH_DIR }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-publish
+          path: ${{ env.PUBLISH_DIR }}
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    environment:
+      name: develop
+      url: ${{ steps.deploy-step.outputs.webapp-url }}
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: api-publish
+          path: ${{ env.PUBLISH_DIR }}
+
+      - name: Deploy to Azure Web App
+        id: deploy-step
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ${{ env.PUBLISH_DIR }}
