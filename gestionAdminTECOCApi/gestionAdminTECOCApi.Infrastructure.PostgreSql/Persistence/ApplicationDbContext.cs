@@ -1,4 +1,5 @@
 ﻿using gestionAdminTECOCApi.Domain.DocumentTypes;
+using gestionAdminTECOCApi.Domain.ScheduledClasses;
 using gestionAdminTECOCApi.Domain.Loans;
 using gestionAdminTECOCApi.Domain.Prestamos;
 using gestionAdminTECOCApi.Domain.Groups;
@@ -23,6 +24,7 @@ public partial class ApplicationDbContext : DbContext {
         _config = config;
     }
 
+    public virtual DbSet<ScheduledClass> ScheduledClasses { get; set; }
     public virtual DbSet<User> Users { get; set; }
     public virtual DbSet<Prestamo> Prestamo { get; set; }
     public virtual DbSet<Group> Groups { get; set; }

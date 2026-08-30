@@ -15,6 +15,10 @@ import { GroupsApi } from './groups/groups-api';
 import { GroupsHttpApi } from './core/groups/groups-http.api';
 import { LoansApi } from './loans/loans-api';
 import { LoansMockApi } from './mocks/loans/loans-mock.api';
+import { ImplementosApi } from './core/loans/implementos-api';
+import { ImplementosHttpApi } from './core/loans/implementos-http.api';
+import { ImplementoPrestadoApi } from './core/loans/implemento-prestado-api';
+import { ImplementoPrestadoHttpApi } from './core/loans/implemento-prestado-http.api';
 import { AttendanceApi } from './attendance/attendance-api';
 import { AttendanceMockApi } from './mocks/attendance/attendance-mock.api';
 
@@ -29,6 +33,8 @@ export const appConfig: ApplicationConfig = {
     { provide: UsersApi, useClass: UsersHttpApi },
     { provide: UserRegistrationApi, useClass: UserRegistrationHttpApi },
     { provide: GroupsApi, useClass: GroupsHttpApi },
+    { provide: ImplementosApi, useClass: ImplementosHttpApi },
+    { provide: ImplementoPrestadoApi, useClass: ImplementoPrestadoHttpApi },
     { provide: LoansApi, useClass: LoansMockApi },
     { provide: AttendanceApi, useClass: AttendanceMockApi },
   ],
