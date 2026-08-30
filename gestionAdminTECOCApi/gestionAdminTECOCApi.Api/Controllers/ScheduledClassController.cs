@@ -23,6 +23,13 @@ public class ScheduledClassController(
         [FromBody] ScheduledClassCommand request,
         CancellationToken cancellationToken
     ) {
+        if (request is null) {
+            return BadRequest( new CodeError(
+                (int)HttpStatusCode.BadRequest,
+                "El cuerpo de la solicitud es obligatorio"
+            ) );
+        }
+
         logger.LogInformation(
             "En la siguiente fecha {date} a las {time}, se llamo el endpoint {endpoint} de la clase {class}",
                 DateTime.Now.ZoneByIdPacificStandardTime().ToString( "dd/MM/yyyy", provider: new CultureInfo( "es-CO" ) ),
