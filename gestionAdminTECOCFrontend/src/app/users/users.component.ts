@@ -34,6 +34,9 @@ export class UsersComponent implements OnInit {
     const pendientes = total - activos;
     const now = new Date();
     const nuevos = all.filter((user) => {
+      if (!user.registeredAtIso) {
+        return false;
+      }
       const registered = new Date(user.registeredAtIso);
       return (
         registered.getFullYear() === now.getFullYear() && registered.getMonth() === now.getMonth()

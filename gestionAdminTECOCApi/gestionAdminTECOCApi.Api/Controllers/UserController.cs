@@ -1,5 +1,7 @@
 ﻿using gestionAdminTECOCApi.Api.Errors;
 using gestionAdminTECOCApi.Application.Features.Users.CreateUser;
+using gestionAdminTECOCApi.Application.Features.Users.GetUserById;
+using gestionAdminTECOCApi.Application.Features.Users.GetUsers;
 using gestionAdminTECOCApi.Application.Messaging;
 using gestionAdminTECOCApi.Domain.Abstractions;
 using gestionAdminTECOCApi.Domain.Helpers;
@@ -14,6 +16,44 @@ public class UserController(
     ILogger<UserController> logger,
     IDispatch dispatch
 ) : ControllerBase {
+
+    [HttpGet()]
+    [ProducesResponseType( typeof( GetUsersResponse ), (int)HttpStatusCode.OK )]
+    public async Task<IActionResult> GetUsersAsync(
+        CancellationToken cancellationToken
+    ) {
+        Result<GetUsersResponse> result = await dispatch.Send(
+            new GetUsersQuery(),
+            cancellationToken
+        );
+
+        if (result.IsFailure) {
+            int statusCode = StatusCodeByError( result.Error );
+            return StatusCode( statusCode, new CodeError( statusCode, result.Error.Name ) );
+        }
+
+        return Ok( result.Value );
+    }
+
+    [HttpGet( "{userId:guid}" )]
+    [ProducesResponseType( typeof( GetUserByIdResponse ), (int)HttpStatusCode.OK )]
+    [ProducesResponseType( typeof( CodeError ), (int)HttpStatusCode.NotFound )]
+    public async Task<IActionResult> GetUserByIdAsync(
+        Guid userId,
+        CancellationToken cancellationToken
+    ) {
+        Result<GetUserByIdResponse> result = await dispatch.Send(
+            new GetUserByIdQuery( userId ),
+            cancellationToken
+        );
+
+        if (result.IsFailure) {
+            int statusCode = StatusCodeByError( result.Error );
+            return StatusCode( statusCode, new CodeError( statusCode, result.Error.Name ) );
+        }
+
+        return Ok( result.Value );
+    }
 
     [HttpPost()]
     [ProducesResponseType( typeof( UserCommandResponse ), (int)HttpStatusCode.Created )]
@@ -48,6 +88,7 @@ public class UserController(
 
     private static int StatusCodeByError( Error error ) => error.Code switch {
         "User.DocumentAlreadyRegistered" => (int)HttpStatusCode.Conflict,
+        "User.NotFound" => (int)HttpStatusCode.NotFound,
         _ => (int)HttpStatusCode.BadRequest
     };
 }

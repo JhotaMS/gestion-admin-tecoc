@@ -74,6 +74,7 @@
             <tr class="bg-slate-50">
               <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Usuario</th>
               <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Rol</th>
+              <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Grupo</th>
               <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Fecha de registro</th>
               <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Estado</th>
             </tr>
@@ -99,7 +100,18 @@
                     {{ user.role }}
                   </span>
                 </td>
-                <td class="px-5 py-3.5 text-sm text-slate-700">{{ user.registeredAtIso | date: 'dd MMM y' }}</td>
+                <td class="px-5 py-3.5">
+                  @if (user.group) {
+                    <span class="rounded-full bg-tecoc-tint px-2.5 py-1 text-[11px] font-semibold text-tecoc-navy" [title]="user.group.code">
+                      {{ user.group.name }}
+                    </span>
+                  } @else {
+                    <span class="text-xs text-tecoc-ink">Sin grupo registrado</span>
+                  }
+                </td>
+                <td class="px-5 py-3.5 text-sm text-slate-700">
+                  {{ user.registeredAtIso ? (user.registeredAtIso | date: 'dd MMM y') : 'No disponible' }}
+                </td>
                 <td class="px-5 py-3.5">
                   <span
                     class="inline-flex items-center gap-1.5 text-xs font-semibold"
@@ -117,7 +129,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="4" class="px-5 py-10 text-center text-sm text-tecoc-ink">
+                <td colspan="5" class="px-5 py-10 text-center text-sm text-tecoc-ink">
                   No se encontraron usuarios que coincidan con la búsqueda.
                 </td>
               </tr>

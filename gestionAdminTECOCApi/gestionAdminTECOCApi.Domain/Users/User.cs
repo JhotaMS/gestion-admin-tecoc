@@ -1,4 +1,5 @@
 using gestionAdminTECOCApi.Domain.Abstractions;
+using gestionAdminTECOCApi.Domain.Groups;
 
 namespace gestionAdminTECOCApi.Domain.Users;
 
@@ -9,7 +10,8 @@ public class User : Entity<Guid> {
         string documentNumber,
         string userName,
         string email,
-        string passwordHash
+        string passwordHash,
+        Guid? groupId
     ) : base( true ) {
         Id = Guid.NewGuid();
         FullName = fullName;
@@ -18,6 +20,7 @@ public class User : Entity<Guid> {
         UserName = userName;
         Email = email;
         PasswordHash = passwordHash;
+        GroupId = groupId;
     }
 
     public string FullName { get; private set; } = default!;
@@ -26,6 +29,8 @@ public class User : Entity<Guid> {
     public string UserName { get; private set; } = default!;
     public string Email { get; private set; } = default!;
     public string PasswordHash { get; private set; } = default!;
+    public Guid? GroupId { get; private set; }
+    public Group? Group { get; private set; }
 
     public static User Create(
         string fullName,
@@ -33,13 +38,15 @@ public class User : Entity<Guid> {
         string documentNumber,
         string userName,
         string email,
-        string passwordHash
+        string passwordHash,
+        Guid? groupId = null
     ) => new(
         fullName,
         documentType,
         documentNumber,
         userName,
         email,
-        passwordHash
+        passwordHash,
+        groupId
     );
 }
