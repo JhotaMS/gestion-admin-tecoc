@@ -1,19 +1,18 @@
-﻿using gestionAdminTECOCApi.Domain.DomainService;
+﻿using gestionAdminTECOCApi.Domain.Abstractions;
+using gestionAdminTECOCApi.Domain.DomainService;
 using gestionAdminTECOCApi.Domain.Ports;
-using gestionAdminTECOCApi.Domain.Abstractions;
-
 
 namespace gestionAdminTECOCApi.Domain.Users;
 
 [DomainService]
-public class UserService( IUnitOfWork unitOfWork ) {
-
-    // ... CreateUserAsync y ExistsByDocumentAsync ya existentes ...
+public class UserService(
+    IUnitOfWork unitOfWork
+) {
 
     public async Task<Result> DeleteUserAsync(
-        Guid id,
-        CancellationToken cancellationToken
-    ) {
+            Guid id,
+            CancellationToken cancellationToken
+        ) {
         User user = await unitOfWork.Repository<User>().GetByAsync(
             u => u.Id == id,
             disableTracking: false,
@@ -25,7 +24,7 @@ public class UserService( IUnitOfWork unitOfWork ) {
         }
 
         if (!user.Enabled) {
-            return Result.Failure( UserErrors.AlreadyDisabled( id ) );
+            return Result.Failure( UserErrors.NotFound( id ) );
         }
 
         user.Disable();
@@ -34,7 +33,19 @@ public class UserService( IUnitOfWork unitOfWork ) {
 
         return Result.Success();
     }
-}
+
+    public async Task<Guid> CreateUserAsync(
+        User user,
+        CancellationToken cancellationToken
+    ) {
+        ArgumentNullException.ThrowIfNull( user );
+
+        await unitOfWork.Repository<User>()
+            .AddAsync( user, cancellationToken );
+
+        return user.Id;
+    }
+
     public async Task<bool> ExistsByDocumentAsync(
         DocumentType documentType,
         string documentNumber,
