@@ -9,7 +9,6 @@ import {
   RequesterRole,
   ReviewMoment,
   StockItem,
-  TeacherItem,
 } from './loans.models';
 
 interface StatusFilterOption {
@@ -89,13 +88,11 @@ export class LoansComponent implements OnInit {
   readonly loans = signal<LoanRequest[]>([]);
   readonly stock = signal<StockItem[]>([]);
   readonly catalog = signal<CatalogItem[]>([]);
-  readonly teachers = signal<TeacherItem[]>([]);
   readonly searchTerm = signal('');
   readonly statusFilter = signal<'todos' | LoanStatus>('todos');
 
-  // Formulario lateral de revisión / estado de préstamo
-  readonly selectedTeacherId = signal<string>('');
-  readonly selectedItemCode = signal<string>('');
+  // Formulario lateral de revisión / estado de un préstamo existente
+  readonly selectedLoanId = signal<string>('');
   readonly reviewMoment = signal<ReviewMoment>('inicio');
   readonly reviewCondition = signal<ItemCondition | null>('bueno');
   readonly reviewStartDate = signal<string>(todayIso());
@@ -103,6 +100,10 @@ export class LoansComponent implements OnInit {
   readonly reviewNote = signal<string>('');
   readonly reviewMessage = signal<{ text: string; tone: 'success' | 'error' } | null>(null);
   readonly submitting = signal(false);
+
+  readonly selectedLoan = computed(
+    () => this.loans().find((loan) => loan.id === this.selectedLoanId()) ?? null,
+  );
 
   // Modal "Nueva solicitud"
   readonly newLoanModalOpen = signal(false);
@@ -114,7 +115,7 @@ export class LoansComponent implements OnInit {
   readonly newNote = signal('');
   readonly newLoanSubmitted = signal(false);
   readonly newLoanSubmitting = signal(false);
-  readonly newLoanMessage = signal<string | null>(null);
+  readonly newLoanMessage = signal<{ text: string; tone: 'success' | 'error' } | null>(null);
 
   readonly filteredLoans = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
@@ -152,13 +153,11 @@ export class LoansComponent implements OnInit {
       this.loans.set(snapshot.loans);
       this.stock.set(snapshot.stock);
       this.catalog.set(snapshot.catalog);
-      this.teachers.set(snapshot.teachers || []);
 
-      if (snapshot.teachers && snapshot.teachers.length > 0) {
-        this.selectedTeacherId.set(snapshot.teachers[0].name);
-      }
-      if (snapshot.catalog && snapshot.catalog.length > 0) {
-        this.selectedItemCode.set(snapshot.catalog[0].code);
+      const initial =
+        snapshot.loans.find((loan) => loan.status !== 'devuelto') ?? snapshot.loans[0];
+      if (initial) {
+        this.selectLoan(initial.id);
       }
       this.loading.set(false);
     });
@@ -166,6 +165,28 @@ export class LoansComponent implements OnInit {
 
   setStatusFilter(status: 'todos' | LoanStatus): void {
     this.statusFilter.set(status);
+  }
+
+  selectLoan(loanId: string): void {
+    this.selectedLoanId.set(loanId);
+    this.reviewMessage.set(null);
+
+    const loan = this.loans().find((item) => item.id === loanId);
+    if (!loan) {
+      return;
+    }
+
+    // "Fin Préstamo" aplica a implementos ya entregados; el resto parte de "Inicio".
+    this.reviewMoment.set(loan.status === 'entregado' ? 'fin' : 'inicio');
+
+    const editableConditions: ItemCondition[] = ['malo', 'regular', 'bueno'];
+    this.reviewCondition.set(
+      editableConditions.includes(loan.condition) ? loan.condition : null,
+    );
+
+    this.reviewStartDate.set(loan.startDate ?? todayIso());
+    this.reviewEndDate.set(loan.endDate ?? todayIso());
+    this.reviewNote.set('');
   }
 
   selectCondition(condition: ItemCondition): void {
@@ -207,13 +228,20 @@ export class LoansComponent implements OnInit {
   }
 
   submitReview(): void {
-    const teacher = this.selectedTeacherId();
-    const itemCode = this.selectedItemCode();
+    const loan = this.selectedLoan();
     const condition = this.reviewCondition();
 
-    if (!teacher || !itemCode || !condition) {
+    if (!loan) {
       this.reviewMessage.set({
-        text: 'Por favor selecciona el docente, implemento y estado.',
+        text: 'Selecciona un préstamo existente para registrar la revisión.',
+        tone: 'error',
+      });
+      return;
+    }
+
+    if (!condition) {
+      this.reviewMessage.set({
+        text: 'Selecciona el estado del implemento.',
         tone: 'error',
       });
       return;
@@ -227,14 +255,13 @@ export class LoansComponent implements OnInit {
       return;
     }
 
-    const item = this.catalog().find((candidate) => candidate.code === itemCode);
-
     this.submitting.set(true);
     this.loansApi
       .reviewLoan({
-        teacherName: teacher,
-        itemCode: itemCode,
-        itemName: item?.name,
+        loanId: loan.id,
+        teacherName: loan.requesterName,
+        itemCode: loan.itemCode,
+        itemName: loan.itemName,
         moment: this.reviewMoment(),
         condition,
         startDate: this.reviewStartDate(),
@@ -243,13 +270,14 @@ export class LoansComponent implements OnInit {
       })
       .subscribe({
         next: (updated) => {
-          this.loans.update((list) => {
-            const exists = list.some((loan) => loan.id === updated.id);
-            return exists
-              ? list.map((loan) => (loan.id === updated.id ? updated : loan))
-              : [updated, ...list];
+          this.loans.update((list) =>
+            list.map((item) => (item.id === updated.id ? updated : item)),
+          );
+          this.selectedLoanId.set(updated.id);
+          this.reviewMessage.set({
+            text: 'Revisión registrada y préstamo actualizado.',
+            tone: 'success',
           });
-          this.reviewMessage.set({ text: 'Revisión y préstamo registrado correctamente.', tone: 'success' });
           this.reviewNote.set('');
           this.submitting.set(false);
           setTimeout(() => this.reviewMessage.set(null), 3500);
@@ -296,6 +324,20 @@ export class LoansComponent implements OnInit {
       return;
     }
 
+    // Regla de negocio: una persona solo puede tener un préstamo activo a la vez.
+    const hasActiveLoan = this.loans().some(
+      (loan) =>
+        loan.requesterName.trim().toLowerCase() === requesterName.toLowerCase() &&
+        loan.status !== 'devuelto',
+    );
+    if (hasActiveLoan) {
+      this.newLoanMessage.set({
+        text: `${requesterName} ya tiene un préstamo activo. Solo se permite un préstamo por persona.`,
+        tone: 'error',
+      });
+      return;
+    }
+
     const item = this.catalog().find((candidate) => candidate.code === itemCode);
     if (!item) {
       return;
@@ -316,12 +358,15 @@ export class LoansComponent implements OnInit {
         next: (created) => {
           this.loans.update((list) => [created, ...list]);
           this.newLoanSubmitting.set(false);
-          this.newLoanMessage.set('Solicitud creada correctamente.');
+          this.newLoanMessage.set({ text: 'Solicitud creada correctamente.', tone: 'success' });
           setTimeout(() => this.closeNewLoanModal(), 900);
         },
         error: () => {
           this.newLoanSubmitting.set(false);
-          this.newLoanMessage.set('No fue posible crear la solicitud. Intenta nuevamente.');
+          this.newLoanMessage.set({
+            text: 'No fue posible crear la solicitud. Intenta nuevamente.',
+            tone: 'error',
+          });
         },
       });
   }
