@@ -14,3 +14,11 @@ export interface UserAccount {
   enabled: boolean;
   group: UserGroup | null;
 }
+
+export interface UpdateUserAccountRequest {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  status: UserStatus;
+}

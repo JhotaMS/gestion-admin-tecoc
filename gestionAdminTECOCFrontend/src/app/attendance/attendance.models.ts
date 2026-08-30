@@ -1,8 +1,13 @@
+import { DocumentTypeCode } from '../core/models/user-registration.models';
+
 export type AttendanceStatus = 'completa' | 'parcial' | 'ausente';
 
 export interface AttendanceStudent {
   id: string;
-  name: string;
+  fullName: string;
+  documentType: DocumentTypeCode;
+  documentNumber: string;
+  email: string;
 }
 
 export interface ClassSession {

@@ -12,4 +12,9 @@ public static class UserErrors {
         "User.DocumentAlreadyRegistered",
         $"Ya existe un registro con el tipo de documento '{documentType}' y el número de documento '{documentNumber}'"
     );
+
+    public static Error NotFound( Guid userId ) => new(
+        "User.NotFound",
+        $"No se encontró el usuario con id '{userId}'"
+    );
 }

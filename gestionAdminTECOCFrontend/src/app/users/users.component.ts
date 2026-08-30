@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { UsersApi } from './users-api';
-import { UserAccount } from './users.models';
+import { UserAccount, UserStatus } from './users.models';
 
 const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   CC: 'Cédula de ciudadanía',
@@ -23,8 +23,13 @@ export class UsersComponent implements OnInit {
   readonly users = signal<UserAccount[]>([]);
   readonly searchTerm = signal('');
 
-  readonly detailsModalOpen = signal(false);
-  readonly selectedUser = signal<UserAccount | null>(null);
+  readonly statusOptions: { key: UserStatus; label: string }[] = [
+    { key: 'activo', label: 'Activo' },
+    { key: 'pendiente', label: 'Pendiente' },
+  ];
+
+  readonly editingUser = signal<UserAccount | null>(null);
+  readonly editSaving = signal(false);
 
   readonly filteredUsers = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
@@ -54,16 +59,32 @@ export class UsersComponent implements OnInit {
     this.searchTerm.set(value);
   }
 
-  documentTypeLabel(code: string): string {
-    return DOCUMENT_TYPE_LABELS[code] ?? code;
+  openEdit(user: UserAccount): void {
+    this.editingUser.set({ ...user });
   }
 
-  openUserDetails(user: UserAccount): void {
-    this.selectedUser.set(user);
-    this.detailsModalOpen.set(true);
+  closeEdit(): void {
+    this.editingUser.set(null);
   }
 
-  closeUserDetails(): void {
-    this.detailsModalOpen.set(false);
+  updateEditingField<K extends keyof UserAccount>(field: K, value: UserAccount[K]): void {
+    this.editingUser.update((user) => (user ? { ...user, [field]: value } : user));
+  }
+
+  saveEdit(): void {
+    const user = this.editingUser();
+    if (!user || !user.name.trim() || !user.email.trim()) return;
+
+    this.editSaving.set(true);
+    this.usersApi.updateUser(user).subscribe({
+      next: (updated) => {
+        this.users.update((list) => list.map((u) => (u.id === updated.id ? updated : u)));
+        this.editSaving.set(false);
+        this.editingUser.set(null);
+      },
+      error: () => {
+        this.editSaving.set(false);
+      },
+    });
   }
 }
