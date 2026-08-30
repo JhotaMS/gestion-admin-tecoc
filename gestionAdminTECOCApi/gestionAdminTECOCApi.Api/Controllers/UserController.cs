@@ -75,6 +75,19 @@ public class UserController(
 
         Result<UpdateUserCommandResponse> result = await dispatch.Send(
             request,
+            cancellationToken
+        );
+
+        if (result.IsFailure) {
+            return StatusCode(
+                StatusCodeByError( result.Error ),
+                new CodeError( StatusCodeByError( result.Error ), result.Error.Name )
+            );
+        }
+
+        return Ok( result.Value );
+    }
+
     [HttpGet()]
     [ProducesResponseType( typeof( GetAllUsersResponse ), (int)HttpStatusCode.OK )]
     [ProducesResponseType( typeof( CodeError ), (int)HttpStatusCode.BadRequest )]
