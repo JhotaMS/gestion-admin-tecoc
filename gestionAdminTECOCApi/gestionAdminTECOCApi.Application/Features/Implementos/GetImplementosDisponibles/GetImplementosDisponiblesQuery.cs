@@ -1,6 +1,6 @@
 using gestionAdminTECOCApi.Application.Messaging;
 using gestionAdminTECOCApi.Domain.Abstractions;
-using gestionAdminTECOCApi.Domain.Implementos;
+using gestionAdminTECOCApi.Domain.Loans;
 using gestionAdminTECOCApi.Domain.Ports;
 
 namespace gestionAdminTECOCApi.Application.Features.Implementos.GetImplementosDisponibles;

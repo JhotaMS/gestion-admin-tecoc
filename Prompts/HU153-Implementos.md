@@ -66,55 +66,62 @@ Respuesta `200 OK` sin resultados (CA06):
 | Campo | Descripción | Regla |
 |---|---|---|
 | `Id` | Identificador del implemento | `Guid`, generado por el sistema |
-| `Nombre` | Nombre del implemento | Obligatorio, máximo 100 caracteres |
-| `Codigo` | Código del implemento | Obligatorio, único, máximo 20 caracteres |
-| `Descripcion` | Descripción del implemento | Obligatorio, máximo 250 caracteres |
+| `Nombre` | Nombre del implemento | Obligatorio, máximo 150 caracteres |
+| `Codigo` | Código del implemento | Obligatorio, único, máximo 30 caracteres |
+| `Descripcion` | Descripción del implemento | Máximo 500 caracteres |
 | `CantidadTotal` | Cantidad total registrada | Entero |
 | `CantidadDisponible` | Cantidad disponible para préstamo | Entero |
-| `Estado` | Estado actual del implemento | Obligatorio, texto libre, máximo 50 caracteres |
+| `Estado` | Estado actual del implemento | Texto libre, máximo 50 caracteres |
 | `Activo` | Indica si el implemento está activo | Booleano |
+
+Las longitudes de `Nombre`, `Codigo` y `Descripcion` las fija la configuración que
+ya existía en `develop`; no se modificaron.
 
 ## Archivos
 
-| Capa | Archivo |
-|---|---|
-| Domain | `gestionAdminTECOCApi.Domain/Implementos/Implemento.cs` |
-| Application | `gestionAdminTECOCApi.Application/Features/Implementos/GetImplementosDisponibles/GetImplementosDisponiblesQuery.cs` |
-| Infrastructure | `gestionAdminTECOCApi.Infrastructure.PostgreSql/Configurations/ImplementoConfiguration.cs` |
-| Infrastructure | `Migrations/20260830154520_V1-0-5-Hu153Implementos.cs` (+ `.Designer.cs`) |
-| Api | `gestionAdminTECOCApi.Api/Controllers/ImplementosController.cs` |
-| Tests | `gestionAdminTECOCApi.Api.Tests/Integration/ImplementosDisponiblesTests.cs` |
+| Capa | Archivo | |
+|---|---|---|
+| Domain | `gestionAdminTECOCApi.Domain/Loans/Implemento.cs` | ampliado |
+| Application | `Features/Implementos/GetImplementosDisponibles/GetImplementosDisponiblesQuery.cs` | nuevo |
+| Infrastructure | `Configurations/ImplementoDisponibilidadConfiguration.cs` | nuevo |
+| Infrastructure | `Migrations/20260830201049_V1-0-6-Hu153ImplementosDisponibilidad.cs` | nuevo |
+| Api | `Controllers/ImplementosDisponiblesController.cs` | nuevo |
+| Tests | `Api.Tests/Integration/ImplementosDisponiblesTests.cs` | nuevo |
 
 ## Decisiones de implementación
 
-- **La entidad se llama `Implemento`, en español.** La entidad `Prestamo` que
-  entró en `develop` con el PR #25 declara `public Guid ImplementoId`, así que el
-  modelo del equipo ya espera ese nombre. Namespace `Domain.Implementos`, tabla
-  `Implementos`.
+- **Se reutiliza la entidad `Implemento` que ya existe en `Domain/Loans`.** Entró a
+  `develop` con el PR #29, creada para el módulo de préstamos. La historia necesita
+  tres campos que esa entidad no tenía, así que se le agregaron `CantidadTotal`,
+  `CantidadDisponible` y `Estado`. La alternativa —una segunda entidad `Implemento`
+  propia— era inviable: dos tipos no pueden mapearse a la misma tabla `Implementos`,
+  y duplicar la tabla habría partido el inventario en dos.
+- **La ampliación de la entidad es aditiva y no rompe nada.** Los parámetros nuevos
+  de `Create` son opcionales y con valor por defecto, así que las llamadas que ya
+  existían siguen compilando y comportándose igual.
+- **Las columnas nuevas se configuran en un archivo aparte**,
+  `ImplementoDisponibilidadConfiguration`, en lugar de modificar el
+  `ImplementoConfiguration` existente. Entity Framework admite varias
+  `IEntityTypeConfiguration<T>` para la misma entidad y aplica todas.
+- **El endpoint vive en su propio controller**, `ImplementosDisponiblesController`,
+  y no dentro del `ImplementosController` que ya existía. Las rutas no chocan:
+  `api/implementos/disponibles` frente a `api/v1/Implementos`.
 - **La ruta es la de la historia**, `api/implementos/disponibles`. Se aparta de la
-  convención `api/v1/[controller]` que usan los demás controllers, pero el
-  criterio de aceptación fija esa URL y manda la historia.
+  convención `api/v1/[controller]` que usan los demás controllers, pero el criterio
+  de aceptación fija esa URL.
 - **`Activo` se apoya en el `Enabled` que hereda `Entity<Guid>`.** La clase base ya
   persiste una columna booleana; agregar además una columna `Activo` dejaría dos
-  banderas con el mismo significado en la misma tabla. El filtro del CA02 y CA05
-  se aplica sobre `Enabled`. El constructor privado recibe el parámetro como
-  `enabled` porque EF Core enlaza los parámetros del constructor por nombre de
-  propiedad, y con `activo` falla al construir el modelo.
+  banderas con el mismo significado. El filtro del CA02 y CA05 opera sobre ella.
 - **`Activo` no se retorna** (CA03 no lo lista). Como el endpoint solo devuelve
   implementos activos, el campo sería siempre `true` y no aporta información.
 - **El filtro se aplica en base de datos**, no en memoria, para no traer todo el
   inventario y descartarlo después.
-- **`estado` es texto libre**, igual que `EstadoTipo` en `Prestamo`. No se
-  restringe a una lista de valores para no rechazar lo que envíe el `POST` de la
-  historia de alta.
-- **El ordenamiento por nombre se hace en el handler**, no en base de datos, para
-  no depender de la colación del servidor PostgreSQL: los nombres llevan tildes y
-  el orden debe ser estable entre el entorno local y el desplegado.
-- **La tabla nace vacía y no se siembra.** Los implementos del mock del frontend
-  (`loans-mock.api.ts`) son datos de relleno para maquetar, no inventario real, y
-  cargarlos con `HasData` los dejaría en la base de producción. El alta se hace
-  desde la aplicación con el `POST` de la historia correspondiente.
+- **El ordenamiento por nombre se hace en el handler**, no en base de datos, para no
+  depender de la colación del servidor PostgreSQL: los nombres llevan tildes y el
+  orden debe ser estable entre el entorno local y el desplegado.
+- **La migración solo agrega columnas.** No recrea la tabla `Implementos` ni toca
+  los datos existentes; las tres columnas entran con valor por defecto.
+- **La tabla no se siembra.** Los implementos del mock del frontend son datos de
+  relleno para maquetar, no inventario real. El alta se hace desde la aplicación.
 - **Solo lectura.** La historia pide obtener los implementos disponibles; no se
   implementó `POST`, `PUT` ni `DELETE`.
-- **No se tocó el frontend.** `app.config.ts` sigue con
-  `{ provide: LoansApi, useClass: LoansMockApi }`.

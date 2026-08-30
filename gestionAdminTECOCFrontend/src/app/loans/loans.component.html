@@ -3,8 +3,8 @@
     <div>
       <h1 class="m-0 text-2xl font-bold tracking-tight text-tecoc-deep">Préstamo de implementos</h1>
       <p class="mt-1 max-w-xl text-sm text-tecoc-ink">
-        Estudiantes y docentes solicitan implementos de uso técnico o práctico desde el sistema, los retiran en el
-        mostrador y su estado se revisa al entregarlos y al devolverlos.
+        Estudiantes y docentes solicitan implementos de uso técnico o práctico desde el sistema, los
+        retiran en el mostrador y su estado se revisa al entregarlos y al devolverlos.
       </p>
     </div>
     <button
@@ -18,7 +18,9 @@
 
   <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <div class="rounded-md border border-tecoc-border bg-white p-5">
-      <div class="font-narrow text-3xl font-bold leading-none text-tecoc-deep">{{ stats().total }}</div>
+      <div class="font-narrow text-3xl font-bold leading-none text-tecoc-deep">
+        {{ stats().total }}
+      </div>
       <div class="mt-1.5 text-xs tracking-wide text-tecoc-ink">Solicitudes activas</div>
       <div class="mt-3 h-[3px] rounded-full bg-tecoc-border">
         <div class="h-full rounded-full bg-tecoc-blue" style="width: 100%"></div>
@@ -26,37 +28,55 @@
     </div>
 
     <div class="rounded-md border border-tecoc-border bg-white p-5">
-      <div class="font-narrow text-3xl font-bold leading-none text-tecoc-deep">{{ stats().reservado }}</div>
+      <div class="font-narrow text-3xl font-bold leading-none text-tecoc-deep">
+        {{ stats().reservado }}
+      </div>
       <div class="mt-1.5 text-xs tracking-wide text-tecoc-ink">Por retirar en mostrador</div>
       <div class="mt-3 h-[3px] rounded-full bg-tecoc-border">
-        <div class="h-full rounded-full bg-tecoc-blue" [style.width.%]="stats().reservadoPercent"></div>
+        <div
+          class="h-full rounded-full bg-tecoc-blue"
+          [style.width.%]="stats().reservadoPercent"
+        ></div>
       </div>
     </div>
 
     <div class="rounded-md border border-tecoc-border bg-white p-5">
-      <div class="font-narrow text-3xl font-bold leading-none text-tecoc-deep">{{ stats().entregado }}</div>
+      <div class="font-narrow text-3xl font-bold leading-none text-tecoc-deep">
+        {{ stats().entregado }}
+      </div>
       <div class="mt-1.5 text-xs tracking-wide text-tecoc-ink">Entregados, en uso</div>
       <div class="mt-3 h-[3px] rounded-full bg-tecoc-border">
-        <div class="h-full rounded-full bg-tecoc-success" [style.width.%]="stats().entregadoPercent"></div>
+        <div
+          class="h-full rounded-full bg-tecoc-success"
+          [style.width.%]="stats().entregadoPercent"
+        ></div>
       </div>
     </div>
 
     <div class="rounded-md border border-tecoc-border bg-white p-5">
-      <div class="font-narrow text-3xl font-bold leading-none text-tecoc-deep">{{ stats().atrasado }}</div>
+      <div class="font-narrow text-3xl font-bold leading-none text-tecoc-deep">
+        {{ stats().atrasado }}
+      </div>
       <div class="mt-1.5 text-xs tracking-wide text-tecoc-ink">Devoluciones atrasadas</div>
       <div class="mt-3 h-[3px] rounded-full bg-tecoc-border">
-        <div class="h-full rounded-full bg-tecoc-danger" [style.width.%]="stats().atrasadoPercent"></div>
+        <div
+          class="h-full rounded-full bg-tecoc-danger"
+          [style.width.%]="stats().atrasadoPercent"
+        ></div>
       </div>
     </div>
   </div>
 
   <div class="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_320px] lg:items-start">
     <div class="overflow-hidden rounded-md border border-tecoc-border bg-white">
-      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-tecoc-border px-5 py-4">
+      <div
+        class="flex flex-wrap items-center justify-between gap-4 border-b border-tecoc-border px-5 py-4"
+      >
         <div>
           <h2 class="m-0 text-[15px] font-bold text-tecoc-deep">Solicitudes de préstamo</h2>
           <div class="mt-0.5 text-xs text-tecoc-ink">
-            {{ filteredLoans().length }} {{ filteredLoans().length === 1 ? 'resultado' : 'resultados' }}
+            {{ filteredLoans().length }}
+            {{ filteredLoans().length === 1 ? 'resultado' : 'resultados' }}
           </div>
         </div>
         <div class="relative w-64 max-w-full">
@@ -94,13 +114,29 @@
           <table class="w-full border-collapse">
             <thead>
               <tr class="bg-slate-50">
-                <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Implemento</th>
-                <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Solicitante</th>
-                <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Estado</th>
-                <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">
+                <th
+                  class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
+                >
+                  Implemento
+                </th>
+                <th
+                  class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
+                >
+                  Solicitante
+                </th>
+                <th
+                  class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
+                >
+                  Estado
+                </th>
+                <th
+                  class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
+                >
                   Retiro / vencimiento
                 </th>
-                <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">
+                <th
+                  class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
+                >
                   Estado físico
                 </th>
               </tr>
@@ -123,13 +159,21 @@
                   </td>
                   <td class="px-5 py-3.5">
                     <div class="text-sm font-semibold text-slate-900">{{ loan.requesterName }}</div>
-                    <span class="rounded-full bg-tecoc-tint px-2.5 py-1 text-[11px] font-semibold text-tecoc-navy">
+                    <span
+                      class="rounded-full bg-tecoc-tint px-2.5 py-1 text-[11px] font-semibold text-tecoc-navy"
+                    >
                       {{ loan.requesterRole }}
                     </span>
                   </td>
                   <td class="px-5 py-3.5">
-                    <span class="inline-flex items-center gap-1.5 text-xs font-semibold" [style.color]="statusColor(loan.status)">
-                      <span class="h-1.5 w-1.5 rounded-full" [style.background]="statusColor(loan.status)"></span>
+                    <span
+                      class="inline-flex items-center gap-1.5 text-xs font-semibold"
+                      [style.color]="statusColor(loan.status)"
+                    >
+                      <span
+                        class="h-1.5 w-1.5 rounded-full"
+                        [style.background]="statusColor(loan.status)"
+                      ></span>
                       {{ statusLabel(loan.status) }}
                     </span>
                   </td>
@@ -138,7 +182,10 @@
                       class="inline-flex items-center gap-1.5 text-sm font-semibold"
                       [style.color]="scheduleColor(loan.dueInDays)"
                     >
-                      <span class="h-1.5 w-1.5 rounded-full" [style.background]="scheduleColor(loan.dueInDays)"></span>
+                      <span
+                        class="h-1.5 w-1.5 rounded-full"
+                        [style.background]="scheduleColor(loan.dueInDays)"
+                      ></span>
                       {{ loan.scheduleLabel }}
                     </span>
                   </td>
@@ -147,7 +194,10 @@
                       class="inline-flex items-center gap-1.5 text-xs font-semibold"
                       [style.color]="conditionColor(loan.condition)"
                     >
-                      <span class="h-1.5 w-1.5 rounded-full" [style.background]="conditionColor(loan.condition)"></span>
+                      <span
+                        class="h-1.5 w-1.5 rounded-full"
+                        [style.background]="conditionColor(loan.condition)"
+                      ></span>
                       {{ conditionLabel(loan.condition) }}
                     </span>
                   </td>
@@ -167,37 +217,58 @@
 
     <div class="flex flex-col gap-5">
       <div class="rounded-md border border-tecoc-border bg-white p-5">
-        <h3 class="m-0 text-sm font-bold text-tecoc-deep">Revisión en mostrador</h3>
+        <h3 class="m-0 text-sm font-bold text-tecoc-deep">Estado de la implementación</h3>
         <p class="mt-1 mb-4 text-xs text-tecoc-ink">
-          Registra el estado del implemento al entregarlo o al recibir la devolución.
+          Registra o cambia el estado del préstamo de implementos para usuarios.
         </p>
 
         <label class="mb-3.5 block">
-          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Solicitud</span>
+          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
+            >Usuario</span
+          >
           <select
             class="w-full rounded-md border border-tecoc-line bg-white px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
-            [ngModel]="selectedLoanId()"
-            (ngModelChange)="selectedLoanId.set($event)"
+            [ngModel]="selectedTeacherId()"
+            (ngModelChange)="selectedTeacherId.set($event)"
           >
-            @for (loan of loans(); track loan.id) {
-              <option [value]="loan.id">{{ loan.itemName }} · {{ loan.requesterName }}</option>
+            @for (teacher of teachers(); track teacher.id) {
+              <option [value]="teacher.name">{{ teacher.name }}</option>
             }
           </select>
         </label>
 
         <label class="mb-3.5 block">
-          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Momento de revisión</span>
+          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
+            >Implemento</span
+          >
+          <select
+            class="w-full rounded-md border border-tecoc-line bg-white px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+            [ngModel]="selectedItemCode()"
+            (ngModelChange)="selectedItemCode.set($event)"
+          >
+            @for (item of catalog(); track item.code) {
+              <option [value]="item.code">{{ item.name }} · {{ item.code }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="mb-3.5 block">
+          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
+            >Tipo Revisión</span
+          >
           <select
             class="w-full rounded-md border border-tecoc-line bg-white px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
             [ngModel]="reviewMoment()"
             (ngModelChange)="reviewMoment.set($event)"
           >
-            <option value="entrega">Entrega al solicitante</option>
-            <option value="devolucion">Devolución</option>
+            <option value="inicio">Inicio Préstamo</option>
+            <option value="fin">Fin Préstamo</option>
           </select>
         </label>
 
-        <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Estado del implemento</span>
+        <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
+          >Estado</span
+        >
         <div class="flex gap-1.5">
           @for (option of conditionOptions; track option.key) {
             <button
@@ -205,11 +276,11 @@
               class="flex-1 rounded-md border px-2 py-2.5 text-[11.5px] font-bold transition"
               [class]="
                 reviewCondition() === option.key
-                  ? (option.key === 'bueno'
-                      ? 'border-tecoc-success bg-tecoc-success text-white'
-                      : option.key === 'regular'
-                        ? 'border-tecoc-warning bg-tecoc-warning text-white'
-                        : 'border-tecoc-danger bg-tecoc-danger text-white')
+                  ? option.key === 'bueno'
+                    ? 'border-tecoc-success bg-tecoc-success text-white'
+                    : option.key === 'regular'
+                      ? 'border-tecoc-warning bg-tecoc-warning text-white'
+                      : 'border-tecoc-danger bg-tecoc-danger text-white'
                   : 'border-tecoc-border bg-slate-50 text-tecoc-ink hover:border-tecoc-blue'
               "
               (click)="selectCondition(option.key)"
@@ -219,15 +290,42 @@
           }
         </div>
 
-        <label class="mt-3.5 mb-1.5 block">
-          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Observaciones</span>
-          <input
-            type="text"
+        <div class="mt-3.5 mb-1.5 grid grid-cols-2 gap-2.5">
+          <label class="block">
+            <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
+              >Fecha de inicio</span
+            >
+            <input
+              type="date"
+              readonly
+              class="w-full rounded-md border border-tecoc-line bg-slate-100 px-3 py-2 text-xs text-slate-600 outline-none cursor-not-allowed select-none"
+              [ngModel]="reviewStartDate()"
+            />
+          </label>
+          <label class="block">
+            <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
+              >Fecha de fin</span
+            >
+            <input
+              type="date"
+              readonly
+              class="w-full rounded-md border border-tecoc-line bg-slate-100 px-3 py-2 text-xs text-slate-600 outline-none cursor-not-allowed select-none"
+              [ngModel]="reviewEndDate()"
+            />
+          </label>
+        </div>
+
+        <label class="mt-2 mb-1.5 block">
+          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
+            >Observación</span
+          >
+          <textarea
+            rows="2"
             placeholder="Opcional"
-            class="w-full rounded-md border border-tecoc-line px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+            class="w-full resize-y rounded-md border border-tecoc-line px-3 py-2 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
             [ngModel]="reviewNote()"
             (ngModelChange)="reviewNote.set($event)"
-          />
+          ></textarea>
         </label>
 
         <button
@@ -236,7 +334,7 @@
           [disabled]="submitting()"
           (click)="submitReview()"
         >
-          {{ submitting() ? 'Registrando…' : 'Registrar revisión' }}
+          {{ submitting() ? 'Registrando…' : 'Registrar' }}
         </button>
 
         @if (reviewMessage(); as message) {
@@ -275,7 +373,9 @@
         class="w-full max-w-lg overflow-hidden rounded-lg bg-white shadow-[0_30px_60px_-20px_rgba(0,20,60,0.5)]"
         (click)="$event.stopPropagation()"
       >
-        <div class="flex items-start justify-between gap-4 bg-gradient-to-r from-tecoc-deep to-tecoc-navy px-6 py-5">
+        <div
+          class="flex items-start justify-between gap-4 bg-gradient-to-r from-tecoc-deep to-tecoc-navy px-6 py-5"
+        >
           <div>
             <h3 class="m-0 mb-1 text-[17px] font-bold text-white">Nueva solicitud de préstamo</h3>
             <p class="m-0 max-w-sm text-[12.5px] text-white/70">
@@ -294,10 +394,14 @@
 
         <div class="max-h-[65vh] overflow-y-auto px-6 py-5">
           <label class="mb-4 block">
-            <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Implemento</span>
+            <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
+              >Implemento</span
+            >
             <select
               class="w-full rounded-md border px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
-              [class]="newLoanSubmitted() && !newItemCode() ? 'border-tecoc-danger' : 'border-tecoc-line'"
+              [class]="
+                newLoanSubmitted() && !newItemCode() ? 'border-tecoc-danger' : 'border-tecoc-line'
+              "
               [ngModel]="newItemCode()"
               (ngModelChange)="newItemCode.set($event)"
             >
@@ -307,27 +411,39 @@
               }
             </select>
             @if (newLoanSubmitted() && !newItemCode()) {
-              <span class="mt-1.5 block text-[11px] font-semibold text-tecoc-danger">Selecciona el implemento a prestar.</span>
+              <span class="mt-1.5 block text-[11px] font-semibold text-tecoc-danger"
+                >Selecciona el implemento a prestar.</span
+              >
             }
           </label>
 
           <label class="mb-4 block">
-            <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Solicitante</span>
+            <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
+              >Solicitante</span
+            >
             <input
               type="text"
               placeholder="Nombre completo"
               class="w-full rounded-md border px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
-              [class]="newLoanSubmitted() && !newRequesterName().trim() ? 'border-tecoc-danger' : 'border-tecoc-line'"
+              [class]="
+                newLoanSubmitted() && !newRequesterName().trim()
+                  ? 'border-tecoc-danger'
+                  : 'border-tecoc-line'
+              "
               [ngModel]="newRequesterName()"
               (ngModelChange)="newRequesterName.set($event)"
             />
             @if (newLoanSubmitted() && !newRequesterName().trim()) {
-              <span class="mt-1.5 block text-[11px] font-semibold text-tecoc-danger">Escribe el nombre del solicitante.</span>
+              <span class="mt-1.5 block text-[11px] font-semibold text-tecoc-danger"
+                >Escribe el nombre del solicitante.</span
+              >
             }
           </label>
 
           <div class="mb-4">
-            <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Rol</span>
+            <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
+              >Rol</span
+            >
             <div class="flex gap-1.5">
               @for (role of roleOptions; track role) {
                 <button
@@ -345,27 +461,41 @@
               }
             </div>
             @if (newLoanSubmitted() && !newRequesterRole()) {
-              <span class="mt-1.5 block text-[11px] font-semibold text-tecoc-danger">Indica si es estudiante o docente.</span>
+              <span class="mt-1.5 block text-[11px] font-semibold text-tecoc-danger"
+                >Indica si es estudiante o docente.</span
+              >
             }
           </div>
 
           <div class="mb-4 grid grid-cols-2 gap-3.5">
             <label class="block">
-              <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Fecha de retiro</span>
+              <span
+                class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
+                >Fecha de retiro</span
+              >
               <input
                 type="date"
                 [min]="minPickupDate"
                 class="w-full rounded-md border px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
-                [class]="newLoanSubmitted() && !newPickupDate() ? 'border-tecoc-danger' : 'border-tecoc-line'"
+                [class]="
+                  newLoanSubmitted() && !newPickupDate()
+                    ? 'border-tecoc-danger'
+                    : 'border-tecoc-line'
+                "
                 [ngModel]="newPickupDate()"
                 (ngModelChange)="newPickupDate.set($event)"
               />
               @if (newLoanSubmitted() && !newPickupDate()) {
-                <span class="mt-1.5 block text-[11px] font-semibold text-tecoc-danger">Elige la fecha de retiro.</span>
+                <span class="mt-1.5 block text-[11px] font-semibold text-tecoc-danger"
+                  >Elige la fecha de retiro.</span
+                >
               }
             </label>
             <label class="block">
-              <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Hora de retiro</span>
+              <span
+                class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
+                >Hora de retiro</span
+              >
               <input
                 type="time"
                 class="w-full rounded-md border border-tecoc-line px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
@@ -376,7 +506,9 @@
           </div>
 
           <label class="block">
-            <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Observaciones</span>
+            <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
+              >Observaciones</span
+            >
             <textarea
               rows="2"
               placeholder="Opcional"
@@ -390,7 +522,11 @@
         @if (newLoanMessage(); as message) {
           <div
             class="mx-6 mb-4 rounded-md px-3.5 py-2.5 text-[12.5px] font-semibold"
-            [class]="message.startsWith('No fue posible') ? 'bg-tecoc-danger-tint text-tecoc-danger' : 'bg-tecoc-success-tint text-tecoc-success'"
+            [class]="
+              message.startsWith('No fue posible')
+                ? 'bg-tecoc-danger-tint text-tecoc-danger'
+                : 'bg-tecoc-success-tint text-tecoc-success'
+            "
           >
             {{ message }}
           </div>

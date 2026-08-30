@@ -1,4 +1,4 @@
-using gestionAdminTECOCApi.Domain.Implementos;
+using gestionAdminTECOCApi.Domain.Loans;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,34 +12,24 @@ internal sealed class ImplementoConfiguration
 
         builder
             .Property( property => property.Codigo )
-            .HasMaxLength( 20 )
+            .HasMaxLength( 30 )
             .IsRequired( true );
 
         builder
             .Property( property => property.Nombre )
-            .HasMaxLength( 100 )
+            .HasMaxLength( 150 )
             .IsRequired( true );
 
         builder
             .Property( property => property.Descripcion )
-            .HasMaxLength( 250 )
-            .IsRequired( true );
+            .HasMaxLength( 500 )
+            .IsRequired( false );
 
-        builder
-            .Property( property => property.CantidadTotal )
-            .IsRequired( true );
-
-        builder
-            .Property( property => property.CantidadDisponible )
-            .IsRequired( true );
-
-        builder
-            .Property( property => property.Estado )
-            .HasMaxLength( 50 )
-            .IsRequired( true );
+        builder.Property( property => property.Enabled );
 
         builder
             .HasIndex( index => index.Codigo )
             .IsUnique();
     }
 }
+

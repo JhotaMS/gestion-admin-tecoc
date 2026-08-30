@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using gestionAdminTECOCApi.Application.Features.Implementos.GetImplementosDisponibles;
-using gestionAdminTECOCApi.Domain.Implementos;
+using gestionAdminTECOCApi.Domain.Loans;
 using gestionAdminTECOCApi.Infrastructure.PostgreSql.Persistence;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -42,11 +42,29 @@ public class ImplementosDisponiblesTests : IClassFixture<WebApplicationFactory<P
         db.SaveChanges();
     }
 
+    private static Implemento Disponible(
+        string codigo,
+        string nombre,
+        string descripcion,
+        int cantidadTotal,
+        int cantidadDisponible,
+        string estado = "Bueno",
+        bool activo = true
+    ) => Implemento.Create(
+        codigo,
+        nombre,
+        descripcion,
+        cantidadTotal: cantidadTotal,
+        cantidadDisponible: cantidadDisponible,
+        estado: estado,
+        activo: activo
+    );
+
     private HttpClient Client() => _factory.CreateClient();
 
     [Fact]
     public async Task CA03_retorna_la_informacion_del_implemento_disponible() {
-        Seed( Implemento.Create( "MT-014", "Multímetro digital", "Multímetro digital de gama media", 8, 3, "Bueno", true ) );
+        Seed( Disponible( "MT-014", "Multímetro digital", "Multímetro digital de gama media", 8, 3 ) );
 
         var response = await Client().GetAsync( Url );
 
@@ -69,8 +87,8 @@ public class ImplementosDisponiblesTests : IClassFixture<WebApplicationFactory<P
     [Fact]
     public async Task CA04_no_incluye_los_implementos_sin_unidades_disponibles() {
         Seed(
-            Implemento.Create( "MC-006", "Microscopio óptico", "Microscopio de laboratorio", 5, 0, "Bueno", true ),
-            Implemento.Create( "PR-005", "Proyector portátil", "Proyector HDMI para aulas", 6, 5, "Bueno", true ) );
+            Disponible( "MC-006", "Microscopio óptico", "Microscopio de laboratorio", 5, 0 ),
+            Disponible( "PR-005", "Proyector portátil", "Proyector HDMI para aulas", 6, 5 ) );
 
         var body = await Client().GetFromJsonAsync<GetImplementosDisponiblesResponse>( Url );
 
@@ -81,7 +99,7 @@ public class ImplementosDisponiblesTests : IClassFixture<WebApplicationFactory<P
 
     [Fact]
     public async Task CA05_no_retorna_los_implementos_inactivos_aunque_tengan_unidades() {
-        Seed( Implemento.Create( "TL-002", "Taladro inalámbrico", "Taladro con batería de repuesto", 4, 4, "Bueno", false ) );
+        Seed( Disponible( "TL-002", "Taladro inalámbrico", "Taladro con batería de repuesto", 4, 4, activo: false ) );
 
         var body = await Client().GetFromJsonAsync<GetImplementosDisponiblesResponse>( Url );
 
@@ -91,7 +109,7 @@ public class ImplementosDisponiblesTests : IClassFixture<WebApplicationFactory<P
 
     [Fact]
     public async Task CA06_sin_resultados_retorna_lista_vacia_e_informa() {
-        Seed( Implemento.Create( "KD-031", "Kit de disección", "Kit completo de disección", 2, 0, "Regular", true ) );
+        Seed( Disponible( "KD-031", "Kit de disección", "Kit completo de disección", 2, 0, "Regular" ) );
 
         var response = await Client().GetAsync( Url );
 
@@ -106,9 +124,9 @@ public class ImplementosDisponiblesTests : IClassFixture<WebApplicationFactory<P
     [Fact]
     public async Task Los_implementos_disponibles_se_devuelven_ordenados_por_nombre() {
         Seed(
-            Implemento.Create( "TL-002", "Taladro inalámbrico", "Taladro con batería de repuesto", 4, 1, "Bueno", true ),
-            Implemento.Create( "CM-017", "Cámara réflex", "Cámara con lente 18-55", 3, 3, "Regular", true ),
-            Implemento.Create( "PR-005", "Proyector portátil", "Proyector HDMI para aulas", 6, 5, "Bueno", true ) );
+            Disponible( "TL-002", "Taladro inalámbrico", "Taladro con batería de repuesto", 4, 1 ),
+            Disponible( "CM-017", "Cámara réflex", "Cámara con lente 18-55", 3, 3, "Regular" ),
+            Disponible( "PR-005", "Proyector portátil", "Proyector HDMI para aulas", 6, 5 ) );
 
         var body = await Client().GetFromJsonAsync<GetImplementosDisponiblesResponse>( Url );
 
