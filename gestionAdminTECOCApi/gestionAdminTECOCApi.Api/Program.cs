@@ -53,7 +53,7 @@ if (app.Environment.IsDevelopment()) {
 }
 
 app.UseMiddleware<ExceptionMiddleware>();
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 await app.RunAsync()
