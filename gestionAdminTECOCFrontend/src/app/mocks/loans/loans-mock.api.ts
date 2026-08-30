@@ -9,7 +9,17 @@ import {
   LoansSnapshot,
   NewLoanRequest,
   StockItem,
+  TeacherItem,
 } from '../../loans/loans.models';
+
+const TEACHERS: TeacherItem[] = [
+  { id: 't1', name: 'Julián Torres' },
+  { id: 't2', name: 'Andrés Muñoz' },
+  { id: 't3', name: 'Daniela Peña' },
+  { id: 't4', name: 'Carlos Mendoza' },
+  { id: 't5', name: 'Martha Lucía Gómez' },
+  { id: 't6', name: 'Camila Restrepo' },
+];
 
 let loans: LoanRequest[] = [
   { id: 'l1', itemName: 'Multímetro digital', itemCode: 'MT-014', requesterName: 'Camila Restrepo', requesterRole: 'Estudiante', status: 'entregado', scheduleLabel: 'Vence 29 ago 2026', dueInDays: 6, condition: 'bueno' },
@@ -71,23 +81,60 @@ function scheduleFromPickup(pickupDateIso: string, pickupTime: string): { label:
 @Injectable()
 export class LoansMockApi extends LoansApi {
   getSnapshot(): Observable<LoansSnapshot> {
-    return of({ loans: [...loans], stock: [...stock], catalog: [...CATALOG] }).pipe(delay(300));
+    return of({
+      loans: [...loans],
+      stock: [...stock],
+      catalog: [...CATALOG],
+      teachers: [...TEACHERS],
+    }).pipe(delay(300));
   }
 
   reviewLoan(request: LoanReviewRequest): Observable<LoanRequest> {
-    const target = loans.find((loan) => loan.id === request.loanId);
-    if (!target) {
-      return throwError(() => new Error('Solicitud no encontrada.'));
+    let target = request.loanId ? loans.find((loan) => loan.id === request.loanId) : undefined;
+
+    if (!target && request.teacherName && request.itemCode) {
+      target = loans.find(
+        (loan) => loan.itemCode === request.itemCode && loan.requesterName === request.teacherName
+      );
     }
 
-    const updated: LoanRequest = {
-      ...target,
-      condition: request.condition,
-      status: request.moment === 'entrega' ? 'entregado' : 'devuelto',
-    };
-    loans = loans.map((loan) => (loan.id === request.loanId ? updated : loan));
+    const updatedCondition = request.condition;
+    const isEntrega = request.moment === 'entrega' || request.moment === '2';
+    const updatedStatus = isEntrega ? 'entregado' : 'devuelto';
 
-    return of(updated).pipe(delay(300));
+    if (target) {
+      const updated: LoanRequest = {
+        ...target,
+        condition: updatedCondition,
+        status: updatedStatus,
+        startDate: request.startDate,
+        endDate: request.endDate,
+      };
+      loans = loans.map((loan) => (loan.id === target!.id ? updated : loan));
+      return of(updated).pipe(delay(300));
+    }
+
+    const item = CATALOG.find((c) => c.code === request.itemCode) || {
+      name: request.itemName || 'Implemento',
+      code: request.itemCode || 'IMP-001',
+    };
+
+    const newCreated: LoanRequest = {
+      id: `loan-${Date.now()}`,
+      itemName: item.name,
+      itemCode: item.code,
+      requesterName: request.teacherName || 'Docente',
+      requesterRole: 'Docente',
+      status: updatedStatus,
+      scheduleLabel: request.endDate ? `Hasta ${request.endDate}` : 'En uso',
+      dueInDays: 3,
+      condition: updatedCondition,
+      startDate: request.startDate,
+      endDate: request.endDate,
+    };
+
+    loans = [newCreated, ...loans];
+    return of(newCreated).pipe(delay(300));
   }
 
   createLoan(request: NewLoanRequest): Observable<LoanRequest> {
