@@ -10,6 +10,7 @@ public class AuthController(
 ) : ControllerBase {
 
     [HttpPost( "login" )]
+    [AllowAnonymous]
     public async Task<IActionResult> LoginAsync(
         [FromBody] LoginCommand request,
         CancellationToken cancellationToken
