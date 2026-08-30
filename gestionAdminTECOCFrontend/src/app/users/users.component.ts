@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { UsersApi } from './users-api';
-import { UserAccount, UserStatus } from './users.models';
+import { UserAccount } from './users.models';
 
 const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   CC: 'Cédula de ciudadanía',
@@ -22,11 +22,6 @@ export class UsersComponent implements OnInit {
   readonly loading = signal(true);
   readonly users = signal<UserAccount[]>([]);
   readonly searchTerm = signal('');
-
-  readonly statusOptions: { key: UserStatus; label: string }[] = [
-    { key: 'activo', label: 'Activo' },
-    { key: 'pendiente', label: 'Pendiente' },
-  ];
 
   readonly editingUser = signal<UserAccount | null>(null);
   readonly editSaving = signal(false);
@@ -50,6 +45,10 @@ export class UsersComponent implements OnInit {
     });
   }
 
+  documentTypeLabel(documentType: string): string {
+    return DOCUMENT_TYPE_LABELS[documentType] ?? documentType;
+  }
+
   initials(name: string): string {
     const parts = name.trim().split(/\s+/);
     return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase();
@@ -57,6 +56,10 @@ export class UsersComponent implements OnInit {
 
   onSearchInput(value: string): void {
     this.searchTerm.set(value);
+  }
+
+  openUserDetails(user: UserAccount): void {
+    this.openEdit(user);
   }
 
   openEdit(user: UserAccount): void {
@@ -76,15 +79,17 @@ export class UsersComponent implements OnInit {
     if (!user || !user.name.trim() || !user.email.trim()) return;
 
     this.editSaving.set(true);
-    this.usersApi.updateUser(user).subscribe({
-      next: (updated) => {
-        this.users.update((list) => list.map((u) => (u.id === updated.id ? updated : u)));
-        this.editSaving.set(false);
-        this.editingUser.set(null);
-      },
-      error: () => {
-        this.editSaving.set(false);
-      },
-    });
+    this.usersApi
+      .updateUser({ id: user.id, name: user.name, email: user.email, enabled: user.enabled })
+      .subscribe({
+        next: (updated) => {
+          this.users.update((list) => list.map((u) => (u.id === updated.id ? updated : u)));
+          this.editSaving.set(false);
+          this.editingUser.set(null);
+        },
+        error: () => {
+          this.editSaving.set(false);
+        },
+      });
   }
 }
