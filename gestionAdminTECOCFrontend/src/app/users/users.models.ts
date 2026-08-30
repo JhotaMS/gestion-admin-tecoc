@@ -1,5 +1,3 @@
-export type UserStatus = 'activo' | 'pendiente';
-
 export interface UserGroup {
   id: string;
   name: string;
@@ -9,9 +7,10 @@ export interface UserGroup {
 export interface UserAccount {
   id: string;
   name: string;
+  userName: string;
+  documentType: string;
+  documentNumber: string;
   email: string;
-  role: string;
-  registeredAtIso: string | null;
-  status: UserStatus;
+  enabled: boolean;
   group: UserGroup | null;
 }

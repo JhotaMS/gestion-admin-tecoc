@@ -1,27 +1,29 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { UsersApi } from '../../users/users-api';
 import { UserAccount } from '../../users/users.models';
 
-interface UsersResponse {
-  users: ApiUser[];
-}
-
-interface ApiUser {
+interface UserDto {
   id: string;
   fullName: string;
+  documentType: string;
+  documentNumber: string;
   userName: string;
   email: string;
   enabled: boolean;
-  group: ApiGroup | null;
+  group: UserGroupDto | null;
 }
 
-interface ApiGroup {
+interface UserGroupDto {
   id: string;
   name: string;
   code: string;
+}
+
+interface GetAllUsersResponseDto {
+  users: UserDto[];
 }
 
 @Injectable()
@@ -29,18 +31,21 @@ export class UsersHttpApi extends UsersApi {
   private readonly http = inject(HttpClient);
 
   getUsers(): Observable<UserAccount[]> {
-    return this.http.get<UsersResponse>(`${environment.apiBaseUrl}/User`).pipe(
-      map((response) =>
-        response.users.map((user) => ({
-          id: user.id,
-          name: user.fullName,
-          email: user.email,
-          role: user.userName,
-          registeredAtIso: null,
-          status: user.enabled ? 'activo' : 'pendiente',
-          group: user.group,
-        })),
-      ),
-    );
+    return this.http
+      .get<GetAllUsersResponseDto>(`${environment.apiBaseUrl}/User`)
+      .pipe(map((response) => response.users.map(toUserAccount)));
   }
+}
+
+function toUserAccount(dto: UserDto): UserAccount {
+  return {
+    id: dto.id,
+    name: dto.fullName,
+    userName: dto.userName,
+    documentType: dto.documentType,
+    documentNumber: dto.documentNumber,
+    email: dto.email,
+    enabled: dto.enabled,
+    group: dto.group,
+  };
 }

@@ -25,7 +25,6 @@ export const appConfig: ApplicationConfig = {
     { provide: AuthApi, useClass: AuthHttpApi },
     { provide: DashboardApi, useClass: DashboardMockApi },
     { provide: UsersApi, useClass: UsersHttpApi },
-    // Este sí habla con el backend real (no tiene mock): v1/User.
     { provide: UserRegistrationApi, useClass: UserRegistrationHttpApi },
     { provide: LoansApi, useClass: LoansMockApi },
     { provide: AttendanceApi, useClass: AttendanceMockApi },

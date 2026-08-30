@@ -155,6 +155,39 @@ internal sealed record class RepositoryBaseService<T>
         return await query.FirstOrDefaultAsync( cancellationToken ) ?? default!;
     }
 
+    public async Task<(IReadOnlyList<T> Items, int TotalCount)> GetPagedAsync(
+        int pageNumber,
+        int pageSize,
+        Expression<Func<T, bool>>? predicate = null,
+        Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+        bool? disableTracking = true,
+        CancellationToken cancellationToken = default
+    ) {
+        IQueryable<T> query = _context.Set<T>();
+
+        if ((bool)disableTracking!)
+            query = query.AsNoTracking();
+
+        if (predicate != null)
+            query = query.Where( predicate );
+
+        // Se cuenta ANTES de aplicar Skip/Take, sobre el mismo filtro, para saber cuántos
+        // registros hay en total (independientemente de la página que se esté pidiendo).
+        var totalCount = await query.CountAsync( cancellationToken );
+
+        if (orderBy != null)
+            query = orderBy( query );
+
+        // Skip/Take se traducen a OFFSET/LIMIT en SQL, así que la base de datos es la que
+        // descarta el resto de filas: nunca se cargan en memoria las páginas que no se piden.
+        var items = await query
+            .Skip( ( pageNumber - 1 ) * pageSize )
+            .Take( pageSize )
+            .ToListAsync( cancellationToken );
+
+        return (items, totalCount);
+    }
+
     public void Update( T entity ) {
         _context.Set<T>()
             .Attach( entity );
