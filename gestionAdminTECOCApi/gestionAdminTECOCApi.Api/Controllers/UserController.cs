@@ -70,7 +70,6 @@ public class UserController(
 
     private static int StatusCodeByError( Error error ) => error.Code switch {
         "User.DocumentAlreadyRegistered" => (int)HttpStatusCode.Conflict,
-        "User.NotFound" => (int)HttpStatusCode.NotFound,
         _ => (int)HttpStatusCode.BadRequest
     };
 }
