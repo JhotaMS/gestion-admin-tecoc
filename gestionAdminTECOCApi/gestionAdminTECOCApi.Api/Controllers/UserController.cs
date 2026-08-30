@@ -6,6 +6,7 @@ using gestionAdminTECOCApi.Domain.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using System.Net;
+using gestionAdminTECOCApi.Application.Features.Users.DeleteUser;
 
 namespace gestionAdminTECOCApi.Api.Controllers;
 
@@ -46,8 +47,32 @@ public class UserController(
         return StatusCode( (int)HttpStatusCode.Created, result.Value );
     }
 
-    private static int StatusCodeByError( Error error ) => error.Code switch {
-        "User.DocumentAlreadyRegistered" => (int)HttpStatusCode.Conflict,
-        _ => (int)HttpStatusCode.BadRequest
-    };
+   private static int StatusCodeByError( Error error ) => error.Code switch {
+    "User.DocumentAlreadyRegistered" => (int)HttpStatusCode.Conflict,
+    "User.AlreadyDisabled" => (int)HttpStatusCode.Conflict,
+    "User.NotFound" => (int)HttpStatusCode.NotFound,
+    _ => (int)HttpStatusCode.BadRequest
+};
+}
+[HttpDelete( "{id:guid}" )]
+[ProducesResponseType( (int)HttpStatusCode.NoContent )]
+[ProducesResponseType( typeof( CodeError ), (int)HttpStatusCode.NotFound )]
+[ProducesResponseType( typeof( CodeError ), (int)HttpStatusCode.Conflict )]
+public async Task<IActionResult> DeleteUserAsync(
+    [FromRoute] Guid id,
+    CancellationToken cancellationToken
+) {
+    Result result = await dispatch.Send(
+        new DeleteUserCommand( id ),
+        cancellationToken
+    );
+
+    if (result.IsFailure) {
+        return StatusCode(
+            StatusCodeByError( result.Error ),
+            new CodeError( StatusCodeByError( result.Error ), result.Error.Name )
+        );
+    }
+
+    return NoContent();
 }
