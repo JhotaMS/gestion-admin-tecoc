@@ -32,13 +32,18 @@ internal sealed class CreateImplementoPrestadoCommandHandler(
             );
         }
 
+        // La columna se persiste como "timestamp with time zone" y Npgsql exige Kind=Utc;
+        // las fechas llegan sin zona horaria (Kind=Unspecified) desde el body JSON.
+        var fechaInicio = DateTime.SpecifyKind( request.FechaInicio, DateTimeKind.Utc );
+        var fechaFin = DateTime.SpecifyKind( request.FechaFin, DateTimeKind.Utc );
+
         var entity = ImplementoPrestado.Create(
             request.UserId,
             request.ImplementoId,
             request.TipoRevisionId,
             request.EstadoTipo,
-            request.FechaInicio,
-            request.FechaFin,
+            fechaInicio,
+            fechaFin,
             request.Observacion?.Trim()
         );
 

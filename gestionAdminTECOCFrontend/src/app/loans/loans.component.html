@@ -400,17 +400,17 @@
             <select
               class="w-full rounded-md border px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
               [class]="
-                newLoanSubmitted() && !newItemCode() ? 'border-tecoc-danger' : 'border-tecoc-line'
+                newLoanSubmitted() && !newImplementoId() ? 'border-tecoc-danger' : 'border-tecoc-line'
               "
-              [ngModel]="newItemCode()"
-              (ngModelChange)="newItemCode.set($event)"
+              [ngModel]="newImplementoId()"
+              (ngModelChange)="newImplementoId.set($event)"
             >
               <option value="">Selecciona un implemento…</option>
-              @for (item of catalog(); track item.code) {
-                <option [value]="item.code">{{ item.name }} · {{ item.code }}</option>
+              @for (item of implementoOptions(); track item.id) {
+                <option [value]="item.id">{{ item.nombre }}</option>
               }
             </select>
-            @if (newLoanSubmitted() && !newItemCode()) {
+            @if (newLoanSubmitted() && !newImplementoId()) {
               <span class="mt-1.5 block text-[11px] font-semibold text-tecoc-danger"
                 >Selecciona el implemento a prestar.</span
               >
@@ -421,93 +421,85 @@
             <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
               >Solicitante</span
             >
-            <input
-              type="text"
-              placeholder="Nombre completo"
+            <select
               class="w-full rounded-md border px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
               [class]="
-                newLoanSubmitted() && !newRequesterName().trim()
-                  ? 'border-tecoc-danger'
-                  : 'border-tecoc-line'
+                newLoanSubmitted() && !newUserId() ? 'border-tecoc-danger' : 'border-tecoc-line'
               "
-              [ngModel]="newRequesterName()"
-              (ngModelChange)="newRequesterName.set($event)"
-            />
-            @if (newLoanSubmitted() && !newRequesterName().trim()) {
+              [ngModel]="newUserId()"
+              (ngModelChange)="newUserId.set($event)"
+            >
+              <option value="">Selecciona un solicitante…</option>
+              @for (user of requesterOptions(); track user.id) {
+                <option [value]="user.id">{{ user.name }}</option>
+              }
+            </select>
+            @if (newLoanSubmitted() && !newUserId()) {
               <span class="mt-1.5 block text-[11px] font-semibold text-tecoc-danger"
-                >Escribe el nombre del solicitante.</span
+                >Selecciona el solicitante.</span
               >
             }
           </label>
 
-          <div class="mb-4">
+          <label class="mb-4 block">
             <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
               >Rol</span
             >
-            <div class="flex gap-1.5">
-              @for (role of roleOptions; track role) {
-                <button
-                  type="button"
-                  class="flex-1 rounded-md border px-2 py-2.5 text-[12.5px] font-bold transition"
-                  [class]="
-                    newRequesterRole() === role
-                      ? 'border-tecoc-deep bg-tecoc-deep text-white'
-                      : 'border-tecoc-border bg-slate-50 text-tecoc-ink hover:border-tecoc-blue'
-                  "
-                  (click)="selectRole(role)"
-                >
-                  {{ role }}
-                </button>
-              }
+            <div
+              class="w-full rounded-md border border-tecoc-line bg-slate-50 px-3 py-2.5 text-sm text-tecoc-ink"
+            >
+              {{ newRequesterRoleLabel }}
             </div>
-            @if (newLoanSubmitted() && !newRequesterRole()) {
-              <span class="mt-1.5 block text-[11px] font-semibold text-tecoc-danger"
-                >Indica si es estudiante o docente.</span
-              >
-            }
-          </div>
+          </label>
 
           <div class="mb-4 grid grid-cols-2 gap-3.5">
             <label class="block">
               <span
                 class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
-                >Fecha de retiro</span
+                >Fecha de inicio</span
               >
               <input
                 type="date"
                 [min]="minPickupDate"
                 class="w-full rounded-md border px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
                 [class]="
-                  newLoanSubmitted() && !newPickupDate()
-                    ? 'border-tecoc-danger'
-                    : 'border-tecoc-line'
+                  newLoanSubmitted() && !newStartDate() ? 'border-tecoc-danger' : 'border-tecoc-line'
                 "
-                [ngModel]="newPickupDate()"
-                (ngModelChange)="newPickupDate.set($event)"
+                [ngModel]="newStartDate()"
+                (ngModelChange)="newStartDate.set($event)"
               />
-              @if (newLoanSubmitted() && !newPickupDate()) {
+              @if (newLoanSubmitted() && !newStartDate()) {
                 <span class="mt-1.5 block text-[11px] font-semibold text-tecoc-danger"
-                  >Elige la fecha de retiro.</span
+                  >Elige la fecha de inicio.</span
                 >
               }
             </label>
             <label class="block">
               <span
                 class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
-                >Hora de retiro</span
+                >Fecha de fin</span
               >
               <input
-                type="time"
-                class="w-full rounded-md border border-tecoc-line px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
-                [ngModel]="newPickupTime()"
-                (ngModelChange)="newPickupTime.set($event)"
+                type="date"
+                [min]="newStartDate()"
+                class="w-full rounded-md border px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+                [class]="
+                  newLoanSubmitted() && !newEndDate() ? 'border-tecoc-danger' : 'border-tecoc-line'
+                "
+                [ngModel]="newEndDate()"
+                (ngModelChange)="newEndDate.set($event)"
               />
+              @if (newLoanSubmitted() && !newEndDate()) {
+                <span class="mt-1.5 block text-[11px] font-semibold text-tecoc-danger"
+                  >Elige la fecha de fin.</span
+                >
+              }
             </label>
           </div>
 
           <label class="block">
             <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink"
-              >Observaciones</span
+              >Observación</span
             >
             <textarea
               rows="2"

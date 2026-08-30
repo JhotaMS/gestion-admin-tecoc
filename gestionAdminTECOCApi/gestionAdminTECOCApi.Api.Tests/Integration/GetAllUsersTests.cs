@@ -1,6 +1,5 @@
 using gestionAdminTECOCApi.Application.Features.Users.CreateUser;
 using gestionAdminTECOCApi.Application.Features.Users.GetAllUsers;
-using gestionAdminTECOCApi.Domain.Users;
 using gestionAdminTECOCApi.Infrastructure.PostgreSql.Persistence;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -52,7 +51,7 @@ public class GetAllUsersTests : IClassFixture<WebApplicationFactory<Program>> {
         Assert.Contains( body!.Users, u =>
             u.FullName == "Camila Restrepo"
             && u.UserName == "crestrepo"
-            && u.DocumentType == DocumentType.CedulaCiudadania
+            && u.DocumentType == "Cédula de ciudadanía"
             && u.DocumentNumber == "1094567890"
             && u.Email == "camila.restrepo@example.com" );
     }
