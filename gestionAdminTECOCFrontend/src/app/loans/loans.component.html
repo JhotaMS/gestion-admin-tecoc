@@ -7,13 +7,22 @@
         mostrador y su estado se revisa al entregarlos y al devolverlos.
       </p>
     </div>
-    <button
-      type="button"
-      class="whitespace-nowrap rounded-md bg-gradient-to-r from-tecoc-navy to-tecoc-blue px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_20px_-10px_rgba(0,56,146,0.85)] transition hover:brightness-105"
-      (click)="openNewLoanModal()"
-    >
-      + Nueva solicitud
-    </button>
+    <div class="flex gap-2.5">
+      <button
+        type="button"
+        class="whitespace-nowrap rounded-md border border-tecoc-danger/40 bg-white px-5 py-2.5 text-sm font-semibold text-tecoc-danger transition hover:bg-tecoc-danger-tint"
+        (click)="openDeleteModal()"
+      >
+        Eliminar por ID
+      </button>
+      <button
+        type="button"
+        class="whitespace-nowrap rounded-md bg-gradient-to-r from-tecoc-navy to-tecoc-blue px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_20px_-10px_rgba(0,56,146,0.85)] transition hover:brightness-105"
+        (click)="openNewLoanModal()"
+      >
+        + Nueva solicitud
+      </button>
+    </div>
   </div>
 
   <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -103,6 +112,7 @@
                 <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">
                   Estado físico
                 </th>
+                <th class="px-5 py-3"></th>
               </tr>
             </thead>
             <tbody>
@@ -117,7 +127,7 @@
                       </div>
                       <div>
                         <div class="font-semibold text-slate-900">{{ loan.itemName }}</div>
-                        <div class="text-xs text-tecoc-ink">{{ loan.itemCode }}</div>
+                        <div class="text-xs text-tecoc-ink">{{ loan.itemCode }} · ID: {{ loan.id }}</div>
                       </div>
                     </div>
                   </td>
@@ -151,10 +161,19 @@
                       {{ conditionLabel(loan.condition) }}
                     </span>
                   </td>
+                  <td class="px-5 py-3.5 text-right">
+                    <button
+                      type="button"
+                      class="rounded-md border border-tecoc-line bg-white px-3 py-1.5 text-[11px] font-semibold text-tecoc-ink transition hover:border-tecoc-blue hover:text-tecoc-navy"
+                      (click)="openEditLoan(loan)"
+                    >
+                      Editar
+                    </button>
+                  </td>
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="5" class="px-5 py-10 text-center text-sm text-tecoc-ink">
+                  <td colspan="6" class="px-5 py-10 text-center text-sm text-tecoc-ink">
                     No se encontraron solicitudes que coincidan con la búsqueda.
                   </td>
                 </tr>
@@ -411,6 +430,182 @@
             (click)="submitNewLoan()"
           >
             {{ newLoanSubmitting() ? 'Creando…' : 'Crear solicitud' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (deleteModalOpen()) {
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center bg-tecoc-deep/45 p-6 backdrop-blur-sm"
+      (click)="closeDeleteModal()"
+    >
+      <div
+        class="w-full max-w-md overflow-hidden rounded-lg bg-white shadow-[0_30px_60px_-20px_rgba(0,20,60,0.5)]"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="flex items-start justify-between gap-4 bg-gradient-to-r from-tecoc-deep to-tecoc-navy px-6 py-5">
+          <div>
+            <h3 class="m-0 mb-1 text-[17px] font-bold text-white">Eliminar solicitud por ID</h3>
+            <p class="m-0 max-w-sm text-[12.5px] text-white/70">
+              Escribe el ID numérico de la solicitud que quieres eliminar.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
+            (click)="closeDeleteModal()"
+            aria-label="Cerrar"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="px-6 py-5">
+          <label class="mb-4 block">
+            <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">ID de la solicitud</span>
+            <input
+              type="text"
+              inputmode="numeric"
+              placeholder="Ej: 3"
+              class="w-full rounded-md border border-tecoc-line px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+              [ngModel]="deleteIdInput()"
+              (ngModelChange)="setDeleteIdInput($event)"
+            />
+          </label>
+
+          @if (deleteIdInput() && !deleteMatch()) {
+            <div class="rounded-md bg-tecoc-danger-tint px-3.5 py-2.5 text-[12.5px] font-semibold text-tecoc-danger">
+              No existe ninguna solicitud con el ID "{{ deleteIdInput() }}".
+            </div>
+          }
+
+          @if (deleteMatch(); as match) {
+            <div class="flex items-center gap-3 rounded-md border border-tecoc-border bg-slate-50 px-3.5 py-3">
+              <div
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-tecoc-blue to-tecoc-navy text-xs font-bold text-white"
+              >
+                {{ initials(match.itemName) }}
+              </div>
+              <div>
+                <div class="text-sm font-semibold text-slate-900">{{ match.itemName }}</div>
+                <div class="text-xs text-tecoc-ink">{{ match.requesterName }} · {{ statusLabel(match.status) }}</div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="flex justify-end gap-2.5 border-t border-tecoc-border bg-slate-50 px-6 py-4">
+          <button
+            type="button"
+            class="rounded-md border border-tecoc-line bg-white px-4 py-2.5 text-sm font-semibold text-tecoc-ink transition hover:border-tecoc-blue hover:text-tecoc-navy"
+            (click)="closeDeleteModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="rounded-md bg-tecoc-danger px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_20px_-10px_rgba(192,57,43,0.55)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+            [disabled]="!deleteMatch() || deleteSubmitting()"
+            (click)="confirmDeleteById()"
+          >
+            {{ deleteSubmitting() ? 'Eliminando…' : 'Eliminar solicitud' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (editingLoan(); as loan) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-tecoc-deep/45 p-6 backdrop-blur-sm" (click)="closeEditLoan()">
+      <div class="w-full max-w-sm rounded-lg bg-white p-6 shadow-[0_30px_60px_-20px_rgba(0,20,60,0.5)]" (click)="$event.stopPropagation()">
+        <h3 class="m-0 mb-4 text-[17px] font-bold text-tecoc-deep">Editar solicitud</h3>
+
+        <label class="mb-3 block">
+          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Implemento</span>
+          <input
+            type="text"
+            class="w-full rounded-md border border-tecoc-line px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+            [ngModel]="loan.itemName"
+            (ngModelChange)="updateEditingLoanField('itemName', $event)"
+          />
+        </label>
+
+        <label class="mb-3 block">
+          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Código</span>
+          <input
+            type="text"
+            class="w-full rounded-md border border-tecoc-line px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+            [ngModel]="loan.itemCode"
+            (ngModelChange)="updateEditingLoanField('itemCode', $event)"
+          />
+        </label>
+
+        <label class="mb-3 block">
+          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Solicitante</span>
+          <input
+            type="text"
+            class="w-full rounded-md border border-tecoc-line px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+            [ngModel]="loan.requesterName"
+            (ngModelChange)="updateEditingLoanField('requesterName', $event)"
+          />
+        </label>
+
+        <label class="mb-3 block">
+          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Rol</span>
+          <select
+            class="w-full rounded-md border border-tecoc-line bg-white px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+            [ngModel]="loan.requesterRole"
+            (ngModelChange)="updateEditingLoanField('requesterRole', $event)"
+          >
+            @for (role of roleOptions; track role) {
+              <option [value]="role">{{ role }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="mb-3 block">
+          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Estado</span>
+          <select
+            class="w-full rounded-md border border-tecoc-line bg-white px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+            [ngModel]="loan.status"
+            (ngModelChange)="updateEditingLoanField('status', $event)"
+          >
+            @for (option of editStatusOptions; track option.key) {
+              <option [value]="option.key">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="mb-5 block">
+          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Estado físico</span>
+          <select
+            class="w-full rounded-md border border-tecoc-line bg-white px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+            [ngModel]="loan.condition"
+            (ngModelChange)="updateEditingLoanField('condition', $event)"
+          >
+            @for (option of conditionOptions; track option.key) {
+              <option [value]="option.key">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+
+        <div class="flex justify-end gap-2.5">
+          <button
+            type="button"
+            class="rounded-md border border-tecoc-line bg-white px-4 py-2.5 text-sm font-semibold text-tecoc-ink transition hover:border-tecoc-blue hover:text-tecoc-navy"
+            (click)="closeEditLoan()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="rounded-md bg-gradient-to-r from-tecoc-navy to-tecoc-blue px-4 py-2.5 text-sm font-semibold text-white shadow-[0_10px_20px_-10px_rgba(0,56,146,0.85)] transition hover:brightness-105 disabled:opacity-60"
+            [disabled]="editSaving()"
+            (click)="saveEditLoan()"
+          >
+            {{ editSaving() ? 'Guardando…' : 'Guardar' }}
           </button>
         </div>
       </div>
