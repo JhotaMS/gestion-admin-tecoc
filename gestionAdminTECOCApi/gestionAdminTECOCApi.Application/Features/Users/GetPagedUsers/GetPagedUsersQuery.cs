@@ -1,3 +1,4 @@
+using gestionAdminTECOCApi.Application.Features.Users.GetAllUsers;
 using gestionAdminTECOCApi.Application.Messaging;
 using gestionAdminTECOCApi.Domain.Abstractions;
 using gestionAdminTECOCApi.Domain.Ports;
@@ -14,7 +15,9 @@ public record PagedUserDto(
     string UserName,
     string Email,
     string DocumentType,
-    string DocumentNumber
+    string DocumentNumber,
+    GroupDto? Group,
+    ProgramaAcademicoDto? ProgramaAcademico
 );
 
 // TotalCount/TotalPages le permiten al frontend armar los controles de paginación
@@ -51,6 +54,10 @@ internal sealed class GetPagedUsersQueryHandler(
             pageNumber: request.PageNumber,
             pageSize: request.PageSize,
             orderBy: query => query.OrderBy( u => u.FullName ),
+            includes: new List<System.Linq.Expressions.Expression<Func<User, object>>> {
+                u => u.Group!,
+                u => u.ProgramaAcademico!
+            },
             cancellationToken: cancellationToken
         );
 
@@ -61,7 +68,13 @@ internal sealed class GetPagedUsersQueryHandler(
                 u.UserName,
                 u.Email,
                 DocumentTypeCodes.ToDescription( u.DocumentType ),
-                u.DocumentNumber
+                u.DocumentNumber,
+                u.Group is null
+                    ? null
+                    : new GroupDto( u.Group.Id, u.Group.Name, u.Group.Code ),
+                u.ProgramaAcademico is null
+                    ? null
+                    : new ProgramaAcademicoDto( u.ProgramaAcademico.Id, u.ProgramaAcademico.Name, u.ProgramaAcademico.Code )
             ) )
             .ToList();
 

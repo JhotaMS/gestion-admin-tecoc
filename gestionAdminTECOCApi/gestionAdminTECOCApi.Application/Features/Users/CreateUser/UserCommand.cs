@@ -10,4 +10,6 @@ public record UserCommand(
     , [Required] string UserName
     , [Required] string Email
     , [Required] string Password
+    , Guid? GroupId = null
+    , Guid? ProgramaAcademicoId = null
     ) : ICommand<UserCommandResponse>;

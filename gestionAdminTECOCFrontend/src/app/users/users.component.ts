@@ -2,6 +2,10 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { UsersApi } from './users-api';
 import { UserAccount } from './users.models';
+import { GroupsApi } from '../groups/groups-api';
+import { Group } from '../groups/groups.models';
+import { ProgramasAcademicosApi } from '../programas-academicos/programas-academicos-api';
+import { ProgramaAcademico } from '../programas-academicos/programas-academicos.models';
 
 const DOCUMENT_TYPE_LABELS: Record<string, string> = {
   CC: 'Cédula de ciudadanía',
@@ -18,10 +22,15 @@ const DOCUMENT_TYPE_LABELS: Record<string, string> = {
 })
 export class UsersComponent implements OnInit {
   private readonly usersApi = inject(UsersApi);
+  private readonly groupsApi = inject(GroupsApi);
+  private readonly programasAcademicosApi = inject(ProgramasAcademicosApi);
 
   readonly loading = signal(true);
   readonly users = signal<UserAccount[]>([]);
   readonly searchTerm = signal('');
+
+  readonly groups = signal<Group[]>([]);
+  readonly programasAcademicos = signal<ProgramaAcademico[]>([]);
 
   // Modal "Detalle de usuario"
   readonly detailsModalOpen = signal(false);
@@ -48,6 +57,10 @@ export class UsersComponent implements OnInit {
       this.users.set(users);
       this.loading.set(false);
     });
+    this.groupsApi.getGroups().subscribe((groups) => this.groups.set(groups));
+    this.programasAcademicosApi
+      .getProgramasAcademicos()
+      .subscribe((programasAcademicos) => this.programasAcademicos.set(programasAcademicos));
   }
 
   initials(name: string): string {
@@ -80,20 +93,38 @@ export class UsersComponent implements OnInit {
     this.editingUser.update((user) => (user ? { ...user, [field]: value } : user));
   }
 
+  onEditingGroupChange(groupId: string): void {
+    const group = this.groups().find((item) => item.id === groupId) ?? null;
+    this.updateEditingField('group', group);
+  }
+
+  onEditingProgramaAcademicoChange(programaAcademicoId: string): void {
+    const programaAcademico = this.programasAcademicos().find((item) => item.id === programaAcademicoId) ?? null;
+    this.updateEditingField('programaAcademico', programaAcademico);
+  }
+
   saveEdit(): void {
     const user = this.editingUser();
     if (!user || !user.name.trim() || !user.email.trim()) return;
 
     this.editSaving.set(true);
-    this.usersApi.updateUser({ id: user.id, name: user.name.trim(), email: user.email.trim() }).subscribe({
-      next: (updated) => {
-        this.users.update((list) => list.map((u) => (u.id === updated.id ? updated : u)));
-        this.editSaving.set(false);
-        this.editingUser.set(null);
-      },
-      error: () => {
-        this.editSaving.set(false);
-      },
-    });
+    this.usersApi
+      .updateUser({
+        id: user.id,
+        name: user.name.trim(),
+        email: user.email.trim(),
+        group: user.group,
+        programaAcademico: user.programaAcademico,
+      })
+      .subscribe({
+        next: (updated) => {
+          this.users.update((list) => list.map((u) => (u.id === updated.id ? updated : u)));
+          this.editSaving.set(false);
+          this.editingUser.set(null);
+        },
+        error: () => {
+          this.editSaving.set(false);
+        },
+      });
   }
 }

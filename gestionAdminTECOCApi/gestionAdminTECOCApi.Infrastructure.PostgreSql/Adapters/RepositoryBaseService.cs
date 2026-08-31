@@ -160,6 +160,7 @@ internal sealed record class RepositoryBaseService<T>
         int pageSize,
         Expression<Func<T, bool>>? predicate = null,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+        List<Expression<Func<T, object>>>? includes = null,
         bool? disableTracking = true,
         CancellationToken cancellationToken = default
     ) {
@@ -167,6 +168,9 @@ internal sealed record class RepositoryBaseService<T>
 
         if ((bool)disableTracking!)
             query = query.AsNoTracking();
+
+        if (includes != null)
+            query = includes.Aggregate( query, ( current, include ) => current.Include( include ) );
 
         if (predicate != null)
             query = query.Where( predicate );

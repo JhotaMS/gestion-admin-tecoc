@@ -1,11 +1,15 @@
 using gestionAdminTECOCApi.Application.Messaging;
 using gestionAdminTECOCApi.Domain.Abstractions;
+using gestionAdminTECOCApi.Domain.Groups;
+using gestionAdminTECOCApi.Domain.Ports;
+using gestionAdminTECOCApi.Domain.ProgramasAcademicos;
 using gestionAdminTECOCApi.Domain.Users;
 
 namespace gestionAdminTECOCApi.Application.Features.Users.UpdateUser;
 
 internal sealed class UpdateUserCommandHandler(
     UserService userService
+    , IUnitOfWork unitOfWork
 ) : ICommandHandler<UpdateUserCommand, UpdateUserCommandResponse> {
 
     public async Task<Result<UpdateUserCommandResponse>> Handle( UpdateUserCommand request
@@ -43,6 +47,22 @@ internal sealed class UpdateUserCommandHandler(
             );
         }
 
+        if (request.GroupId is not null) {
+            bool groupExists = await unitOfWork.Repository<Group>()
+                .Exitst( group => group.Id == request.GroupId, cancellationToken );
+
+            if (!groupExists)
+                return Result.Failure<UpdateUserCommandResponse>( GroupErrors.NotFound );
+        }
+
+        if (request.ProgramaAcademicoId is not null) {
+            bool programaExists = await unitOfWork.Repository<ProgramaAcademico>()
+                .Exitst( programa => programa.Id == request.ProgramaAcademicoId, cancellationToken );
+
+            if (!programaExists)
+                return Result.Failure<UpdateUserCommandResponse>( ProgramaAcademicoErrors.NotFound );
+        }
+
         user.Update(
             request.FullName.Trim()
             , documentType
@@ -50,6 +70,9 @@ internal sealed class UpdateUserCommandHandler(
             , request.UserName.Trim()
             , request.Email.Trim()
         );
+
+        user.AssignGroup( request.GroupId );
+        user.AssignProgramaAcademico( request.ProgramaAcademicoId );
 
         await userService.UpdateUserAsync( user, cancellationToken );
 

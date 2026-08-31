@@ -27,6 +27,7 @@ public interface IAsyncRepository<T> where T : class {
         int pageSize,
         Expression<Func<T, bool>>? predicate = null,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+        List<Expression<Func<T, object>>>? includes = null,
         bool? disableTracking = true,
         CancellationToken cancellationToken = default
     );

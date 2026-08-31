@@ -1,5 +1,6 @@
 using gestionAdminTECOCApi.Domain.Abstractions;
 using gestionAdminTECOCApi.Domain.Groups;
+using gestionAdminTECOCApi.Domain.ProgramasAcademicos;
 
 namespace gestionAdminTECOCApi.Domain.Users;
 
@@ -11,7 +12,8 @@ public class User : Entity<Guid> {
         string userName,
         string email,
         string passwordHash,
-        Guid? groupId
+        Guid? groupId,
+        Guid? programaAcademicoId
     ) : base( true ) {
         Id = Guid.NewGuid();
         FullName = fullName;
@@ -21,6 +23,7 @@ public class User : Entity<Guid> {
         Email = email;
         PasswordHash = passwordHash;
         GroupId = groupId;
+        ProgramaAcademicoId = programaAcademicoId;
     }
 
     public string FullName { get; private set; } = default!;
@@ -31,6 +34,8 @@ public class User : Entity<Guid> {
     public string PasswordHash { get; private set; } = default!;
     public Guid? GroupId { get; private set; }
     public Group? Group { get; private set; }
+    public Guid? ProgramaAcademicoId { get; private set; }
+    public ProgramaAcademico? ProgramaAcademico { get; private set; }
 
     public static User Create(
         string fullName,
@@ -39,7 +44,8 @@ public class User : Entity<Guid> {
         string userName,
         string email,
         string passwordHash,
-        Guid? groupId = null
+        Guid? groupId = null,
+        Guid? programaAcademicoId = null
     ) => new(
         fullName,
         documentType,
@@ -47,7 +53,8 @@ public class User : Entity<Guid> {
         userName,
         email,
         passwordHash,
-        groupId
+        groupId,
+        programaAcademicoId
     );
 
     public void Update(
@@ -62,5 +69,13 @@ public class User : Entity<Guid> {
         DocumentNumber = documentNumber;
         UserName = userName;
         Email = email;
+    }
+
+    public void AssignGroup( Guid? groupId ) {
+        GroupId = groupId;
+    }
+
+    public void AssignProgramaAcademico( Guid? programaAcademicoId ) {
+        ProgramaAcademicoId = programaAcademicoId;
     }
 }
