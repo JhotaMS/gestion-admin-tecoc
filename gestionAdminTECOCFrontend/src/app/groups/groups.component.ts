@@ -57,7 +57,7 @@ export class GroupsComponent implements OnInit {
   });
 
   readonly cupoTotalError = computed(() => {
-    const raw = this.formCupoTotal().trim();
+    const raw = String(this.formCupoTotal()).trim();
     if (!raw) return 'El cupo total es obligatorio.';
     const value = Number(raw);
     if (!Number.isInteger(value) || value < 0) {
@@ -114,7 +114,7 @@ export class GroupsComponent implements OnInit {
 
     const name = this.formName().trim();
     const code = this.formCode().trim();
-    const cupoTotal = Number(this.formCupoTotal().trim());
+    const cupoTotal = Number(String(this.formCupoTotal()).trim());
     const editing = this.editingGroup();
 
     this.saving.set(true);
