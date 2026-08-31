@@ -49,6 +49,14 @@ export class UsersComponent implements OnInit {
   readonly users = signal<UserAccount[]>([]);
   readonly searchTerm = signal('');
 
+  // Modal "Detalle de usuario"
+  readonly detailsModalOpen = signal(false);
+  readonly selectedUser = signal<UserAccount | null>(null);
+
+  // Modal "Editar usuario"
+  readonly editingUser = signal<UserAccount | null>(null);
+  readonly editSaving = signal(false);
+
 
   // ================================
   // FILTRO DE USUARIOS
@@ -67,6 +75,8 @@ export class UsersComponent implements OnInit {
         user.email.toLowerCase().includes(term),
     );
   });
+
+  readonly totalUsers = computed(() => this.users().length);
 
 
   // ================================
@@ -118,6 +128,54 @@ export class UsersComponent implements OnInit {
 
   onSearchInput(value: string): void {
     this.searchTerm.set(value);
+  }
+
+
+  // ================================
+  // DETALLE DE USUARIO
+  // ================================
+
+  openUserDetails(user: UserAccount): void {
+    this.selectedUser.set(user);
+    this.detailsModalOpen.set(true);
+  }
+
+  closeUserDetails(): void {
+    this.detailsModalOpen.set(false);
+  }
+
+
+  // ================================
+  // EDITAR USUARIO
+  // ================================
+
+  openEdit(user: UserAccount): void {
+    this.editingUser.set({ ...user });
+  }
+
+  closeEdit(): void {
+    this.editingUser.set(null);
+  }
+
+  updateEditingField<K extends keyof UserAccount>(field: K, value: UserAccount[K]): void {
+    this.editingUser.update((user) => (user ? { ...user, [field]: value } : user));
+  }
+
+  saveEdit(): void {
+    const user = this.editingUser();
+    if (!user || !user.name.trim() || !user.email.trim()) return;
+
+    this.editSaving.set(true);
+    this.usersApi.updateUser({ id: user.id, name: user.name.trim(), email: user.email.trim() }).subscribe({
+      next: (updated) => {
+        this.users.update((list) => list.map((u) => (u.id === updated.id ? updated : u)));
+        this.editSaving.set(false);
+        this.editingUser.set(null);
+      },
+      error: () => {
+        this.editSaving.set(false);
+      },
+    });
   }
 
 

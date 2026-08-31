@@ -45,6 +45,7 @@ export const appConfig: ApplicationConfig = {
     { provide: UsersApi, useClass: UsersHttpApi },
     { provide: UserRegistrationApi, useClass: UserRegistrationHttpApi },
     { provide: PagedUsersApi, useClass: PagedUsersHttpApi },
+    { provide: GroupsApi, useClass: GroupsHttpApi },
     { provide: ImplementosApi, useClass: ImplementosHttpApi },
     { provide: ImplementoPrestadoApi, useClass: ImplementoPrestadoHttpApi },
     { provide: PrestamoDetalleApi, useClass: PrestamoDetalleHttpApi },
