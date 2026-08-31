@@ -58,6 +58,7 @@
               <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Nombre</th>
               <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Código</th>
               <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Estado</th>
+              <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Cupos disponibles</th>
               <th class="px-5 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Acciones</th>
             </tr>
           </thead>
@@ -75,6 +76,21 @@
                     <span class="font-semibold text-tecoc-success">Activo</span>
                   } @else {
                     <span class="text-tecoc-ink">Inactivo</span>
+                  }
+                </td>
+                <td class="px-5 py-3.5 text-sm">
+                  <span
+                    class="font-semibold"
+                    [class.text-tecoc-danger]="group.cupoDisponible === 0"
+                    [class.text-tecoc-success]="group.cupoDisponible > 0"
+                  >
+                    {{ group.cupoDisponible }}
+                  </span>
+                  <span class="text-tecoc-ink"> de {{ group.cupoTotal }}</span>
+                  @if (group.cupoDisponible === 0) {
+                    <span class="ml-1.5 rounded-full bg-tecoc-danger/10 px-2 py-0.5 text-[10px] font-semibold text-tecoc-danger">
+                      Sin cupo
+                    </span>
                   }
                 </td>
                 <td class="px-5 py-3.5 text-right">
@@ -139,6 +155,25 @@
         </span>
         @if (formSubmitted() && codeError()) {
           <span class="mt-1 block text-[11px] font-semibold text-tecoc-danger">{{ codeError() }}</span>
+        }
+      </label>
+
+      <label class="mt-4 block">
+        <span class="text-xs font-semibold uppercase tracking-wide text-tecoc-ink">Cupo total</span>
+        <input
+          type="number"
+          min="0"
+          step="1"
+          placeholder="30"
+          class="mt-1.5 w-full rounded-md border border-tecoc-line px-3 py-2 text-sm outline-none transition focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+          [ngModel]="formCupoTotal()"
+          (ngModelChange)="formCupoTotal.set($event)"
+        />
+        <span class="mt-1.5 block text-[11px] text-tecoc-ink">
+          Cuántos estudiantes pueden matricularse en este grupo.
+        </span>
+        @if (formSubmitted() && cupoTotalError()) {
+          <span class="mt-1 block text-[11px] font-semibold text-tecoc-danger">{{ cupoTotalError() }}</span>
         }
       </label>
 

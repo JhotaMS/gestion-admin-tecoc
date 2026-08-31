@@ -5,6 +5,8 @@ using gestionAdminTECOCApi.Application.Features.Groups;
 using gestionAdminTECOCApi.Application.Features.Groups.CreateGroup;
 using gestionAdminTECOCApi.Application.Features.Groups.GetAllGroups;
 using gestionAdminTECOCApi.Application.Features.Groups.UpdateGroup;
+using gestionAdminTECOCApi.Application.Features.Users.CreateUser;
+using gestionAdminTECOCApi.Domain.Users;
 using gestionAdminTECOCApi.Infrastructure.PostgreSql.Persistence;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -43,13 +45,24 @@ public class GroupTests : IClassFixture<WebApplicationFactory<Program>> {
 
     private HttpClient Client() => _factory.CreateClient();
 
+    // La asignacion de un usuario a un grupo es responsabilidad de otra historia (formulario
+    // de usuario); aqui solo se necesita simular un usuario ya matriculado para poder probar
+    // el calculo de cupo disponible, por lo que se escribe directo en el contexto de datos.
+    private async Task MatricularUsuarioAsync( string documentNumber, Guid groupId ) {
+        using IServiceScope scope = _factory.Services.CreateScope();
+        var database = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        User usuario = await database.Set<User>().SingleAsync( user => user.DocumentNumber == documentNumber );
+        database.Entry( usuario ).Property( user => user.GroupId ).CurrentValue = groupId;
+        await database.SaveChangesAsync();
+    }
+
     [Fact]
     public async Task Crear_grupo_normaliza_datos_y_retorna_created() {
         HttpClient client = Client();
 
         HttpResponseMessage response = await client.PostAsJsonAsync(
             "/api/v1/Group",
-            new CreateGroupCommand( "  Grupo A  ", "  grp-a  " )
+            new CreateGroupCommand( "  Grupo A  ", "  grp-a  ", 30 )
         );
 
         Assert.Equal( HttpStatusCode.Created, response.StatusCode );
@@ -65,8 +78,8 @@ public class GroupTests : IClassFixture<WebApplicationFactory<Program>> {
     [Fact]
     public async Task Listar_grupos_retorna_todos_ordenados_por_nombre() {
         HttpClient client = Client();
-        await client.PostAsJsonAsync( "/api/v1/Group", new CreateGroupCommand( "Grupo B", "GRP-B" ) );
-        await client.PostAsJsonAsync( "/api/v1/Group", new CreateGroupCommand( "Grupo A", "GRP-A" ) );
+        await client.PostAsJsonAsync( "/api/v1/Group", new CreateGroupCommand( "Grupo B", "GRP-B", 30 ) );
+        await client.PostAsJsonAsync( "/api/v1/Group", new CreateGroupCommand( "Grupo A", "GRP-A", 30 ) );
 
         GetAllGroupsResponse? response = await client.GetFromJsonAsync<GetAllGroupsResponse>(
             "/api/v1/Group"
@@ -92,11 +105,11 @@ public class GroupTests : IClassFixture<WebApplicationFactory<Program>> {
     [Fact]
     public async Task Crear_codigo_duplicado_sin_importar_mayusculas_retorna_conflict() {
         HttpClient client = Client();
-        await client.PostAsJsonAsync( "/api/v1/Group", new CreateGroupCommand( "Grupo A", "GRP-A" ) );
+        await client.PostAsJsonAsync( "/api/v1/Group", new CreateGroupCommand( "Grupo A", "GRP-A", 30 ) );
 
         HttpResponseMessage response = await client.PostAsJsonAsync(
             "/api/v1/Group",
-            new CreateGroupCommand( "Otro grupo", "grp-a" )
+            new CreateGroupCommand( "Otro grupo", "grp-a", 30 )
         );
 
         Assert.Equal( HttpStatusCode.Conflict, response.StatusCode );
@@ -115,7 +128,7 @@ public class GroupTests : IClassFixture<WebApplicationFactory<Program>> {
 
         HttpResponseMessage response = await client.PostAsJsonAsync(
             "/api/v1/Group",
-            new CreateGroupCommand( name, code )
+            new CreateGroupCommand( name, code, 30 )
         );
 
         Assert.Equal( HttpStatusCode.BadRequest, response.StatusCode );
@@ -126,14 +139,14 @@ public class GroupTests : IClassFixture<WebApplicationFactory<Program>> {
         HttpClient client = Client();
         HttpResponseMessage create = await client.PostAsJsonAsync(
             "/api/v1/Group",
-            new CreateGroupCommand( "Grupo A", "GRP-A" )
+            new CreateGroupCommand( "Grupo A", "GRP-A", 30 )
         );
         GroupResponse? created = await create.Content.ReadFromJsonAsync<GroupResponse>();
         Assert.NotNull( created );
 
         HttpResponseMessage update = await client.PutAsJsonAsync(
             $"/api/v1/Group/{created.Id}",
-            new UpdateGroupCommand( created.Id, "  Grupo Alfa  ", "  alfa  " )
+            new UpdateGroupCommand( created.Id, "  Grupo Alfa  ", "  alfa  ", 30 )
         );
 
         Assert.Equal( HttpStatusCode.OK, update.StatusCode );
@@ -148,7 +161,7 @@ public class GroupTests : IClassFixture<WebApplicationFactory<Program>> {
 
         HttpResponseMessage response = await client.PutAsJsonAsync(
             $"/api/v1/Group/{Guid.NewGuid()}",
-            new UpdateGroupCommand( Guid.NewGuid(), "Grupo A", "GRP-A" )
+            new UpdateGroupCommand( Guid.NewGuid(), "Grupo A", "GRP-A", 30 )
         );
 
         Assert.Equal( HttpStatusCode.BadRequest, response.StatusCode );
@@ -161,7 +174,7 @@ public class GroupTests : IClassFixture<WebApplicationFactory<Program>> {
 
         HttpResponseMessage response = await client.PutAsJsonAsync(
             $"/api/v1/Group/{groupId}",
-            new UpdateGroupCommand( groupId, "Grupo A", "GRP-A" )
+            new UpdateGroupCommand( groupId, "Grupo A", "GRP-A", 30 )
         );
 
         Assert.Equal( HttpStatusCode.NotFound, response.StatusCode );
@@ -172,7 +185,7 @@ public class GroupTests : IClassFixture<WebApplicationFactory<Program>> {
         HttpClient client = Client();
         HttpResponseMessage create = await client.PostAsJsonAsync(
             "/api/v1/Group",
-            new CreateGroupCommand( "Grupo A", "GRP-A" )
+            new CreateGroupCommand( "Grupo A", "GRP-A", 30 )
         );
         GroupResponse? created = await create.Content.ReadFromJsonAsync<GroupResponse>();
         Assert.NotNull( created );
@@ -195,5 +208,103 @@ public class GroupTests : IClassFixture<WebApplicationFactory<Program>> {
         );
 
         Assert.Equal( HttpStatusCode.NotFound, response.StatusCode );
+    }
+
+    [Fact]
+    public async Task Crear_grupo_con_cupo_negativo_retorna_badrequest() {
+        HttpClient client = Client();
+
+        HttpResponseMessage response = await client.PostAsJsonAsync(
+            "/api/v1/Group",
+            new CreateGroupCommand( "Grupo A", "GRP-A", -1 )
+        );
+
+        Assert.Equal( HttpStatusCode.BadRequest, response.StatusCode );
+    }
+
+    [Fact]
+    public async Task Grupo_recien_creado_tiene_todo_el_cupo_disponible() {
+        HttpClient client = Client();
+
+        HttpResponseMessage create = await client.PostAsJsonAsync(
+            "/api/v1/Group",
+            new CreateGroupCommand( "Grupo A", "GRP-A", 30 )
+        );
+
+        GroupResponse? group = await create.Content.ReadFromJsonAsync<GroupResponse>();
+        Assert.NotNull( group );
+        Assert.Equal( 30, group.CupoTotal );
+        Assert.Equal( 30, group.CupoDisponible );
+    }
+
+    [Fact]
+    public async Task Cupo_disponible_descuenta_los_usuarios_matriculados_en_el_grupo() {
+        HttpClient client = Client();
+
+        HttpResponseMessage createGroup = await client.PostAsJsonAsync(
+            "/api/v1/Group",
+            new CreateGroupCommand( "Grupo A", "GRP-A", 2 )
+        );
+        GroupResponse? group = await createGroup.Content.ReadFromJsonAsync<GroupResponse>();
+        Assert.NotNull( group );
+
+        await client.PostAsJsonAsync( "/api/v1/User", new UserCommand(
+            "Estudiante Uno", "CC", "1000000001", "estudiante1", "estudiante1@tecoc.edu.co", "Passw0rd!" ) );
+        await MatricularUsuarioAsync( "1000000001", group!.Id );
+
+        GetAllGroupsResponse? response = await client.GetFromJsonAsync<GetAllGroupsResponse>( "/api/v1/Group" );
+        GroupResponse actualizado = response!.Groups.Single( g => g.Id == group.Id );
+
+        Assert.Equal( 2, actualizado.CupoTotal );
+        Assert.Equal( 1, actualizado.CupoDisponible );
+    }
+
+    [Fact]
+    public async Task Cupo_disponible_no_baja_de_cero_cuando_el_grupo_esta_sobrecupado() {
+        HttpClient client = Client();
+
+        HttpResponseMessage createGroup = await client.PostAsJsonAsync(
+            "/api/v1/Group",
+            new CreateGroupCommand( "Grupo A", "GRP-A", 1 )
+        );
+        GroupResponse? group = await createGroup.Content.ReadFromJsonAsync<GroupResponse>();
+        Assert.NotNull( group );
+
+        await client.PostAsJsonAsync( "/api/v1/User", new UserCommand(
+            "Estudiante Uno", "CC", "1000000001", "estudiante1", "estudiante1@tecoc.edu.co", "Passw0rd!" ) );
+        await client.PostAsJsonAsync( "/api/v1/User", new UserCommand(
+            "Estudiante Dos", "CC", "1000000002", "estudiante2", "estudiante2@tecoc.edu.co", "Passw0rd!" ) );
+        await MatricularUsuarioAsync( "1000000001", group!.Id );
+        await MatricularUsuarioAsync( "1000000002", group.Id );
+
+        GetAllGroupsResponse? response = await client.GetFromJsonAsync<GetAllGroupsResponse>( "/api/v1/Group" );
+        GroupResponse actualizado = response!.Groups.Single( g => g.Id == group.Id );
+
+        Assert.Equal( 0, actualizado.CupoDisponible );
+    }
+
+    [Fact]
+    public async Task Actualizar_cupo_total_recalcula_el_cupo_disponible() {
+        HttpClient client = Client();
+
+        HttpResponseMessage createGroup = await client.PostAsJsonAsync(
+            "/api/v1/Group",
+            new CreateGroupCommand( "Grupo A", "GRP-A", 1 )
+        );
+        GroupResponse? group = await createGroup.Content.ReadFromJsonAsync<GroupResponse>();
+        Assert.NotNull( group );
+
+        await client.PostAsJsonAsync( "/api/v1/User", new UserCommand(
+            "Estudiante Uno", "CC", "1000000001", "estudiante1", "estudiante1@tecoc.edu.co", "Passw0rd!" ) );
+        await MatricularUsuarioAsync( "1000000001", group!.Id );
+
+        HttpResponseMessage update = await client.PutAsJsonAsync(
+            $"/api/v1/Group/{group.Id}",
+            new UpdateGroupCommand( group.Id, "Grupo A", "GRP-A", 5 )
+        );
+
+        GroupResponse? actualizado = await update.Content.ReadFromJsonAsync<GroupResponse>();
+        Assert.Equal( 5, actualizado?.CupoTotal );
+        Assert.Equal( 4, actualizado?.CupoDisponible );
     }
 }

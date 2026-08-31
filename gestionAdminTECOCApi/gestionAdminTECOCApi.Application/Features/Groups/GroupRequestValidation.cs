@@ -6,7 +6,8 @@ namespace gestionAdminTECOCApi.Application.Features.Groups;
 internal static class GroupRequestValidation {
     public static Error? Validate(
         string? name,
-        string? code
+        string? code,
+        int cupoTotal
     ) {
         if (string.IsNullOrWhiteSpace( name ))
             return GroupErrors.NameRequired;
@@ -19,6 +20,9 @@ internal static class GroupRequestValidation {
 
         if (code.Trim().Length > Group.MaximumCodeLength)
             return GroupErrors.CodeTooLong;
+
+        if (cupoTotal < 0)
+            return GroupErrors.CupoTotalInvalido;
 
         return null;
     }

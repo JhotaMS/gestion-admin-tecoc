@@ -13,7 +13,7 @@ using System.Net;
 namespace gestionAdminTECOCApi.Api.Controllers;
 
 [ApiController]
-[Route( "v1/[controller]" )]
+[Route( "api/v1/[controller]" )]
 public class UserController(
     ILogger<UserController> logger,
     IDispatch dispatch

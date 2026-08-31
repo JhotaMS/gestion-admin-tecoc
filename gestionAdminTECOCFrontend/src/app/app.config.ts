@@ -39,7 +39,6 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor])),
     authProvider,
     { provide: DashboardApi, useClass: DashboardMockApi },
-    { provide: UsersApi, useClass: UsersMockApi },
     // Swap these for real HttpClient-backed implementations once the backend is ready.
     { provide: AuthApi, useClass: AuthHttpApi },
     { provide: DashboardApi, useClass: DashboardMockApi },

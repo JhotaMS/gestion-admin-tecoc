@@ -12,7 +12,7 @@ internal sealed class CreateGroupCommandHandler(
         CreateGroupCommand request,
         CancellationToken cancellationToken
     ) {
-        Error? validationError = GroupRequestValidation.Validate( request.Name, request.Code );
+        Error? validationError = GroupRequestValidation.Validate( request.Name, request.Code, request.CupoTotal );
         if (validationError is not null)
             return Result.Failure<GroupResponse>( validationError );
 
@@ -26,17 +26,19 @@ internal sealed class CreateGroupCommandHandler(
         if (existing.Any())
             return Result.Failure<GroupResponse>( GroupErrors.DuplicateCode );
 
-        Group group = Group.Create( request.Name, request.Code );
+        Group group = Group.Create( request.Name, request.Code, request.CupoTotal );
         await repository.AddAsync( group, cancellationToken );
         await unitOfWork.SaveChangesAsync();
 
-        return Result.Success( ToResponse( group ) );
+        return Result.Success( ToResponse( group, cupoDisponible: group.CupoTotal ) );
     }
 
-    private static GroupResponse ToResponse( Group group ) => new(
+    private static GroupResponse ToResponse( Group group, int cupoDisponible ) => new(
         group.Id,
         group.Name,
         group.Code,
-        group.Enabled
+        group.Enabled,
+        group.CupoTotal,
+        cupoDisponible
     );
 }

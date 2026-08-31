@@ -70,53 +70,6 @@ export class UsersComponent implements OnInit {
 
 
   // ================================
-  // ESTADÍSTICAS
-  // ================================
-
-  readonly stats = computed(() => {
-    const all = this.users();
-
-    const total = all.length;
-
-    const activos = all.filter(
-      (user) => user.status === 'activo',
-    ).length;
-
-    const pendientes = total - activos;
-
-    const now = new Date();
-
-    const nuevos = all.filter((user) => {
-      const registered = new Date(user.registeredAtIso);
-
-      return (
-        registered.getFullYear() === now.getFullYear() &&
-        registered.getMonth() === now.getMonth()
-      );
-    }).length;
-
-    return {
-      total,
-      activos,
-      pendientes,
-      nuevos,
-
-      activosPercent: total
-        ? Math.round((activos / total) * 100)
-        : 0,
-
-      pendientesPercent: total
-        ? Math.round((pendientes / total) * 100)
-        : 0,
-
-      nuevosPercent: total
-        ? Math.round((nuevos / total) * 100)
-        : 0,
-    };
-  });
-
-
-  // ================================
   // INICIALIZACIÓN
   // ================================
 
