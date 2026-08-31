@@ -1,0 +1,213 @@
+<div class="space-y-6">
+  <div class="flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <h1 class="m-0 text-2xl font-bold tracking-tight text-tecoc-deep">Calendario académico</h1>
+      <p class="mt-1 max-w-xl text-sm text-tecoc-ink">
+        Fechas importantes del semestre: inicio y fin de clases, cortes, matrículas y exámenes.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="whitespace-nowrap rounded-md bg-gradient-to-r from-tecoc-navy to-tecoc-blue px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_20px_-10px_rgba(0,56,146,0.85)] transition hover:brightness-105"
+      (click)="openCreate()"
+    >
+      + Nuevo evento
+    </button>
+  </div>
+
+  @if (feedback(); as message) {
+    <div
+      class="rounded-md border px-4 py-3 text-sm font-semibold"
+      [class]="
+        message.tone === 'success'
+          ? 'border-tecoc-success/30 bg-tecoc-success/10 text-tecoc-success'
+          : 'border-tecoc-danger/30 bg-tecoc-danger/10 text-tecoc-danger'
+      "
+    >
+      {{ message.text }}
+    </div>
+  }
+
+  <div class="rounded-md border border-tecoc-border bg-white p-5 sm:w-64">
+    <div class="font-narrow text-3xl font-bold leading-none text-tecoc-deep">{{ totalEventos() }}</div>
+    <div class="mt-1.5 text-xs tracking-wide text-tecoc-ink">Eventos registrados</div>
+  </div>
+
+  <div class="overflow-hidden rounded-md border border-tecoc-border bg-white">
+    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-tecoc-border px-5 py-4">
+      <div>
+        <h2 class="m-0 text-[15px] font-bold text-tecoc-deep">Fechas del semestre</h2>
+        <div class="mt-0.5 text-xs text-tecoc-ink">
+          {{ totalEventos() }} {{ totalEventos() === 1 ? 'evento' : 'eventos' }}
+        </div>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="px-5 py-10 text-center text-sm text-tecoc-ink">Cargando calendario…</div>
+    } @else if (totalEventos() === 0) {
+      <div class="px-5 py-10 text-center text-sm text-tecoc-ink">
+        Todavía no hay eventos registrados. Crea el primero con el botón "Nuevo evento".
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr class="bg-slate-50">
+              <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Evento</th>
+              <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Fecha inicio</th>
+              <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Fecha fin</th>
+              <th class="px-5 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (evento of eventos(); track evento.id) {
+              <tr class="border-t border-tecoc-border transition hover:bg-tecoc-tint/60">
+                <td class="px-5 py-3.5">
+                  <div class="font-semibold text-slate-900">{{ evento.titulo }}</div>
+                  @if (evento.descripcion) {
+                    <div class="text-xs text-tecoc-ink">{{ evento.descripcion }}</div>
+                  }
+                </td>
+                <td class="px-5 py-3.5 text-sm text-slate-700">{{ evento.fechaInicio }}</td>
+                <td class="px-5 py-3.5 text-sm text-slate-700">
+                  {{ evento.fechaFin ?? '—' }}
+                </td>
+                <td class="px-5 py-3.5 text-right">
+                  <button
+                    type="button"
+                    class="rounded-md border border-tecoc-line px-3 py-1.5 text-xs font-semibold text-tecoc-navy transition hover:border-tecoc-blue hover:bg-tecoc-tint"
+                    (click)="openEdit(evento)"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    class="ml-2 rounded-md border border-tecoc-danger/40 px-3 py-1.5 text-xs font-semibold text-tecoc-danger transition hover:bg-tecoc-danger/10"
+                    (click)="askDelete(evento)"
+                  >
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+@if (formOpen()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
+    <div class="w-full max-w-md rounded-md border border-tecoc-border bg-white p-6 shadow-xl">
+      <h2 class="m-0 text-lg font-bold text-tecoc-deep">
+        {{ editingEvento() ? 'Editar evento' : 'Nuevo evento' }}
+      </h2>
+
+      <label class="mt-5 block">
+        <span class="text-xs font-semibold uppercase tracking-wide text-tecoc-ink">Título</span>
+        <input
+          type="text"
+          [maxlength]="tituloMaxLength"
+          placeholder="Inicio de clases"
+          class="mt-1.5 w-full rounded-md border border-tecoc-line px-3 py-2 text-sm outline-none transition focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+          [ngModel]="formTitulo()"
+          (ngModelChange)="formTitulo.set($event)"
+        />
+        @if (formSubmitted() && tituloError()) {
+          <span class="mt-1.5 block text-[11px] font-semibold text-tecoc-danger">{{ tituloError() }}</span>
+        }
+      </label>
+
+      <label class="mt-4 block">
+        <span class="text-xs font-semibold uppercase tracking-wide text-tecoc-ink">Descripción (opcional)</span>
+        <textarea
+          [maxlength]="descripcionMaxLength"
+          rows="2"
+          placeholder="Detalles adicionales del evento"
+          class="mt-1.5 w-full rounded-md border border-tecoc-line px-3 py-2 text-sm outline-none transition focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+          [ngModel]="formDescripcion()"
+          (ngModelChange)="formDescripcion.set($event)"
+        ></textarea>
+      </label>
+
+      <label class="mt-4 block">
+        <span class="text-xs font-semibold uppercase tracking-wide text-tecoc-ink">Fecha de inicio</span>
+        <input
+          type="date"
+          class="mt-1.5 w-full rounded-md border border-tecoc-line px-3 py-2 text-sm outline-none transition focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+          [ngModel]="formFechaInicio()"
+          (ngModelChange)="formFechaInicio.set($event)"
+        />
+        @if (formSubmitted() && fechaInicioError()) {
+          <span class="mt-1.5 block text-[11px] font-semibold text-tecoc-danger">{{ fechaInicioError() }}</span>
+        }
+      </label>
+
+      <label class="mt-4 block">
+        <span class="text-xs font-semibold uppercase tracking-wide text-tecoc-ink">Fecha de fin (opcional)</span>
+        <input
+          type="date"
+          class="mt-1.5 w-full rounded-md border border-tecoc-line px-3 py-2 text-sm outline-none transition focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+          [ngModel]="formFechaFin()"
+          (ngModelChange)="formFechaFin.set($event)"
+        />
+        <span class="mt-1.5 block text-[11px] text-tecoc-ink">
+          Déjala vacía si es un evento de un solo día.
+        </span>
+        @if (formSubmitted() && fechaFinError()) {
+          <span class="mt-1 block text-[11px] font-semibold text-tecoc-danger">{{ fechaFinError() }}</span>
+        }
+      </label>
+
+      <div class="mt-6 flex justify-end gap-2">
+        <button
+          type="button"
+          class="rounded-md border border-tecoc-line px-4 py-2 text-sm font-semibold text-tecoc-ink transition hover:bg-slate-50"
+          (click)="closeForm()"
+          [disabled]="saving()"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="rounded-md bg-gradient-to-r from-tecoc-navy to-tecoc-blue px-4 py-2 text-sm font-semibold text-white transition hover:brightness-105 disabled:opacity-60"
+          (click)="saveEvento()"
+          [disabled]="saving()"
+        >
+          {{ saving() ? 'Guardando…' : 'Guardar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (deletingEvento(); as evento) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
+    <div class="w-full max-w-md rounded-md border border-tecoc-border bg-white p-6 shadow-xl">
+      <h2 class="m-0 text-lg font-bold text-tecoc-deep">Eliminar evento</h2>
+      <p class="mt-3 text-sm text-tecoc-ink">
+        Se va a eliminar <b class="text-slate-900">{{ evento.titulo }}</b>. Esta acción no se puede deshacer.
+      </p>
+      <div class="mt-6 flex justify-end gap-2">
+        <button
+          type="button"
+          class="rounded-md border border-tecoc-line px-4 py-2 text-sm font-semibold text-tecoc-ink transition hover:bg-slate-50"
+          (click)="cancelDelete()"
+          [disabled]="deleting()"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="rounded-md bg-tecoc-danger px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
+          (click)="confirmDelete()"
+          [disabled]="deleting()"
+        >
+          {{ deleting() ? 'Eliminando…' : 'Eliminar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

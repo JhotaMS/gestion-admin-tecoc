@@ -19,6 +19,8 @@ const authProvider = environment.useMockApi
   : { provide: AuthApi, useClass: AuthHttpApi };
 import { GroupsApi } from './groups/groups-api';
 import { GroupsHttpApi } from './core/groups/groups-http.api';
+import { CalendarioAcademicoApi } from './calendario-academico/calendario-academico-api';
+import { CalendarioAcademicoHttpApi } from './core/calendario-academico/calendario-academico-http.api';
 import { PagedUsersApi } from './core/users/paged-users-api';
 import { PagedUsersHttpApi } from './core/users/paged-users-http.api';
 import { LoansApi } from './loans/loans-api';
@@ -39,13 +41,13 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor])),
     authProvider,
     { provide: DashboardApi, useClass: DashboardMockApi },
-    { provide: UsersApi, useClass: UsersMockApi },
     // Swap these for real HttpClient-backed implementations once the backend is ready.
     { provide: AuthApi, useClass: AuthHttpApi },
     { provide: DashboardApi, useClass: DashboardMockApi },
     { provide: UsersApi, useClass: UsersHttpApi },
     { provide: UserRegistrationApi, useClass: UserRegistrationHttpApi },
     { provide: PagedUsersApi, useClass: PagedUsersHttpApi },
+    { provide: CalendarioAcademicoApi, useClass: CalendarioAcademicoHttpApi },
     { provide: ImplementosApi, useClass: ImplementosHttpApi },
     { provide: ImplementoPrestadoApi, useClass: ImplementoPrestadoHttpApi },
     { provide: PrestamoDetalleApi, useClass: PrestamoDetalleHttpApi },

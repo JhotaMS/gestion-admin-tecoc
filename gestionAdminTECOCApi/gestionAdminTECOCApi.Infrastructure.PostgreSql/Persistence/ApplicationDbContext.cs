@@ -3,6 +3,7 @@ using gestionAdminTECOCApi.Domain.ScheduledClasses;
 using gestionAdminTECOCApi.Domain.Loans;
 using gestionAdminTECOCApi.Domain.Prestamos;
 using gestionAdminTECOCApi.Domain.Groups;
+using gestionAdminTECOCApi.Domain.CalendarioAcademico;
 using gestionAdminTECOCApi.Domain.Users;
 using gestionAdminTECOCApi.Domain.WeatherForecasts;
 using gestionAdminTECOCApi.Domain.WeatherForecastsHistories;
@@ -34,6 +35,7 @@ public partial class ApplicationDbContext : DbContext {
     public virtual DbSet<ImplementoPrestado> ImplementosPrestados { get; set; }
     public virtual DbSet<Implemento> Implementos { get; set; }
     public virtual DbSet<TipoRevision> TiposRevision { get; set; }
+    public virtual DbSet<EventoAcademico> EventosAcademicos { get; set; }
 
     public override Task<int> SaveChangesAsync( CancellationToken cancellationToken = default ) {
         return base.SaveChangesAsync( cancellationToken );
