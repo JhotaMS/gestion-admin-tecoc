@@ -6,6 +6,7 @@
     </div>
     <button
       type="button"
+      (click)="openRegisterForm()"
       class="whitespace-nowrap rounded-md bg-gradient-to-r from-tecoc-navy to-tecoc-blue px-5 py-2.5 text-sm font-semibold text-white shadow-[0_10px_20px_-10px_rgba(0,56,146,0.85)] transition hover:brightness-105"
     >
       + Registrar usuario
@@ -284,3 +285,168 @@
     </div>
   }
 </div>
+@if (showRegisterForm()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+    <div class="w-full max-w-2xl rounded-lg bg-white shadow-2xl">
+
+      <!-- Encabezado -->
+      <div class="flex items-center justify-between border-b border-tecoc-border px-6 py-4">
+        <div>
+          <h2 class="text-xl font-bold text-tecoc-deep">
+            Registrar nuevo usuario
+          </h2>
+
+          <p class="mt-1 text-sm text-tecoc-ink">
+            Completa la información del usuario.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          (click)="closeRegisterForm()"
+          class="text-2xl text-gray-400 hover:text-gray-700"
+        >
+          ×
+        </button>
+      </div>
+
+      <!-- Formulario -->
+      <form
+        #userForm="ngForm"
+        (ngSubmit)="registerUser(userForm)"
+        class="space-y-5 px-6 py-6"
+      >
+
+        <!-- Nombre completo -->
+        <div>
+          <label class="mb-1 block text-sm font-semibold text-tecoc-deep">
+            Nombre completo
+          </label>
+
+          <input
+            type="text"
+            name="fullName"
+            [(ngModel)]="newUser.fullName"
+            required
+            placeholder="Ej: Juan Pérez"
+            class="w-full rounded-md border border-tecoc-border px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+          />
+        </div>
+
+        <!-- Tipo de documento -->
+        <div>
+          <label class="mb-1 block text-sm font-semibold text-tecoc-deep">
+            Tipo de documento
+          </label>
+
+          <select
+            name="documentType"
+            [(ngModel)]="newUser.documentType"
+            required
+            class="w-full rounded-md border border-tecoc-border bg-white px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+          >
+            <option value="" disabled>Seleccione un tipo</option>
+            <option value="CC">Cédula de ciudadanía</option>
+            <option value="CE">Cédula de extranjería</option>
+            <option value="TI">Tarjeta de identidad</option>
+            <option value="NIT">NIT</option>
+          </select>
+        </div>
+
+        <!-- Número de documento -->
+        <div>
+          <label class="mb-1 block text-sm font-semibold text-tecoc-deep">
+            Número de documento
+          </label>
+
+          <input
+            type="text"
+            name="documentNumber"
+            [(ngModel)]="newUser.documentNumber"
+            required
+            placeholder="Ej: 1234567890"
+            class="w-full rounded-md border border-tecoc-border px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+          />
+        </div>
+
+        <!-- Nombre de usuario -->
+        <div>
+          <label class="mb-1 block text-sm font-semibold text-tecoc-deep">
+            Nombre de usuario
+          </label>
+
+          <input
+            type="text"
+            name="userName"
+            [(ngModel)]="newUser.userName"
+            required
+            placeholder="Ej: jperez"
+            class="w-full rounded-md border border-tecoc-border px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+          />
+        </div>
+
+        <!-- Correo -->
+        <div>
+          <label class="mb-1 block text-sm font-semibold text-tecoc-deep">
+            Correo electrónico
+          </label>
+
+          <input
+            type="email"
+            name="email"
+            [(ngModel)]="newUser.email"
+            required
+            placeholder="Ej: jperez@tecoc.edu.co"
+            class="w-full rounded-md border border-tecoc-border px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+          />
+        </div>
+
+        <!-- Contraseña -->
+        <div>
+          <label class="mb-1 block text-sm font-semibold text-tecoc-deep">
+            Contraseña
+          </label>
+
+          <input
+            type="password"
+            name="password"
+            [(ngModel)]="newUser.password"
+            required
+            minlength="6"
+            placeholder="Ingrese una contraseña"
+            class="w-full rounded-md border border-tecoc-border px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+          />
+        </div>
+
+        <!-- Error -->
+        @if (registerError()) {
+          <div class="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
+            {{ registerError() }}
+          </div>
+        }
+
+        <!-- Botones -->
+        <div class="flex justify-end gap-3 border-t border-tecoc-border pt-5">
+
+          <button
+            type="button"
+            (click)="closeRegisterForm()"
+            class="rounded-md border border-tecoc-border px-5 py-2.5 text-sm font-semibold text-tecoc-ink hover:bg-gray-50"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="submit"
+            [disabled]="userForm.invalid || registering()"
+            class="rounded-md bg-gradient-to-r from-tecoc-navy to-tecoc-blue px-5 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {{ registering() ? 'Registrando...' : 'Registrar usuario' }}
+          </button>
+
+        </div>
+
+      </form>
+    </div>
+  </div>
+}
