@@ -1,40 +1,34 @@
 using gestionAdminTECOCApi.Domain.Abstractions;
 
-namespace gestionAdminTECOCApi.Domain.Groups;
+namespace gestionAdminTECOCApi.Domain.ProgramasAcademicos;
 
-public class Group : Entity<Guid> {
-    public const int MaximumNameLength = 100;
+public class ProgramaAcademico : Entity<Guid> {
+    public const int MaximumNameLength = 150;
     public const int MaximumCodeLength = 30;
 
-    private Group(
+    private ProgramaAcademico(
         string name,
-        string code,
-        int cupoTotal
+        string code
     ) : base( true ) {
         Id = Guid.NewGuid();
         Name = NormalizeName( name );
         Code = NormalizeCode( code );
-        CupoTotal = cupoTotal;
     }
 
     public string Name { get; private set; } = default!;
     public string Code { get; private set; } = default!;
-    public int CupoTotal { get; private set; }
 
-    public static Group Create(
+    public static ProgramaAcademico Create(
         string name,
-        string code,
-        int cupoTotal
-    ) => new( name, code, cupoTotal );
+        string code
+    ) => new( name, code );
 
     public void Update(
         string name,
-        string code,
-        int cupoTotal
+        string code
     ) {
         Name = NormalizeName( name );
         Code = NormalizeCode( code );
-        CupoTotal = cupoTotal;
     }
 
     public static string NormalizeName( string name ) => name.Trim();

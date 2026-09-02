@@ -1,27 +1,23 @@
-using gestionAdminTECOCApi.Domain.Groups;
+using gestionAdminTECOCApi.Domain.ProgramasAcademicos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Configurations;
 
-internal sealed class GroupConfiguration
-    : IEntityTypeConfiguration<Group> {
-    public void Configure( EntityTypeBuilder<Group> builder ) {
-        builder.ToTable( "Groups" );
+internal sealed class ProgramaAcademicoConfiguration
+    : IEntityTypeConfiguration<ProgramaAcademico> {
+    public void Configure( EntityTypeBuilder<ProgramaAcademico> builder ) {
+        builder.ToTable( "ProgramasAcademicos" );
         builder.HasKey( key => key.Id );
 
         builder
             .Property( property => property.Name )
-            .HasMaxLength( 100 )
+            .HasMaxLength( 150 )
             .IsRequired( true );
 
         builder
             .Property( property => property.Code )
             .HasMaxLength( 30 )
-            .IsRequired( true );
-
-        builder
-            .Property( property => property.CupoTotal )
             .IsRequired( true );
 
         builder

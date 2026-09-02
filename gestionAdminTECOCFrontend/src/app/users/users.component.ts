@@ -3,6 +3,10 @@ import { FormsModule } from '@angular/forms';
 
 import { UsersApi } from './users-api';
 import { UserAccount } from './users.models';
+import { GroupsApi } from '../groups/groups-api';
+import { Group } from '../groups/groups.models';
+import { ProgramasAcademicosApi } from '../programas-academicos/programas-academicos-api';
+import { ProgramaAcademico } from '../programas-academicos/programas-academicos.models';
 
 import { UserRegistrationApi } from '../core/users/user-registration-api';
 import { CreateUserRequest } from '../core/models/user-registration.models';
@@ -20,6 +24,8 @@ export class UsersComponent implements OnInit {
   // ================================
 
   private readonly usersApi = inject(UsersApi);
+  private readonly groupsApi = inject(GroupsApi);
+  private readonly programasAcademicosApi = inject(ProgramasAcademicosApi);
   private readonly userRegistrationApi = inject(UserRegistrationApi);
 
 
@@ -85,6 +91,10 @@ export class UsersComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUsers();
+    this.groupsApi.getGroups().subscribe((groups) => this.groups.set(groups));
+    this.programasAcademicosApi
+      .getProgramasAcademicos()
+      .subscribe((programasAcademicos) => this.programasAcademicos.set(programasAcademicos));
   }
 
 

@@ -3,7 +3,7 @@ using gestionAdminTECOCApi.Domain.ScheduledClasses;
 using gestionAdminTECOCApi.Domain.Loans;
 using gestionAdminTECOCApi.Domain.Prestamos;
 using gestionAdminTECOCApi.Domain.Groups;
-using gestionAdminTECOCApi.Domain.CalendarioAcademico;
+using gestionAdminTECOCApi.Domain.ProgramasAcademicos;
 using gestionAdminTECOCApi.Domain.Users;
 using gestionAdminTECOCApi.Domain.WeatherForecasts;
 using gestionAdminTECOCApi.Domain.WeatherForecastsHistories;
@@ -29,6 +29,7 @@ public partial class ApplicationDbContext : DbContext {
     public virtual DbSet<User> Users { get; set; }
     public virtual DbSet<Prestamo> Prestamo { get; set; }
     public virtual DbSet<Group> Groups { get; set; }
+    public virtual DbSet<ProgramaAcademico> ProgramasAcademicos { get; set; }
     public virtual DbSet<DocumentTypeEntity> DocumentTypes { get; set; }
     public virtual DbSet<WeatherForecast> WeatherForecasts { get; set; }
     public virtual DbSet<WeatherForecastsHistory> WeatherForecastsHistories { get; set; }

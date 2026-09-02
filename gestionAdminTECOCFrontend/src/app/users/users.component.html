@@ -48,6 +48,7 @@
               <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Nombre de usuario</th>
               <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Documento</th>
               <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Grupo</th>
+              <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Programa académico</th>
               <th class="px-5 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Acciones</th>
             </tr>
           </thead>
@@ -81,6 +82,18 @@
                     <span class="text-xs text-tecoc-ink">Sin grupo registrado</span>
                   }
                 </td>
+                <td class="px-5 py-3.5">
+                  @if (user.programaAcademico) {
+                    <span
+                      class="rounded-full bg-tecoc-tint px-2.5 py-1 text-[11px] font-semibold text-tecoc-navy"
+                      [title]="user.programaAcademico.code"
+                    >
+                      {{ user.programaAcademico.name }}
+                    </span>
+                  } @else {
+                    <span class="text-xs text-tecoc-ink">Sin programa registrado</span>
+                  }
+                </td>
                 <td class="px-5 py-3.5 text-right">
                   <button
                     type="button"
@@ -93,7 +106,7 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="5" class="px-5 py-10 text-center text-sm text-tecoc-ink">
+                <td colspan="6" class="px-5 py-10 text-center text-sm text-tecoc-ink">
                   No se encontraron usuarios que coincidan con la búsqueda.
                 </td>
               </tr>
@@ -171,6 +184,15 @@
               </span>
               <span class="text-sm text-slate-700">{{ user.group ? user.group.name : 'Sin grupo registrado' }}</span>
             </div>
+
+            <div>
+              <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">
+                Programa académico
+              </span>
+              <span class="text-sm text-slate-700">
+                {{ user.programaAcademico ? user.programaAcademico.name : 'Sin programa registrado' }}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -202,7 +224,7 @@
           />
         </label>
 
-        <label class="mb-5 block">
+        <label class="mb-3 block">
           <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Correo</span>
           <input
             type="email"
@@ -210,6 +232,36 @@
             [ngModel]="user.email"
             (ngModelChange)="updateEditingField('email', $event)"
           />
+        </label>
+
+        <label class="mb-3 block">
+          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">Grupo</span>
+          <select
+            class="w-full rounded-md border border-tecoc-line bg-white px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+            [ngModel]="user.group?.id ?? ''"
+            (ngModelChange)="onEditingGroupChange($event)"
+          >
+            <option value="">Sin grupo</option>
+            @for (group of groups(); track group.id) {
+              <option [value]="group.id">{{ group.name }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="mb-5 block">
+          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-tecoc-ink">
+            Programa académico
+          </span>
+          <select
+            class="w-full rounded-md border border-tecoc-line bg-white px-3 py-2.5 text-sm outline-none focus:border-tecoc-blue focus:ring-2 focus:ring-tecoc-blue/20"
+            [ngModel]="user.programaAcademico?.id ?? ''"
+            (ngModelChange)="onEditingProgramaAcademicoChange($event)"
+          >
+            <option value="">Sin programa académico</option>
+            @for (programa of programasAcademicos(); track programa.id) {
+              <option [value]="programa.id">{{ programa.name }}</option>
+            }
+          </select>
         </label>
 
         <div class="flex justify-end gap-2.5">

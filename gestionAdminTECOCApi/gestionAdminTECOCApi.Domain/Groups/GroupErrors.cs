@@ -28,6 +28,11 @@ public static class GroupErrors {
         "Ya existe un grupo con ese código"
     );
 
+    public static readonly Error CupoTotalInvalido = new(
+        "Group.CupoTotalInvalido",
+        "El cupo total del grupo no puede ser negativo"
+    );
+
     public static readonly Error NotFound = new(
         "Group.NotFound",
         "No se encontró el grupo solicitado"
