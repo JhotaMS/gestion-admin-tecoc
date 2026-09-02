@@ -5,5 +5,6 @@ namespace gestionAdminTECOCApi.Application.Features.Groups.UpdateGroup;
 public record UpdateGroupCommand(
     Guid GroupId,
     string Name,
-    string Code
+    string Code,
+    int CupoTotal
 ) : ICommand<GroupResponse>;

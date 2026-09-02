@@ -29,6 +29,7 @@ export class GroupsComponent implements OnInit {
   readonly editingGroup = signal<Group | null>(null);
   readonly formName = signal('');
   readonly formCode = signal('');
+  readonly formCupoTotal = signal('');
   readonly formSubmitted = signal(false);
   readonly saving = signal(false);
 
@@ -55,7 +56,17 @@ export class GroupsComponent implements OnInit {
     return null;
   });
 
-  readonly formValid = computed(() => !this.nameError() && !this.codeError());
+  readonly cupoTotalError = computed(() => {
+    const raw = String(this.formCupoTotal()).trim();
+    if (!raw) return 'El cupo total es obligatorio.';
+    const value = Number(raw);
+    if (!Number.isInteger(value) || value < 0) {
+      return 'El cupo total debe ser un número entero mayor o igual a 0.';
+    }
+    return null;
+  });
+
+  readonly formValid = computed(() => !this.nameError() && !this.codeError() && !this.cupoTotalError());
 
   ngOnInit(): void {
     this.loadGroups();
@@ -79,6 +90,7 @@ export class GroupsComponent implements OnInit {
     this.editingGroup.set(null);
     this.formName.set('');
     this.formCode.set('');
+    this.formCupoTotal.set('');
     this.formSubmitted.set(false);
     this.formOpen.set(true);
   }
@@ -87,6 +99,7 @@ export class GroupsComponent implements OnInit {
     this.editingGroup.set(group);
     this.formName.set(group.name);
     this.formCode.set(group.code);
+    this.formCupoTotal.set(String(group.cupoTotal));
     this.formSubmitted.set(false);
     this.formOpen.set(true);
   }
@@ -101,13 +114,14 @@ export class GroupsComponent implements OnInit {
 
     const name = this.formName().trim();
     const code = this.formCode().trim();
+    const cupoTotal = Number(String(this.formCupoTotal()).trim());
     const editing = this.editingGroup();
 
     this.saving.set(true);
 
     const request$ = editing
-      ? this.groupsApi.updateGroup({ groupId: editing.id, name, code })
-      : this.groupsApi.createGroup({ name, code });
+      ? this.groupsApi.updateGroup({ groupId: editing.id, name, code, cupoTotal })
+      : this.groupsApi.createGroup({ name, code, cupoTotal });
 
     request$.subscribe({
       next: (group) => {

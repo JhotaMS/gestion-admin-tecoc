@@ -55,9 +55,6 @@ export class UsersComponent implements OnInit {
   readonly users = signal<UserAccount[]>([]);
   readonly searchTerm = signal('');
 
-  readonly groups = signal<Group[]>([]);
-  readonly programasAcademicos = signal<ProgramaAcademico[]>([]);
-
   // Modal "Detalle de usuario"
   readonly detailsModalOpen = signal(false);
   readonly selectedUser = signal<UserAccount | null>(null);
@@ -174,39 +171,21 @@ export class UsersComponent implements OnInit {
     this.editingUser.update((user) => (user ? { ...user, [field]: value } : user));
   }
 
-  onEditingGroupChange(groupId: string): void {
-    const group = this.groups().find((item) => item.id === groupId) ?? null;
-    this.updateEditingField('group', group);
-  }
-
-  onEditingProgramaAcademicoChange(programaAcademicoId: string): void {
-    const programaAcademico = this.programasAcademicos().find((item) => item.id === programaAcademicoId) ?? null;
-    this.updateEditingField('programaAcademico', programaAcademico);
-  }
-
   saveEdit(): void {
     const user = this.editingUser();
     if (!user || !user.name.trim() || !user.email.trim()) return;
 
     this.editSaving.set(true);
-    this.usersApi
-      .updateUser({
-        id: user.id,
-        name: user.name.trim(),
-        email: user.email.trim(),
-        group: user.group,
-        programaAcademico: user.programaAcademico,
-      })
-      .subscribe({
-        next: (updated) => {
-          this.users.update((list) => list.map((u) => (u.id === updated.id ? updated : u)));
-          this.editSaving.set(false);
-          this.editingUser.set(null);
-        },
-        error: () => {
-          this.editSaving.set(false);
-        },
-      });
+    this.usersApi.updateUser({ id: user.id, name: user.name.trim(), email: user.email.trim() }).subscribe({
+      next: (updated) => {
+        this.users.update((list) => list.map((u) => (u.id === updated.id ? updated : u)));
+        this.editSaving.set(false);
+        this.editingUser.set(null);
+      },
+      error: () => {
+        this.editSaving.set(false);
+      },
+    });
   }
 
 

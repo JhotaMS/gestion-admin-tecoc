@@ -21,6 +21,10 @@ internal sealed class GroupConfiguration
             .IsRequired( true );
 
         builder
+            .Property( property => property.CupoTotal )
+            .IsRequired( true );
+
+        builder
             .HasIndex( index => index.Code )
             .IsUnique();
     }

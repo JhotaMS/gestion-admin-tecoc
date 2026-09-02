@@ -8,27 +8,33 @@ public class Group : Entity<Guid> {
 
     private Group(
         string name,
-        string code
+        string code,
+        int cupoTotal
     ) : base( true ) {
         Id = Guid.NewGuid();
         Name = NormalizeName( name );
         Code = NormalizeCode( code );
+        CupoTotal = cupoTotal;
     }
 
     public string Name { get; private set; } = default!;
     public string Code { get; private set; } = default!;
+    public int CupoTotal { get; private set; }
 
     public static Group Create(
         string name,
-        string code
-    ) => new( name, code );
+        string code,
+        int cupoTotal
+    ) => new( name, code, cupoTotal );
 
     public void Update(
         string name,
-        string code
+        string code,
+        int cupoTotal
     ) {
         Name = NormalizeName( name );
         Code = NormalizeCode( code );
+        CupoTotal = cupoTotal;
     }
 
     public static string NormalizeName( string name ) => name.Trim();

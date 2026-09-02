@@ -10,6 +10,8 @@ interface GroupDto {
   name: string;
   code: string;
   enabled: boolean;
+  cupoTotal: number;
+  cupoDisponible: number;
 }
 
 interface GetAllGroupsResponseDto {
@@ -69,6 +71,8 @@ function toGroup(dto: GroupDto): Group {
     name: dto.name,
     code: dto.code,
     enabled: dto.enabled,
+    cupoTotal: dto.cupoTotal,
+    cupoDisponible: dto.cupoDisponible,
   };
 }
 

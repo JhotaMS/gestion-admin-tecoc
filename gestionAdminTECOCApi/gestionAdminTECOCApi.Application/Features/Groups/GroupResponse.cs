@@ -4,5 +4,7 @@ public record GroupResponse(
     Guid Id,
     string Name,
     string Code,
-    bool Enabled
+    bool Enabled,
+    int CupoTotal,
+    int CupoDisponible
 );
