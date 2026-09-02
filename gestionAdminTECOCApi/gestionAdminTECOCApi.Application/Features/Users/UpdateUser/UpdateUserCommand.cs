@@ -10,4 +10,6 @@ public record UpdateUserCommand(
     , [Required] string DocumentNumber
     , [Required] string UserName
     , [Required] string Email
+    , Guid? GroupId = null
+    , Guid? ProgramaAcademicoId = null
     ) : ICommand<UpdateUserCommandResponse>;

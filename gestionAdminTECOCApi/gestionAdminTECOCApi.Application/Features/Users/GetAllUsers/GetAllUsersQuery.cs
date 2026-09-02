@@ -19,10 +19,17 @@ public record UserSummaryDto(
     string DocumentType,
     string DocumentNumber,
     bool Enabled,
-    GroupDto? Group
+    GroupDto? Group,
+    ProgramaAcademicoDto? ProgramaAcademico
 );
 
 public record GroupDto(
+    Guid Id,
+    string Name,
+    string Code
+);
+
+public record ProgramaAcademicoDto(
     Guid Id,
     string Name,
     string Code
@@ -40,7 +47,10 @@ internal sealed class GetAllUsersQueryHandler(
         var items = await repo.GetAsync(
             predicate: null,
             orderBy: null,
-            includeString: "Group",
+            includes: new List<System.Linq.Expressions.Expression<Func<User, object>>> {
+                u => u.Group!,
+                u => u.ProgramaAcademico!
+            },
             disableTracking: true,
             cancellationToken: cancellationToken
         );
@@ -56,7 +66,10 @@ internal sealed class GetAllUsersQueryHandler(
                 u.Enabled,
                 u.Group is null
                     ? null
-                    : new GroupDto( u.Group.Id, u.Group.Name, u.Group.Code )
+                    : new GroupDto( u.Group.Id, u.Group.Name, u.Group.Code ),
+                u.ProgramaAcademico is null
+                    ? null
+                    : new ProgramaAcademicoDto( u.ProgramaAcademico.Id, u.ProgramaAcademico.Name, u.ProgramaAcademico.Code )
             ) )
             .ToList();
 

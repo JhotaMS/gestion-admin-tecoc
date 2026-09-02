@@ -3,6 +3,10 @@ import { FormsModule } from '@angular/forms';
 
 import { UsersApi } from './users-api';
 import { UserAccount } from './users.models';
+import { GroupsApi } from '../groups/groups-api';
+import { Group } from '../groups/groups.models';
+import { ProgramasAcademicosApi } from '../programas-academicos/programas-academicos-api';
+import { ProgramaAcademico } from '../programas-academicos/programas-academicos.models';
 
 import { UserRegistrationApi } from '../core/users/user-registration-api';
 import { CreateUserRequest } from '../core/models/user-registration.models';
@@ -20,6 +24,8 @@ export class UsersComponent implements OnInit {
   // ================================
 
   private readonly usersApi = inject(UsersApi);
+  private readonly groupsApi = inject(GroupsApi);
+  private readonly programasAcademicosApi = inject(ProgramasAcademicosApi);
   private readonly userRegistrationApi = inject(UserRegistrationApi);
 
 
@@ -49,6 +55,17 @@ export class UsersComponent implements OnInit {
   readonly users = signal<UserAccount[]>([]);
   readonly searchTerm = signal('');
 
+  readonly groups = signal<Group[]>([]);
+  readonly programasAcademicos = signal<ProgramaAcademico[]>([]);
+
+  // Modal "Detalle de usuario"
+  readonly detailsModalOpen = signal(false);
+  readonly selectedUser = signal<UserAccount | null>(null);
+
+  // Modal "Editar usuario"
+  readonly editingUser = signal<UserAccount | null>(null);
+  readonly editSaving = signal(false);
+
 
   // ================================
   // FILTRO DE USUARIOS
@@ -68,52 +85,7 @@ export class UsersComponent implements OnInit {
     );
   });
 
-
-  // ================================
-  // ESTADÍSTICAS
-  // ================================
-
-  readonly stats = computed(() => {
-    const all = this.users();
-
-    const total = all.length;
-
-    const activos = all.filter(
-      (user) => user.status === 'activo',
-    ).length;
-
-    const pendientes = total - activos;
-
-    const now = new Date();
-
-    const nuevos = all.filter((user) => {
-      const registered = new Date(user.registeredAtIso);
-
-      return (
-        registered.getFullYear() === now.getFullYear() &&
-        registered.getMonth() === now.getMonth()
-      );
-    }).length;
-
-    return {
-      total,
-      activos,
-      pendientes,
-      nuevos,
-
-      activosPercent: total
-        ? Math.round((activos / total) * 100)
-        : 0,
-
-      pendientesPercent: total
-        ? Math.round((pendientes / total) * 100)
-        : 0,
-
-      nuevosPercent: total
-        ? Math.round((nuevos / total) * 100)
-        : 0,
-    };
-  });
+  readonly totalUsers = computed(() => this.users().length);
 
 
   // ================================
@@ -122,6 +94,10 @@ export class UsersComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUsers();
+    this.groupsApi.getGroups().subscribe((groups) => this.groups.set(groups));
+    this.programasAcademicosApi
+      .getProgramasAcademicos()
+      .subscribe((programasAcademicos) => this.programasAcademicos.set(programasAcademicos));
   }
 
 
@@ -165,6 +141,72 @@ export class UsersComponent implements OnInit {
 
   onSearchInput(value: string): void {
     this.searchTerm.set(value);
+  }
+
+
+  // ================================
+  // DETALLE DE USUARIO
+  // ================================
+
+  openUserDetails(user: UserAccount): void {
+    this.selectedUser.set(user);
+    this.detailsModalOpen.set(true);
+  }
+
+  closeUserDetails(): void {
+    this.detailsModalOpen.set(false);
+  }
+
+
+  // ================================
+  // EDITAR USUARIO
+  // ================================
+
+  openEdit(user: UserAccount): void {
+    this.editingUser.set({ ...user });
+  }
+
+  closeEdit(): void {
+    this.editingUser.set(null);
+  }
+
+  updateEditingField<K extends keyof UserAccount>(field: K, value: UserAccount[K]): void {
+    this.editingUser.update((user) => (user ? { ...user, [field]: value } : user));
+  }
+
+  onEditingGroupChange(groupId: string): void {
+    const group = this.groups().find((item) => item.id === groupId) ?? null;
+    this.updateEditingField('group', group);
+  }
+
+  onEditingProgramaAcademicoChange(programaAcademicoId: string): void {
+    const programaAcademico = this.programasAcademicos().find((item) => item.id === programaAcademicoId) ?? null;
+    this.updateEditingField('programaAcademico', programaAcademico);
+  }
+
+  saveEdit(): void {
+    const user = this.editingUser();
+    if (!user || !user.name.trim() || !user.email.trim()) return;
+
+    this.editSaving.set(true);
+    this.usersApi
+      .updateUser({
+        id: user.id,
+        name: user.name.trim(),
+        email: user.email.trim(),
+        group: user.group,
+        programaAcademico: user.programaAcademico,
+      })
+      .subscribe({
+        next: (updated) => {
+          this.users.update((list) => list.map((u) => (u.id === updated.id ? updated : u)));
+          this.editSaving.set(false);
+          this.editingUser.set(null);
+        },
+        error: () => {
+          this.editSaving.set(false);
+        },
+      });
   }
 
 
