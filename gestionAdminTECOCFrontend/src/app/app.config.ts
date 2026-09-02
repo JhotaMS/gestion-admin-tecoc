@@ -19,6 +19,8 @@ const authProvider = environment.useMockApi
   : { provide: AuthApi, useClass: AuthHttpApi };
 import { GroupsApi } from './groups/groups-api';
 import { GroupsHttpApi } from './core/groups/groups-http.api';
+import { ProgramasAcademicosApi } from './programas-academicos/programas-academicos-api';
+import { ProgramasAcademicosHttpApi } from './core/programas-academicos/programas-academicos-http.api';
 import { PagedUsersApi } from './core/users/paged-users-api';
 import { PagedUsersHttpApi } from './core/users/paged-users-http.api';
 import { LoansApi } from './loans/loans-api';
@@ -46,6 +48,7 @@ export const appConfig: ApplicationConfig = {
     { provide: UserRegistrationApi, useClass: UserRegistrationHttpApi },
     { provide: PagedUsersApi, useClass: PagedUsersHttpApi },
     { provide: GroupsApi, useClass: GroupsHttpApi },
+    { provide: ProgramasAcademicosApi, useClass: ProgramasAcademicosHttpApi },
     { provide: ImplementosApi, useClass: ImplementosHttpApi },
     { provide: ImplementoPrestadoApi, useClass: ImplementoPrestadoHttpApi },
     { provide: PrestamoDetalleApi, useClass: PrestamoDetalleHttpApi },

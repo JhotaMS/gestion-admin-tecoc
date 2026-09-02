@@ -14,7 +14,7 @@ public class UserCommandHandlerTests {
 
     public UserCommandHandlerTests() {
         _unitOfWork.Repository<User>().Returns( _repository );
-        _handler = new UserCommandHandler( new UserService( _unitOfWork ) );
+        _handler = new UserCommandHandler( new UserService( _unitOfWork ), _unitOfWork );
     }
 
     private static UserCommand ValidCommand() => new(

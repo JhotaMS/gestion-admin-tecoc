@@ -275,6 +275,9 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations {
                     .HasMaxLength( 200 )
                     .HasColumnType( "character varying(200)" );
 
+                b.Property<Guid?>( "ProgramaAcademicoId" )
+                    .HasColumnType( "uuid" );
+
                 b.Property<string>( "UserName" )
                     .IsRequired()
                     .HasMaxLength( 50 )
@@ -286,6 +289,8 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations {
                     .IsUnique();
 
                 b.HasIndex( "GroupId" );
+
+                b.HasIndex( "ProgramaAcademicoId" );
 
                 b.HasIndex( "UserName" )
                     .IsUnique();
@@ -358,7 +363,14 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations {
                     .HasForeignKey( "GroupId" )
                     .OnDelete( DeleteBehavior.SetNull );
 
+                b.HasOne( "gestionAdminTECOCApi.Domain.ProgramasAcademicos.ProgramaAcademico", "ProgramaAcademico" )
+                    .WithMany()
+                    .HasForeignKey( "ProgramaAcademicoId" )
+                    .OnDelete( DeleteBehavior.SetNull );
+
                 b.Navigation( "Group" );
+
+                b.Navigation( "ProgramaAcademico" );
             } );
 #pragma warning restore 612, 618
         }

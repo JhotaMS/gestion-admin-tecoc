@@ -1,4 +1,5 @@
 ﻿using gestionAdminTECOCApi.Domain.Users;
+using gestionAdminTECOCApi.Domain.ProgramasAcademicos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -61,6 +62,12 @@ internal sealed class UserConfiguration
             .HasOne( user => user.Group )
             .WithMany()
             .HasForeignKey( user => user.GroupId )
+            .OnDelete( DeleteBehavior.SetNull );
+
+        builder
+            .HasOne( user => user.ProgramaAcademico )
+            .WithMany()
+            .HasForeignKey( user => user.ProgramaAcademicoId )
             .OnDelete( DeleteBehavior.SetNull );
     }
 }

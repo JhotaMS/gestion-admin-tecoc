@@ -16,5 +16,9 @@ public record UserCommand(
     [property: JsonPropertyName( "email" )]
     [Required] string Email,
     [property: JsonPropertyName( "password" )]
-    [Required] string Password
+    [Required] string Password,
+    [property: JsonPropertyName( "groupId" )]
+    Guid? GroupId = null,
+    [property: JsonPropertyName( "programaAcademicoId" )]
+    Guid? ProgramaAcademicoId = null
 ) : ICommand<UserCommandResponse>;
