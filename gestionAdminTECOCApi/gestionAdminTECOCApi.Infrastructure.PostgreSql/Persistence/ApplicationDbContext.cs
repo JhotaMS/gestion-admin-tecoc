@@ -36,6 +36,7 @@ public partial class ApplicationDbContext : DbContext {
     public virtual DbSet<ImplementoPrestado> ImplementosPrestados { get; set; }
     public virtual DbSet<Implemento> Implementos { get; set; }
     public virtual DbSet<TipoRevision> TiposRevision { get; set; }
+    public virtual DbSet<EventoAcademico> EventosAcademicos { get; set; }
 
     public override Task<int> SaveChangesAsync( CancellationToken cancellationToken = default ) {
         return base.SaveChangesAsync( cancellationToken );

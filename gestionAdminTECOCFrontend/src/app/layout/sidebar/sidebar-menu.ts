@@ -15,6 +15,7 @@ export const SIDEBAR_MENU: MenuItem[] = [
       { label: 'Grupos', icon: 'folder-kanban', link: '/grupos' },
       { label: 'Préstamo de implementos', icon: 'package', link: '/prestamos' },
       { label: 'Asistencia', icon: 'calendar-check', link: '/asistencia' },
+      { label: 'Calendario académico', icon: 'calendar', link: '/calendario-academico' },
     ],
   },
   { label: 'Configuración', icon: 'settings', link: '/dashboard' },

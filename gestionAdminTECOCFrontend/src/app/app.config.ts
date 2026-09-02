@@ -19,8 +19,8 @@ const authProvider = environment.useMockApi
   : { provide: AuthApi, useClass: AuthHttpApi };
 import { GroupsApi } from './groups/groups-api';
 import { GroupsHttpApi } from './core/groups/groups-http.api';
-import { ProgramasAcademicosApi } from './programas-academicos/programas-academicos-api';
-import { ProgramasAcademicosHttpApi } from './core/programas-academicos/programas-academicos-http.api';
+import { CalendarioAcademicoApi } from './calendario-academico/calendario-academico-api';
+import { CalendarioAcademicoHttpApi } from './core/calendario-academico/calendario-academico-http.api';
 import { PagedUsersApi } from './core/users/paged-users-api';
 import { PagedUsersHttpApi } from './core/users/paged-users-http.api';
 import { LoansApi } from './loans/loans-api';

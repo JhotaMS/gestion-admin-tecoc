@@ -40,6 +40,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./attendance/attendance.component').then((m) => m.AttendanceComponent),
       },
+      {
+        path: 'calendario-academico',
+        loadComponent: () =>
+          import('./calendario-academico/calendario-academico.component').then(
+            (m) => m.CalendarioAcademicoComponent,
+          ),
+      },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },

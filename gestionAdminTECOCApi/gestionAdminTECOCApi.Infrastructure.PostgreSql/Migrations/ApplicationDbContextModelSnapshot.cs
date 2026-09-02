@@ -20,6 +20,37 @@ namespace gestionAdminTECOCApi.Infrastructure.PostgreSql.Migrations {
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns( modelBuilder );
 
+            modelBuilder.Entity( "gestionAdminTECOCApi.Domain.CalendarioAcademico.EventoAcademico", b =>
+            {
+                b.Property<Guid>( "Id" )
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType( "uuid" );
+
+                b.Property<string>( "Descripcion" )
+                    .HasMaxLength( 500 )
+                    .HasColumnType( "character varying(500)" );
+
+                b.Property<bool>( "Enabled" )
+                    .HasColumnType( "boolean" );
+
+                b.Property<DateOnly?>( "FechaFin" )
+                    .HasColumnType( "date" );
+
+                b.Property<DateOnly>( "FechaInicio" )
+                    .HasColumnType( "date" );
+
+                b.Property<string>( "Titulo" )
+                    .IsRequired()
+                    .HasMaxLength( 150 )
+                    .HasColumnType( "character varying(150)" );
+
+                b.HasKey( "Id" );
+
+                b.HasIndex( "FechaInicio" );
+
+                b.ToTable( "EventosAcademicos", "gestionAdminTECOCApiMS" );
+            } );
+
             modelBuilder.Entity( "gestionAdminTECOCApi.Domain.DocumentTypes.DocumentTypeEntity", b =>
             {
                 b.Property<Guid>( "Id" )
